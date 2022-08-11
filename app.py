@@ -30,6 +30,15 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+@app.route('/SaveClients',methods=["GET", "POST"])
+def SaveClients():
+    if request.method == 'POST':
+        data = request.get_json()
+        result = json.loads(data)
+        print(result)
+    
+
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
