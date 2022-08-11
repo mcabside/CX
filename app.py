@@ -20,7 +20,7 @@ Clientes_Data = db.collection("Clientes").get()
 
 
 
-UPLOAD_FOLDER = 'C:\\Users\Abside User\Desktop\customer experience'
+UPLOAD_FOLDER = 'C:\\Users\Daniel Mesa\Desktop\cx\CX'
 ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xlsm'}
 CLIENTES_FILE = "Nombres_Cliente.xlsx"
 
@@ -51,9 +51,8 @@ def upload_file():
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
 
-        clientes = pd.read_excel("assets\\"+CLIENTES_FILE)
+        #clientes = pd.read_excel("assets\\"+CLIENTES_FILE)
         
-
         if file.filename == '':
             flash('No selected file')
             return redirect(request.url)
