@@ -36,7 +36,8 @@ def SaveClients():
     if request.method == 'POST':
         data = request.get_json()
         result = json.loads(data)
-        print(result)
+        for row in result:
+            print(row)
     
 
 @app.route('/', methods=['GET', 'POST'])

@@ -21,14 +21,15 @@ function submitfunc(list){
     for (var i = 1; i <= list.length; i++){
 
         if(document.getElementById(i).value === ""){
-            clientes_input.push([document.getElementById(-1*i).value,false]);
+            clientes_input.push([list[i-1],document.getElementById(-1*i).value,false]);
         }else{ 
-            clientes_input.push([document.getElementById(i).value,true]);
+            clientes_input.push([list[i-1],document.getElementById(i).value,true]);
         }
 
     }
+    console.log(clientes_input)
     const request = new XMLHttpRequest()
-    request.open('POST', `/SaveClients/${JSON.stringify(clientes_input)}`)
+    request.open('POST', `/SaveClients/${JSON.stringify(json_test)}`)
     request.send();
     
 }

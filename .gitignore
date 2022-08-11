@@ -1,0 +1,6 @@
+venv/
+FirebaseKey/
+archivos python x/
+*.xlsx
+assets/
+__pycache__/
