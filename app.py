@@ -6,14 +6,14 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 import json
-
+import threading
 
 cred = credentials.Certificate("FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
 firebase_admin.initialize_app(cred)
-db = firestore.client()
 
-Clientes_Ref = db.collection("Clientes")
-Clientes_Data = db.collection("Clientes").get()
+
+
+
 
 
 
@@ -34,6 +34,9 @@ def allowed_file(filename):
 def SaveClients():
     
     if request.method == 'POST':
+        
+        db = firestore.client()
+        Clientes_Ref = db.collection("Clientes")
         
         if request.is_json:
             print("es json")
@@ -109,8 +112,12 @@ def upload_file():
         found=0
         not_found_list = []
         lista_clientes = []
+        
+        db = firestore.client()
+        Clientes_Data = db.collection("Clientes").get()
         for doc in Clientes_Data:
             lista_clientes.append(doc.to_dict()['Cliente'])
+        lista_clientes.sort()
         for index, row in results.iterrows():
 
             Found = False
