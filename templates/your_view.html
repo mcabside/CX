@@ -5,36 +5,40 @@
 </head>
 
 <h2 class="h2" style="text-align: center">Nombres de clientes no encontrados</h1>
+<div style="margin: auto; width: 70% !important;">
 
-<table class="table table-striped" style="margin: auto; width: 70% !important; border: 1px solid grey; border-collapse: collapse; border-radius:10px">
+    <table class="table table-striped" style=" border: 1px solid grey; border-collapse: collapse; border-radius:10px">
 
-    <thead class="thead-dark">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Cliente Archivo</th>
+                <th scope="col">Clientes registrados</th>
+                <th scope="col">Nombre Nuevo</th>
+            </tr>
+        </thead>
+    
+        <tbody>
+        {% for your_list_element in your_list %}
         <tr>
-            <th scope="col">Cliente Archivo</th>
-            <th scope="col">Clientes registrados</th>
-            <th scope="col">Nombre Nuevo</th>
+            <td style="width: 35%"> {{ your_list_element }} </td>
+            <td>
+                <select id="{{ loop.index * -1 }}" class="form-select">
+                    {% for cliente in lista_clientes %}
+                    <option value="{{cliente}}" >{{ cliente}}</option>"
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="text" id="{{ loop.index }}" class="form-control" oninput="func2(id)" value="">
+            </td>
         </tr>
-    </thead>
-
-    <tbody>
-    {% for your_list_element in your_list %}
-    <tr>
-        <td style="width: 35%"> {{ your_list_element }} </td>
-        <td>
-            <select id="{{ loop.index * -1 }}" class="form-select">
-                {% for cliente in lista_clientes %}
-                <option value="{{cliente}}" >{{ cliente}}</option>"
-                {% endfor %}
-            </select>
-        </td>
-        <td>
-            <input type="text" id="{{ loop.index }}" class="form-control" oninput="func2(id)" value="">
-        </td>
-    </tr>
-    {% endfor %}
-    </tbody>   
-
-</table>
+        {% endfor %}
+        </tbody>   
+    
+    </table>
+    
+    
+    <button type="button" style="float:right" class="btn btn-dark btn-lg" onclick="submitfunc({{your_list}})">Ingresar Clientes</button>
 
 
-<button type="button" class="btn btn-dark" onclick="submitfunc({{your_list}})">Enter</button>
+</div>
