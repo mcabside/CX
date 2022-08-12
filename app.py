@@ -21,7 +21,7 @@ Clientes_Data = db.collection("Clientes").get()
 
 
 
-UPLOAD_FOLDER = 'C:\\Users\Abside User\Desktop\customer experience'
+UPLOAD_FOLDER = 'C:\\Users\Daniel Mesa\Desktop\cx\CX'
 ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xlsm'}
 #CLIENTES_FILE = "Nombres_Cliente.xlsx"
 
