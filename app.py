@@ -1,20 +1,21 @@
 import os
-from flask import Flask, flash, request, redirect, url_for,render_template
+from flask import Flask, flash, request, redirect, url_for,render_template,jsonify
 from werkzeug.utils import secure_filename
 import pandas as pd
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
+import json
+
 
 cred = credentials.Certificate("FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-
-
 Clientes_Ref = db.collection("Clientes")
-
 Clientes_Data = db.collection("Clientes").get()
+
+
 
 
 
@@ -22,7 +23,7 @@ Clientes_Data = db.collection("Clientes").get()
 
 UPLOAD_FOLDER = 'C:\\Users\Abside User\Desktop\customer experience'
 ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xlsm'}
-CLIENTES_FILE = "Nombres_Cliente.xlsx"
+#CLIENTES_FILE = "Nombres_Cliente.xlsx"
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -33,15 +34,55 @@ def allowed_file(filename):
 
 @app.route('/SaveClients',methods=["GET", "POST"])
 def SaveClients():
-    if request.method == 'POST':
-        data = request.get_json()
-        result = json.loads(data)
-        for row in result:
-            print(row)
     
+    if request.method == 'POST':
+        
+        if request.is_json:
+            print("es json")
+            
+            #output = request.form.get('json_data')
+            output = request.json
+            output2 = json.dumps(output)
+            
+            print(output2) # This is the output that was stored in the JSON within the browser
+            print(type(output2))
+            result = json.loads(output2) #this converts the json output to a python dictionary
+            print(result) # Printing the new dictionary
+            print(type(result))#this shows the json converted as a python dictionary
+            
+        
+            for cliente in result:
+                
+                if cliente['Es_nuevo'] == "True": 
+                    Clientes_Ref.add({
+                        'Cliente': cliente['Input'],
+                        'Encuestas': [cliente['Excel']]
+                    })
+
+                else:
+                    docs = Clientes_Ref.where("Cliente","==", cliente['Input']).get()
+                    for doc in docs:
+                        id = doc.id
+                        array = doc.to_dict()['Encuestas']
+                        array.append(cliente['Excel'])
+                    Clientes_Ref.document(id).update({'Encuestas':array})
+                    
+            return jsonify(success=True)        
+            
+            
+        else:
+            print("no es json")
+            
+            
+    #return render_template('home.html')
+
+        
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
+    
+    if request.method == "GET":
+        return render_template('home.html')
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -51,7 +92,7 @@ def upload_file():
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
 
-        clientes = pd.read_excel("assets\\"+CLIENTES_FILE)
+        #clientes = pd.read_excel("assets\\"+CLIENTES_FILE)
         
 
         if file.filename == '':
@@ -83,8 +124,14 @@ def upload_file():
                     break
                 else:
                     for cliente_encuesta in doc.to_dict()['Encuestas']:
-                        if row["Nombre de la empresa a la que pertenece"].lower() == cliente_encuesta.lower() or row["Nombre de la empresa a la que pertenece"].lower() in cliente_encuesta.lower() or cliente_encuesta.lower() in row["Nombre de la empresa a la que pertenece"].lower()  or row["Nombre de la empresa a la que pertenece"].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') == cliente_encuesta.lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') or row["Nombre de la empresa a la que pertenece"].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') in cliente_encuesta.lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u')   :
+                        if (row["Nombre de la empresa a la que pertenece"].lower() == cliente_encuesta.lower() or 
+                            row["Nombre de la empresa a la que pertenece"].lower() in cliente_encuesta.lower() or 
+                            cliente_encuesta.lower() in row["Nombre de la empresa a la que pertenece"].lower()  or 
+                            row["Nombre de la empresa a la que pertenece"].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') == cliente_encuesta.lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') or 
+                            row["Nombre de la empresa a la que pertenece"].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') in cliente_encuesta.lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') )  :
+                            
                             Found = True
+                            
                             Nombre_Cliente = doc.to_dict()['Cliente']
                             
                             break
@@ -101,6 +148,7 @@ def upload_file():
         print("# encontrados : " + str(found))
         print("# no encontrados : " + str(not_found))
 
+        
         if not_found == 0:
             return render_template('simple.html',  tables=[results.to_html(classes='data', header="true")])
         else:
