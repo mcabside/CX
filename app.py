@@ -7,16 +7,10 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 import json
 import threading
+import math
 
 cred = credentials.Certificate("FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
 firebase_admin.initialize_app(cred)
-
-
-
-
-
-
-
 
 
 UPLOAD_FOLDER = 'C:\\Users\Abside User\Desktop\customer experience'
@@ -25,12 +19,13 @@ ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xlsm'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-def allowed_file(filename):
+
+def allowed_file(filename): #check file type
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@app.route('/SaveClients',methods=["GET", "POST"])
+@app.route('/SaveClients',methods=["GET", "POST"]) #save new clients in firebase
 def SaveClients():
     
     if request.method == 'POST':
@@ -39,17 +34,14 @@ def SaveClients():
         Clientes_Ref = db.collection("Clientes")
         
         if request.is_json:
-            print("es json")
+
             
-            #output = request.form.get('json_data')
             output = request.json
             output2 = json.dumps(output)
             
-            print(output2) # This is the output that was stored in the JSON within the browser
-            print(type(output2))
+
             result = json.loads(output2) #this converts the json output to a python dictionary
-            print(result) # Printing the new dictionary
-            print(type(result))#this shows the json converted as a python dictionary
+
             
         
             for cliente in result:
@@ -70,14 +62,11 @@ def SaveClients():
                     
             return jsonify(success=True)        
             
-            
         else:
             print("no es json")
             
             
-    #return render_template('home.html')
-
-        
+            
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
@@ -93,8 +82,6 @@ def upload_file():
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
 
-        #clientes = pd.read_excel("assets\\"+CLIENTES_FILE)
-        
         if file.filename == '':
             flash('No selected file')
             return redirect(request.url)
@@ -102,7 +89,7 @@ def upload_file():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             results = pd.read_excel(filename) 
-            results.replace(["No satisfecho","Ningún Valor","En Desacuerdo"],2,inplace=True)
+            results.replace(["No satisfecho","Ningún Valor","En Desacuerdo","No Satisfecho","En Desacuerdo	"],2,inplace=True) # no se verifica aun si hay espacios o mayusculas
             results.replace(["Baja Satisfacción","Poco Valor","Casi Nunca"],4,inplace=True)
             results.replace(["Satisfacción Promedio","Valor Promedio","Normalmente de Acuerdo"],6,inplace=True)
             results.replace(["Buena Satisfacción","Gran Valor","Totalmente de Acuerdo"],8,inplace=True)
@@ -118,6 +105,10 @@ def upload_file():
         for doc in Clientes_Data:
             lista_clientes.append(doc.to_dict()['Cliente'])
         lista_clientes.sort()
+        Trimestre = math.ceil(int(str(results.loc[0,"Marca temporal"])[5:7])/3)
+        Year = int(str(results.loc[0,"Marca temporal"])[0:4])
+        print(Trimestre)
+        print(Year)
         for index, row in results.iterrows():
 
             Found = False
@@ -137,7 +128,7 @@ def upload_file():
                             Found = True
                             
                             Nombre_Cliente = doc.to_dict()['Cliente']
-                            
+                            results["Nombre de la empresa a la que pertenece"] = results["Nombre de la empresa a la que pertenece"].replace([row["Nombre de la empresa a la que pertenece"]],Nombre_Cliente) 
                             break
 
             
@@ -151,11 +142,12 @@ def upload_file():
 
         print("# encontrados : " + str(found))
         print("# no encontrados : " + str(not_found))
+        print(request.form["area"])
 
         
         if not_found == 0:
             return render_template('simple.html',  tables=[results.to_html(classes='data', header="true")])
         else:
-             return render_template('your_view.html', your_list=not_found_list,lista_clientes=lista_clientes)
+             return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
 
     return render_template('home.html')
