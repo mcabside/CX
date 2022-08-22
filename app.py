@@ -8,6 +8,7 @@ from firebase_admin import firestore
 import json
 import threading
 import math
+from aux_functions import carga_preguntas 
 
 cred = credentials.Certificate("FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
 firebase_admin.initialize_app(cred)
@@ -102,6 +103,7 @@ def upload_file():
         
         db = firestore.client()
         Clientes_Data = db.collection("Clientes").get()
+        CDC_Respuestas_Ref = db.collection("CDC_Respuestas")
         for doc in Clientes_Data:
             lista_clientes.append(doc.to_dict()['Cliente'])
         lista_clientes.sort()
@@ -142,7 +144,9 @@ def upload_file():
 
         print("# encontrados : " + str(found))
         print("# no encontrados : " + str(not_found))
-        print(request.form["area"])
+        Area = str(request.form["area"])
+        
+        carga_preguntas(results, CDC_Respuestas_Ref,Trimestre,Year)
 
         
         if not_found == 0:
