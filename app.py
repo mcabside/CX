@@ -99,6 +99,7 @@ def upload_file():
         not_found=0
         found=0
         not_found_list = []
+        found_list = []
         lista_clientes = []
         
         db = firestore.client()
@@ -136,6 +137,7 @@ def upload_file():
             
             if Found:
                 found+=1
+                found_list.append(Nombre_Cliente)
                 print("se encontro : " + Nombre_Cliente)
             else:
                 not_found+=1
@@ -146,11 +148,28 @@ def upload_file():
         print("# no encontrados : " + str(not_found))
         Area = str(request.form["area"])
         
-        carga_preguntas(results, CDC_Respuestas_Ref,Trimestre,Year)
+        
+        
+            
+        
 
         
         if not_found == 0:
+            
+            query_trimestre = db.collection('CDC_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
+        
+        
+            if len(query_trimestre)>0:
+                print("ya se ingreso el archivo")
+            else:
+                carga_preguntas(results, CDC_Respuestas_Ref,Trimestre,Year)
+                
+             
+                
+            
+            
             return render_template('simple.html',  tables=[results.to_html(classes='data', header="true")])
+        
         else:
              return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
 
