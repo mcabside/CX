@@ -203,3 +203,34 @@ def upload_file():
              return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
 
     return render_template('home.html')
+
+
+@app.route('/chart', methods=['GET', 'POST'])
+def chart():
+    
+    if request.method == 'POST':
+        output = request.json
+        output2 = json.dumps(output)    
+        result = json.loads(output2) #this converts the json output to a python dictionary
+        
+        db = firestore.client()
+        kpi_clients = db.collection('CDC_KPIS').where('Year','==',2022).where('Trimestre','==',2).get()
+        x = []
+        y = []
+        
+        for doc in kpi_clients:
+            x.append(doc.to_dict()['Cliente'])
+            y.append(float(doc.to_dict()[result]))
+            
+        return render_template('chart.html',x=x,y=y)
+    else:
+        db = firestore.client()
+        kpi_clients = db.collection('CDC_KPIS').where('Year','==',2022).where('Trimestre','==',2).get()
+        x = []
+        y = []
+        
+        for doc in kpi_clients:
+            x.append(doc.to_dict()['Cliente'])
+            y.append(float(doc.to_dict()["kpi_total"]))
+            
+        return render_template('chart.html',x=x,y=y)
