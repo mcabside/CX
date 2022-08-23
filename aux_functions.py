@@ -18,7 +18,7 @@ def carga_preguntas(dataframe,CDC_Respuestas_Ref,Trimestre,Year):
             colname = dataframe.columns[column]
             if dataframe.iloc[row,column] != "" and dataframe.iloc[row,column] != "No Aplica" and not pd.isna(dataframe.iloc[row,column]):
                 
-                data = data + str('"' + colname + '"'+ " : " + '"'+str(dataframe.iloc[row,column]) +'"'+ ',') 
+                data = data + str('"' + colname.replace(' ','_') + '"'+ " : " + '"'+str(dataframe.iloc[row,column]) +'"'+ ',') 
                 
                 if colname in Preguntas_valor:
                     kpi_valor += int(dataframe.iloc[row,column])
@@ -31,7 +31,8 @@ def carga_preguntas(dataframe,CDC_Respuestas_Ref,Trimestre,Year):
                     kpi_esfuerzo_cont +=1
                 
                 for pregunta in Preguntas_satisfaccion:
-                    if colname in pregunta:
+
+                    if pregunta in colname:
                         
                         kpi_satisfaccion += int(dataframe.iloc[row,column])
                         kpi_satisfaccion_cont += 1
@@ -40,10 +41,6 @@ def carga_preguntas(dataframe,CDC_Respuestas_Ref,Trimestre,Year):
         kpi_valor = kpi_valor/kpi_valor_cont
         kpi_lealtad = kpi_lealtad/kpi_lealtad_cont
         kpi_esfuerzo = kpi_esfuerzo/kpi_esfuerzo_cont
-        print(kpi_valor)
-        print(kpi_lealtad)
-        print(kpi_esfuerzo)
-        print(data)
         kpi_satisfaccion = kpi_satisfaccion/kpi_satisfaccion_cont
                 
         #kpi_lealtad = kp
@@ -62,6 +59,19 @@ def carga_preguntas(dataframe,CDC_Respuestas_Ref,Trimestre,Year):
         CDC_Respuestas_Ref.add(json.loads(data))
             
         
+def carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total):
+    
+    CDC_KPI_Ref.add({
+                        'Cliente': cliente,
+                        'Trimestre': Trimestre,
+                        'Year': Year,
+                        'kpi_esfuerzo':kpi_esfuerzo,
+                        'kpi_lealtad':kpi_lealtad,
+                        'kpi_valor':kpi_valor,
+                        'kpi_satisfaccion':kpi_satisfaccion,
+                        'kpi_total':kpi_total
+                    })
+    
         
     
     
