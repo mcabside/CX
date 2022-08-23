@@ -74,3 +74,28 @@ function goHome(){
 function carga() {
     document.getElementById("area").value
 }
+
+function kpiChange(){
+    console.log("/kpi")
+    const data = document.getElementById("kpi").value
+    console.log(data)
+    const data_json = { "kpi" : data} 
+    console.log("aaaaa")
+    console.log(typeof data_json)
+    
+    $.ajax({
+        url: '/chart',
+        type: 'POST',
+        contentType: "application/json",
+        data: JSON.stringify(data_json),
+        dataType: "json",
+        success: function(response) {
+            console.log("Todo bien chart page")
+            window.location.href="http://127.0.0.1:5000/chart"
+          },
+          error: function(err) {
+            console.log("error",err);
+          }
+        
+    });
+}
