@@ -177,7 +177,7 @@ def upload_file():
                     
                     carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total) 
                             
-            return render_template('simple.html', tables=[results.to_html(classes='data', header="true")])
+            return redirect(url_for('chart'))
         
         else:
              return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
@@ -213,9 +213,15 @@ def chart():
     if kpi_name != "kpi_total" and kpi_name != "kpi_esfuerzo" and kpi_name != "kpi_lealtad" and kpi_name != "kpi_satisfaccion" and kpi_name != "kpi_valor":
         kpi_name = "kpi_total"
     if trimestre_input is None:
-        trimestre_input = 1
+        if len(Trimestres) >0:
+            trimestre_input = Trimestres[len(Trimestres)-1]
+        else:
+            trimestre_input = 1
     if year_input is None:
-        year_input = int(date.today().year)
+        if len(Years) >0:
+            year_input = Years[len(Years)-1]
+        else:
+            year_input = int(date.today().year)
         
     if cliente_input is None:
         cliente_input = "jeje"
