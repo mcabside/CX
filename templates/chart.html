@@ -10,18 +10,18 @@
 
 <body >
     
-    <div class="center">
-            <h1>Im MEMORY Gludta</h1>
+    <div >
+            
             <div >
-                <form>            
+                <form method = "get">            
                     <select id="kpi" name="kpi" class="form-select" >
-                        <option value="kpi_total" > KPI Total</option>
+                        <option value="kpi_total"  > KPI Total</option>
                         <option value="kpi_esfuerzo"> KPI Esfuerzo</option>
                         <option value="kpi_lealtad"> KPI Lealtad</option>
                         <option value="kpi_satisfaccion">KPI Satisfaccion</option>
                         <option value="kpi_valor">KPI Valor</option>
                     </select>
-                    <button type="button" style="float:right" class="btn btn-dark btn-lg" onclick="kpiChange()">Enter</button>
+                    <input class="btn btn-dark" type=submit value="Enter" style="float:right" >
 
                 </form>
             </div>
@@ -33,7 +33,7 @@
         const data = {
           labels: {{ x | safe}}, //Etiquetas datos
           datasets: [{
-            label: 'IN MEMORY GUDTA', //Title
+            label:'{{ kpi_name | safe}}' , //Title
             backgroundColor: 'rgb(255, 99, 132)',
             borderColor: 'rgb(255, 99, 132)',
             data: {{ y | safe}}, //KPI's
@@ -41,7 +41,7 @@
         };
       
         const config = {
-          type: 'line',
+          type: 'bar',
           data: data,
           options: {}
         };

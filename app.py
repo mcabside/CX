@@ -207,31 +207,17 @@ def upload_file():
 
 @app.route('/chart', methods=['GET', 'POST'])
 def chart():
+     
+    kpi_name = str(request.args.get('kpi'))
+    if kpi_name != "kpi_total" and kpi_name != "kpi_esfuerzo" and kpi_name != "kpi_lealtad" and kpi_name != "kpi_satisfaccion" and kpi_name != "kpi_valor":
+        kpi_name = "kpi_total"
+    db = firestore.client()
+    kpi_clients = db.collection('CDC_KPIS').where('Year','==',2022).where('Trimestre','==',2).get()
+    x = []
+    y = []
     
-    if request.method == 'POST':
-        output = request.json
-        output2 = json.dumps(output)    
-        result = json.loads(output2) #this converts the json output to a python dictionary
-        
-        db = firestore.client()
-        kpi_clients = db.collection('CDC_KPIS').where('Year','==',2022).where('Trimestre','==',2).get()
-        x = []
-        y = []
-        
-        for doc in kpi_clients:
-            x.append(doc.to_dict()['Cliente'])
-            y.append(float(doc.to_dict()[result['kpi']]))
+    for doc in kpi_clients:
+        x.append(doc.to_dict()['Cliente'])
+        y.append(float(doc.to_dict()[kpi_name]))
             
-        return render_template('chart.html',x=x,y=y)
-    else:
-    
-        db = firestore.client()
-        kpi_clients = db.collection('CDC_KPIS').where('Year','==',2022).where('Trimestre','==',2).get()
-        x = []
-        y = []
-        
-        for doc in kpi_clients:
-            x.append(doc.to_dict()['Cliente'])
-            y.append(float(doc.to_dict()['kpi_total']))
-                
-        return render_template('chart.html',x=x,y=y)
+    return render_template('chart.html',x=x,y=y,kpi_name=kpi_name)

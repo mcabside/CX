@@ -86,7 +86,7 @@ function kpiChange(){
     
     $.ajax({
         url: '/chart',
-        type: 'POST',
+        type: 'GET',
         contentType: "application/json",
         data: JSON.stringify(data_json),
         dataType: "json",
