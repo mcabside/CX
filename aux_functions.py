@@ -4,6 +4,7 @@ from cdc_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_le
 
 
 def carga_preguntas(dataframe,CDC_Respuestas_Ref,Trimestre,Year):
+    lista_data = []
     for row in range(len(dataframe)):
         data = ""
         kpi_esfuerzo = 0
@@ -18,7 +19,7 @@ def carga_preguntas(dataframe,CDC_Respuestas_Ref,Trimestre,Year):
             colname = dataframe.columns[column]
             if dataframe.iloc[row,column] != "" and dataframe.iloc[row,column] != "No Aplica" and not pd.isna(dataframe.iloc[row,column]):
                 
-                data = data + str('"' + colname.replace(' ','_') + '"'+ " : " + '"'+str(dataframe.iloc[row,column]) +'"'+ ',') 
+                data = data + str('"' + colname.replace(' ','_').replace('"','').replace("'","") + '"'+ " : " + '"'+str(dataframe.iloc[row,column]).replace('"','').replace("'","") +'"'+ ',') 
                 
                 if colname in Preguntas_valor:
                     kpi_valor += int(dataframe.iloc[row,column])
@@ -56,7 +57,10 @@ def carga_preguntas(dataframe,CDC_Respuestas_Ref,Trimestre,Year):
         data =  data.replace("\n", "")
 
         data = "{" + data + "}"
-        CDC_Respuestas_Ref.add(json.loads(data))
+        lista_data.append(data)
+    for respuesta in lista_data:
+        #print(respuesta)
+        CDC_Respuestas_Ref.add(json.loads(respuesta))
             
         
 def carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total):

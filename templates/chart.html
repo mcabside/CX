@@ -9,23 +9,43 @@
 </head>
 
 <body >
-    
-    <div >
-            
-            <div >
-                <form method = "get">            
-                    <select id="kpi" name="kpi" class="form-select" >
-                        <option value="kpi_total"  > KPI Total</option>
-                        <option value="kpi_esfuerzo"> KPI Esfuerzo</option>
-                        <option value="kpi_lealtad"> KPI Lealtad</option>
-                        <option value="kpi_satisfaccion">KPI Satisfaccion</option>
-                        <option value="kpi_valor">KPI Valor</option>
-                    </select>
-                    <input class="btn btn-dark" type=submit value="Enter" style="float:right" >
+        
+  <div class="center_2">
+          <form method = "get" class="row gy-2 gx-3 align-items-center">
+            <div class="col-sm-3">
+                  <select id="kpi" name="kpi" class="form-select" >
+                    <option value="kpi_total"  > KPI Total</option>
+                    <option value="kpi_esfuerzo"> KPI Esfuerzo</option>
+                    <option value="kpi_lealtad"> KPI Lealtad</option>
+                    <option value="kpi_satisfaccion">KPI Satisfaccion</option>
+                    <option value="kpi_valor">KPI Valor</option>
+                  </select>
+            </div>  
+            <div class="col-sm-3">   
+                 <select id="trimestre_input" name="trimestre_input" class="form-select" >
+                  {% for Trimestre in Trimestres %}
+                  <option value="{{Trimestre}}" >Q{{ Trimestre}}</option>"
+                  {% endfor %}   
+                  </select>
+            </div>  
 
-                </form>
+            <div class="col-sm-3">   
+              <select id="year_input" name="year_input" class="form-select" >
+               {% for Year in Years %}
+               <option value="{{Year}}" >{{ Year}}</option>"
+               {% endfor %}   
+               </select>
             </div>
-            <canvas id="myChart" width="100" height="50"></canvas>                
+
+            <div class="col-sm-3">
+              <div class="form-check">
+                <input class="btn btn-dark" type=submit value="Enter">
+              </div>
+            </div>
+
+          </form>
+             
+          <canvas id="myChart" width="100" height="50"></canvas>                
     </div>
 
     <script>
@@ -34,16 +54,22 @@
           labels: {{ x | safe}}, //Etiquetas datos
           datasets: [{
             label:'{{ kpi_name | safe}}' , //Title
-            backgroundColor: 'rgb(255, 99, 132)',
-            borderColor: 'rgb(255, 99, 132)',
+            backgroundColor: "red",
+            
             data: {{ y | safe}}, //KPI's
           }]
         };
       
         const config = {
-          type: 'bar',
+          type: 'line',
           data: data,
-          options: {}
+          options: {
+            scales:{
+              y:{
+                beginAtZero: true
+              }
+            }
+          }
         };
 
         const myChart = new Chart(

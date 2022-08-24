@@ -9,6 +9,7 @@ import json
 import threading
 import math
 from aux_functions import carga_preguntas,carga_kpi
+from datetime import date
 
 cred = credentials.Certificate("FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
 firebase_admin.initialize_app(cred)
@@ -207,17 +208,65 @@ def upload_file():
 
 @app.route('/chart', methods=['GET', 'POST'])
 def chart():
+    
+    db = firestore.client()
+    CDC_KPIS = db.collection('CDC_KPIS').get()
+    
+    Years =[]
+    Trimestres = []
+    
+    for doc in CDC_KPIS:
+        if doc.to_dict()["Trimestre"] not in Trimestres:
+            Trimestres.append(doc.to_dict()["Trimestre"])
+            
+        if doc.to_dict()["Year"] not in Years:
+            Years.append(doc.to_dict()["Year"])
+        
      
-    kpi_name = str(request.args.get('kpi'))
+     
+    kpi_name = (request.args.get('kpi'))
+    trimestre_input = (request.args.get('trimestre_input'))
+    year_input = (request.args.get('year_input'))
+    
+    
     if kpi_name != "kpi_total" and kpi_name != "kpi_esfuerzo" and kpi_name != "kpi_lealtad" and kpi_name != "kpi_satisfaccion" and kpi_name != "kpi_valor":
         kpi_name = "kpi_total"
-    db = firestore.client()
-    kpi_clients = db.collection('CDC_KPIS').where('Year','==',2022).where('Trimestre','==',2).get()
+    if trimestre_input is None:
+        trimestre_input = 1
+    if year_input is None:
+        year_input = int(date.today().year)
+        
+    
+    
+    kpi_clients = db.collection('CDC_KPIS').where('Trimestre','==',int(trimestre_input)).where('Year','==',int(year_input)).get()
     x = []
     y = []
+    
     
     for doc in kpi_clients:
         x.append(doc.to_dict()['Cliente'])
         y.append(float(doc.to_dict()[kpi_name]))
+        
+ 
+    for j in range(len(x)):
+        aux_x = x[j]
+        aux_x_i = j  
+        for i in range(j,len(x)):
+            if x[i] < aux_x:
+                aux_x = x[i]
+                aux_x_i = i
+        aux_1 = x[j]
+        aux_2 = y[j]
+        
+        x[j] = aux_x
+        y[j] = y[aux_x_i]
+        
+        x[aux_x_i] = aux_1
+        y[aux_x_i] = aux_2
+        
+    print(x)
+        
+        
+        
             
-    return render_template('chart.html',x=x,y=y,kpi_name=kpi_name)
+    return render_template('chart.html',x=x,y=y,kpi_name=kpi_name,Trimestres=Trimestres,Years=Years)
