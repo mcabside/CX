@@ -220,10 +220,11 @@ def chart():
         
         for doc in kpi_clients:
             x.append(doc.to_dict()['Cliente'])
-            y.append(float(doc.to_dict()[result]))
+            y.append(float(doc.to_dict()[result['kpi']]))
             
         return render_template('chart.html',x=x,y=y)
     else:
+    
         db = firestore.client()
         kpi_clients = db.collection('CDC_KPIS').where('Year','==',2022).where('Trimestre','==',2).get()
         x = []
@@ -231,6 +232,6 @@ def chart():
         
         for doc in kpi_clients:
             x.append(doc.to_dict()['Cliente'])
-            y.append(float(doc.to_dict()["kpi_total"]))
-            
+            y.append(float(doc.to_dict()['kpi_total']))
+                
         return render_template('chart.html',x=x,y=y)

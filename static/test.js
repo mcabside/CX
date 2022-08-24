@@ -75,13 +75,14 @@ function carga() {
     document.getElementById("area").value
 }
 
+
+function goChart(){
+    window.location.href="http://127.0.0.1:5000/chart"
+}
+
 function kpiChange(){
-    console.log("/kpi")
     const data = document.getElementById("kpi").value
-    console.log(data)
     const data_json = { "kpi" : data} 
-    console.log("aaaaa")
-    console.log(typeof data_json)
     
     $.ajax({
         url: '/chart',
@@ -90,8 +91,8 @@ function kpiChange(){
         data: JSON.stringify(data_json),
         dataType: "json",
         success: function(response) {
-            console.log("Todo bien chart page")
-            window.location.href="http://127.0.0.1:5000/chart"
+            console.log("Todo bien chart page");
+            //goChart();
           },
           error: function(err) {
             console.log("error",err);
