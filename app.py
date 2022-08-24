@@ -3,8 +3,7 @@ from flask import Flask, flash, request, redirect, url_for,render_template,jsoni
 from werkzeug.utils import secure_filename
 import pandas as pd
 import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
+from firebase_admin import credentials, firestore
 import json
 import threading
 import math
@@ -14,20 +13,20 @@ from datetime import date
 cred = credentials.Certificate("FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
 firebase_admin.initialize_app(cred)
 
-
 UPLOAD_FOLDER = 'C:\\Users\Abside User\Desktop\customer experience'
 ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xlsm'}
-#CLIENTES_FILE = "Nombres_Cliente.xlsx"
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-def allowed_file(filename): #check file type
+#CHECK FILE TYPE
+def allowed_file(filename): 
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@app.route('/SaveClients',methods=["GET", "POST"]) #save new clients in firebase
+#SAVE NEW CLIENTS IN FIREBASE
+@app.route('/SaveClients',methods=["GET", "POST"]) 
 def SaveClients():
     
     if request.method == 'POST':
@@ -37,23 +36,19 @@ def SaveClients():
         
         if request.is_json:
 
-            
             output = request.json
             output2 = json.dumps(output)
-            
-
             result = json.loads(output2) #this converts the json output to a python dictionary
 
-            
-        
+            lista_agregados = []
             for cliente in result:
                 
-                if cliente['Es_nuevo'] == "True": 
+                if cliente['Es_nuevo'] == "True" and cliente['Input'] not in lista_agregados : 
                     Clientes_Ref.add({
                         'Cliente': cliente['Input'],
                         'Encuestas': [cliente['Excel']]
                     })
-
+                    lista_agregados.append(cliente['Input'])
                 else:
                     docs = Clientes_Ref.where("Cliente","==", cliente['Input']).get()
                     for doc in docs:
@@ -68,8 +63,6 @@ def SaveClients():
             print("no es json")
             
             
-            
-
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     
@@ -97,45 +90,45 @@ def upload_file():
             results.replace(["Buena Satisfacción","Gran Valor","Totalmente de Acuerdo"],8,inplace=True)
             results.replace(["Supera las Expectativas"],10,inplace=True)
 
-        not_found=0
-        found=0
-        not_found_list = []
-        found_list = []
-        lista_clientes = []
+        not_found, found = 0, 0
+        not_found_list, found_list, lista_clientes = [], [], []
         
+        #Firebase
         db = firestore.client()
         Clientes_Data = db.collection("Clientes").get()
         CDC_Respuestas_Ref = db.collection("CDC_Respuestas")
         for doc in Clientes_Data:
             lista_clientes.append(doc.to_dict()['Cliente'])
+        #Sort clients
         lista_clientes.sort()
+        
+        #Get trimestre from file
         Trimestre = math.ceil(int(str(results.loc[0,"Marca temporal"])[5:7])/3)
+        
+        #Get trimestre from year
         Year = int(str(results.loc[0,"Marca temporal"])[0:4])
-        print(Trimestre)
-        print(Year)
+        
+        #verify client in DB
         for index, row in results.iterrows():
 
             Found = False
             Nombre_Cliente = row["Nombre de la empresa a la que pertenece"]
+            aux = row["Nombre de la empresa a la que pertenece"].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') 
             for doc in Clientes_Data:
+                aux2 = doc.to_dict()['Cliente'].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') 
+    
                 if row["Nombre de la empresa a la que pertenece"] == doc.to_dict()['Cliente']:
                     Found = True
                     break
                 else:
                     for cliente_encuesta in doc.to_dict()['Encuestas']:
-                        if (row["Nombre de la empresa a la que pertenece"].lower() == cliente_encuesta.lower() or 
-                            row["Nombre de la empresa a la que pertenece"].lower() in cliente_encuesta.lower() or 
-                            cliente_encuesta.lower() in row["Nombre de la empresa a la que pertenece"].lower()  or 
-                            row["Nombre de la empresa a la que pertenece"].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') == cliente_encuesta.lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') or 
-                            row["Nombre de la empresa a la que pertenece"].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') in cliente_encuesta.lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') )  :
-                            
+                        aux3 = cliente_encuesta.lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') 
+                        
+                        if (aux in aux3 or aux3 in aux):
                             Found = True
-                            
                             Nombre_Cliente = doc.to_dict()['Cliente']
                             results["Nombre de la empresa a la que pertenece"] = results["Nombre de la empresa a la que pertenece"].replace([row["Nombre de la empresa a la que pertenece"]],Nombre_Cliente) 
                             break
-
-            
             if Found:
                 found+=1
                 found_list.append(Nombre_Cliente)
@@ -145,20 +138,11 @@ def upload_file():
                 not_found_list.append(Nombre_Cliente)
                 print("no se encontro : " + Nombre_Cliente)
 
-        print("# encontrados : " + str(found))
-        print("# no encontrados : " + str(not_found))
         Area = str(request.form["area"])
-        
-        
-        
-            
-        
-
         
         if not_found == 0:
             
             query_trimestre = db.collection('CDC_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
-        
         
             if len(query_trimestre)>0:
                 print("ya se ingreso el archivo")
@@ -168,11 +152,7 @@ def upload_file():
                 found_set = set(found_list)
                 found_list_unique = list(found_set)
                 for cliente in found_list_unique:
-                    kpi_esfuerzo = 0
-                    kpi_satisfaccion = 0
-                    kpi_lealtad = 0
-                    kpi_valor = 0
-                    numero_de_respuestas = 0
+                    kpi_esfuerzo, kpi_satisfaccion, kpi_lealtad, kpi_valor, numero_de_respuestas = 0, 0, 0, 0, 0
                     query_kpi = db.collection('CDC_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where("Nombre_de_la_empresa_a_la_que_pertenece", '==', cliente).get()
                     
                     for doc in query_kpi:
@@ -184,21 +164,16 @@ def upload_file():
                         
                         numero_de_respuestas += 1
                         
-                        
-                        
-                    kpi_esfuerzo = kpi_esfuerzo/numero_de_respuestas
-                    kpi_satisfaccion = kpi_satisfaccion/numero_de_respuestas
-                    kpi_lealtad = kpi_lealtad/numero_de_respuestas
-                    kpi_valor = kpi_valor/numero_de_respuestas
+                    kpi_esfuerzo = round(kpi_esfuerzo/numero_de_respuestas, 1)
+                    kpi_satisfaccion = round(kpi_satisfaccion/numero_de_respuestas,1)
+                    kpi_lealtad = round(kpi_lealtad/numero_de_respuestas,1)
+                    kpi_valor = round(kpi_valor/numero_de_respuestas,1)
                     
-                    kpi_total = (kpi_esfuerzo*0.20) + (kpi_satisfaccion*0.35) + (kpi_lealtad*0.35) + (kpi_valor*0.10)
-                    
+                    kpi_total = round((kpi_esfuerzo*0.20) + (kpi_satisfaccion*0.35) + (kpi_lealtad*0.35) + (kpi_valor*0.10),1)
                     
                     carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total) 
-                
-            
-            
-            return render_template('simple.html',  tables=[results.to_html(classes='data', header="true")])
+                            
+            return render_template('simple.html', tables=[results.to_html(classes='data', header="true")])
         
         else:
              return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
@@ -212,8 +187,7 @@ def chart():
     db = firestore.client()
     CDC_KPIS = db.collection('CDC_KPIS').get()
     
-    Years =[]
-    Trimestres = []
+    Years, Trimestres, lista_clientes = [], [], []
     
     for doc in CDC_KPIS:
         if doc.to_dict()["Trimestre"] not in Trimestres:
@@ -222,12 +196,15 @@ def chart():
         if doc.to_dict()["Year"] not in Years:
             Years.append(doc.to_dict()["Year"])
         
-     
+    Clientes_Data = db.collection("Clientes").get()
+    for doc in Clientes_Data:
+        lista_clientes.append(doc.to_dict()['Cliente'])
+    lista_clientes.sort()
      
     kpi_name = (request.args.get('kpi'))
     trimestre_input = (request.args.get('trimestre_input'))
     year_input = (request.args.get('year_input'))
-    
+    cliente_input = (request.args.get('cliente_input'))
     
     if kpi_name != "kpi_total" and kpi_name != "kpi_esfuerzo" and kpi_name != "kpi_lealtad" and kpi_name != "kpi_satisfaccion" and kpi_name != "kpi_valor":
         kpi_name = "kpi_total"
@@ -236,18 +213,16 @@ def chart():
     if year_input is None:
         year_input = int(date.today().year)
         
-    
-    
+    if cliente_input is None:
+        cliente_input = "jeje"
+        
     kpi_clients = db.collection('CDC_KPIS').where('Trimestre','==',int(trimestre_input)).where('Year','==',int(year_input)).get()
-    x = []
-    y = []
-    
+    x, y = [], []
     
     for doc in kpi_clients:
         x.append(doc.to_dict()['Cliente'])
         y.append(float(doc.to_dict()[kpi_name]))
         
- 
     for j in range(len(x)):
         aux_x = x[j]
         aux_x_i = j  
@@ -264,9 +239,4 @@ def chart():
         x[aux_x_i] = aux_1
         y[aux_x_i] = aux_2
         
-    print(x)
-        
-        
-        
-            
-    return render_template('chart.html',x=x,y=y,kpi_name=kpi_name,Trimestres=Trimestres,Years=Years)
+    return render_template('chart.html',x=x,y=y,kpi_name=kpi_name,Trimestres=Trimestres,Years=Years,lista_clientes=lista_clientes)

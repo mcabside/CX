@@ -12,7 +12,7 @@
         
   <div class="center_2">
           <form method = "get" class="row gy-2 gx-3 align-items-center">
-            <div class="col-sm-3">
+            <div class="col-sm-2">
                   <select id="kpi" name="kpi" class="form-select" >
                     <option value="kpi_total"  > KPI Total</option>
                     <option value="kpi_esfuerzo"> KPI Esfuerzo</option>
@@ -21,7 +21,8 @@
                     <option value="kpi_valor">KPI Valor</option>
                   </select>
             </div>  
-            <div class="col-sm-3">   
+
+            <div class="col-sm-2">   
                  <select id="trimestre_input" name="trimestre_input" class="form-select" >
                   {% for Trimestre in Trimestres %}
                   <option value="{{Trimestre}}" >Q{{ Trimestre}}</option>"
@@ -29,7 +30,7 @@
                   </select>
             </div>  
 
-            <div class="col-sm-3">   
+            <div class="col-sm-2">   
               <select id="year_input" name="year_input" class="form-select" >
                {% for Year in Years %}
                <option value="{{Year}}" >{{ Year}}</option>"
@@ -37,11 +38,21 @@
                </select>
             </div>
 
-            <div class="col-sm-3">
+            <div class="col-sm-2">   
+              <select id="cliente_input" name="cliente_input" class="form-select" >
+               {% for cliente in lista_clientes %}
+               <option value="{{cliente}}" >{{cliente}}</option>"
+               {% endfor %}   
+               </select>
+            </div>
+
+            <div class="col-sm-2">
               <div class="form-check">
                 <input class="btn btn-dark" type=submit value="Enter">
               </div>
             </div>
+
+         
 
           </form>
              
