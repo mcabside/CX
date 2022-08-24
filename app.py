@@ -117,7 +117,11 @@ def upload_file():
             for doc in Clientes_Data:
                 aux2 = doc.to_dict()['Cliente'].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') 
     
-                if row["Nombre de la empresa a la que pertenece"] == doc.to_dict()['Cliente']:
+                if aux in aux2 or aux2 in aux:
+                    
+                    Nombre_Cliente = doc.to_dict()['Cliente']
+                    results["Nombre de la empresa a la que pertenece"] = results["Nombre de la empresa a la que pertenece"].replace([row["Nombre de la empresa a la que pertenece"]],Nombre_Cliente) 
+                            
                     Found = True
                     break
                 else:
