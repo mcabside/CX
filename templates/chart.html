@@ -97,7 +97,7 @@
       const data = {
         labels: {{ x | safe}}, //Etiquetas datos
         datasets: [{
-          label:'{{ kpi_name | safe}}' , //Title
+          label:'{{ kpi_name | safe}} Q{{ trimestre_input | safe}} {{ year_input | safe}}' , //Title
           backgroundColor: "red",
           
           data: {{ y | safe}}, //KPI's
@@ -119,8 +119,10 @@
         const data2 = {
           labels: {{ x | safe}}, //Etiquetas datos
           datasets: [{
-            label:'{{ cliente_input | safe}}', //Title
-            backgroundColor: "rgb(255,155,0)",
+            label:'{{ cliente_input | safe}} Q{{ trimestre_input | safe}} {{ year_input | safe}}', //Title
+            backgroundColor: "rgba(255,155,0, 0.6)",
+            borderWidth: 1,
+            borderColor : "rgb(255,155,0)",
             
             data: {{ y | safe}}, //KPI's
           }]
@@ -132,7 +134,8 @@
           options: {
             scales:{
               y:{
-                beginAtZero: true
+                beginAtZero: true,
+                max:10
               }
             }
           }
