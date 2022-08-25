@@ -188,8 +188,12 @@ def upload_file():
 @app.route('/chart', methods=['GET', 'POST'])
 def chart():
     
+    tipos_kpi_ori = ["kpi_total", "kpi_esfuerzo", "kpi_lealtad","kpi_satisfaccion","kpi_valor"]
+    tipos_kpi_nice = ["KPI Total", "KPI Esfuerzo", "KPI Lealtad", "KPI Satisfaccion", "KPI Valor"]
+    
     db = firestore.client()
     CDC_KPIS = db.collection('CDC_KPIS').get()
+    cliente_unico = False
     
     Years, Trimestres, lista_clientes = [], [], []
     
@@ -222,31 +226,46 @@ def chart():
             year_input = Years[len(Years)-1]
         else:
             year_input = int(date.today().year)
-        
-    if cliente_input is None:
-        cliente_input = "jeje"
-        
-    kpi_clients = db.collection('CDC_KPIS').where('Trimestre','==',int(trimestre_input)).where('Year','==',int(year_input)).get()
-    x, y = [], []
     
-    for doc in kpi_clients:
-        x.append(doc.to_dict()['Cliente'])
-        y.append(float(doc.to_dict()[kpi_name]))
+    x, y = [], [] 
+    
+    if cliente_input is None or cliente_input=="Todos":
         
-    for j in range(len(x)):
-        aux_x = x[j]
-        aux_x_i = j  
-        for i in range(j,len(x)):
-            if x[i] < aux_x:
-                aux_x = x[i]
-                aux_x_i = i
-        aux_1 = x[j]
-        aux_2 = y[j]
+        kpi_clients = db.collection('CDC_KPIS').where('Trimestre','==',int(trimestre_input)).where('Year','==',int(year_input)).get()
         
-        x[j] = aux_x
-        y[j] = y[aux_x_i]
+        for doc in kpi_clients:
+            x.append(doc.to_dict()['Cliente'])
+            y.append(float(doc.to_dict()[kpi_name]))
+            
+        for j in range(len(x)):
+            aux_x = x[j]
+            aux_x_i = j  
+            for i in range(j,len(x)):
+                if x[i] < aux_x:
+                    aux_x = x[i]
+                    aux_x_i = i
+            aux_1 = x[j]
+            aux_2 = y[j]
+            
+            x[j] = aux_x
+            y[j] = y[aux_x_i]
+            
+            x[aux_x_i] = aux_1
+            y[aux_x_i] = aux_2
+    else:
         
-        x[aux_x_i] = aux_1
-        y[aux_x_i] = aux_2
+        kpi_client = db.collection('CDC_KPIS').where('Trimestre','==',int(trimestre_input)).where('Year','==',int(year_input)).where('Cliente','==',cliente_input).get()
+        cliente_unico = True
+        for doc in kpi_client:
+            x.append("total")
+            x.append("esfuerzo")
+            x.append("satisfaccion")
+            x.append("lealtad")
+            x.append("valor")
+            y.append(float(doc.to_dict()["kpi_total"]))
+            y.append(float(doc.to_dict()["kpi_esfuerzo"]))
+            y.append(float(doc.to_dict()["kpi_satisfaccion"]))
+            y.append(float(doc.to_dict()["kpi_lealtad"]))
+            y.append(float(doc.to_dict()["kpi_valor"]))
         
-    return render_template('chart.html',x=x,y=y,kpi_name=kpi_name,Trimestres=Trimestres,Years=Years,lista_clientes=lista_clientes)
+    return render_template('chart.html',x=x,y=y,kpi_name=kpi_name,Trimestres=Trimestres,Years=Years,lista_clientes=lista_clientes,cliente_unico=cliente_unico,cliente_input=cliente_input,trimestre_input=int(trimestre_input), tipos_kpi_ori=tipos_kpi_ori,tipos_kpi_nice=tipos_kpi_nice)

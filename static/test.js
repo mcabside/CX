@@ -100,3 +100,11 @@ function kpiChange(){
         
     });
 }
+
+function changeSelect(){
+    var cliente_input = document.getElementById("cliente_input").value
+    if(cliente_input != "Todos")
+        document.getElementById("kpi").disabled = true;
+    else
+        document.getElementById("kpi").disabled = false;
+}
