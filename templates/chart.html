@@ -10,64 +10,78 @@
 
 <body >
         
+  
   <div class="center_2">
-          <form method = "get" class="row gy-2 gx-3 align-items-center">
-            <div class="col-sm-2">
-                  {% if cliente_input  != "Todos" and cliente_input %}
-                    <select id="kpi" name="kpi" class="form-select" disabled>
-                  {% else %}
-                    <select id="kpi" name="kpi" class="form-select">
-                  {% endif %}
-                    {% for kpi in tipos_kpi_ori %}
-                    {% if kpi == kpi_name %}
-                      <option value="{{kpi}}" selected="selected">  {{tipos_kpi_nice[loop.index-1]}} </option>
-                    {% else %}
-                      <option value="{{kpi}}"> {{tipos_kpi_nice[loop.index-1]}}</option>  
-                    {% endif %}
-                    {% endfor %}   
-                  </select>
-            </div>  
-
-            <div class="col-sm-2">   
-                 <select id="trimestre_input" name="trimestre_input" class="form-select" >
-                  {% for Trimestre in Trimestres %}
-                  {% if Trimestre == trimestre_input %}
-                    <option value="{{Trimestre}}" selected="selected">Q{{ Trimestre}}</option>
-                  {% else %}
-                    <option value="{{Trimestre}}">Q{{ Trimestre}}</option>  
-                  {% endif %}
-                  {% endfor %}   
-                  </select>
-            </div>  
-
-            <div class="col-sm-2">   
-              <select id="year_input" name="year_input" class="form-select" >
-               {% for Year in Years %}
-               <option value="{{Year}}" >{{ Year}}</option>
-               {% endfor %}   
-               </select>
-            </div>
-
-            <div class="col-sm-2">
-              <select id="cliente_input" name="cliente_input" class="form-select" onchange="changeSelect()">
-                <option value="Todos" default>Todos</option>
-               {% for cliente in lista_clientes %}
-                {% if cliente == cliente_input%}
-                  <option value="{{cliente}}" selected="selected">{{cliente}}</option>
+    
+    <br>
+    <div style="align-items:center;justify-content:center;display:flex">
+      
+      <form method = "get" class="row gy-2 gx-3 align-items-center">
+        <div class="col-sm-2">
+              {% if cliente_input  != "Todos" and cliente_input %}
+                <select id="kpi" name="kpi" class="form-select" disabled>
+              {% else %}
+                <select id="kpi" name="kpi" class="form-select">
+              {% endif %}
+                {% for kpi in tipos_kpi_ori %}
+                {% if kpi == kpi_name %}
+                  <option value="{{kpi}}" selected="selected">  {{tipos_kpi_nice[loop.index-1]}} </option>
                 {% else %}
-                  <option value="{{cliente}}" >{{cliente}}</option>
+                  <option value="{{kpi}}"> {{tipos_kpi_nice[loop.index-1]}}</option>  
                 {% endif %}
-               {% endfor %}   
-               </select>
-            </div>
+                {% endfor %}   
+              </select>
+        </div>  
 
-            <div class="col-sm-2">
-              <div class="form-check">
-                <input class="btn btn-dark" type=submit value="Enter">
-              </div>
-            </div>
+        <div class="col-sm-2">   
+             <select id="trimestre_input" name="trimestre_input" class="form-select" >
+              {% for Trimestre in Trimestres %}
+              {% if Trimestre == trimestre_input %}
+                <option value="{{Trimestre}}" selected="selected">Q{{ Trimestre}}</option>
+              {% else %}
+                <option value="{{Trimestre}}">Q{{ Trimestre}}</option>  
+              {% endif %}
+              {% endfor %}   
+              </select>
+        </div>  
 
-          </form>
+        <div class="col-sm-2">   
+          <select id="year_input" name="year_input" class="form-select" >
+           {% for Year in Years %}
+           <option value="{{Year}}" >{{ Year}}</option>
+           {% endfor %}   
+           </select>
+        </div>
+
+        <div class="col-sm-2">
+          <select id="cliente_input" name="cliente_input" class="form-select" onchange="changeSelect()">
+            <option value="Todos" default>Todos</option>
+           {% for cliente in lista_clientes %}
+            {% if cliente == cliente_input%}
+              <option value="{{cliente}}" selected="selected">{{cliente}}</option>
+            {% else %}
+              <option value="{{cliente}}" >{{cliente}}</option>
+            {% endif %}
+           {% endfor %}   
+           </select>
+        </div>
+
+        <div class="col-sm-2">
+          <div class="form-check">
+            <input class="btn btn-dark" type=submit value="Filtrar">
+          </div>
+        </div>
+
+      </form>
+
+      {% if not cliente_unico %}
+      <h3>Promedio : {{Promedio_total_q}}</h3>
+       
+      {% endif %}
+    
+    </div>
+    <br>
+          
 
           {% if cliente_unico %}
             <canvas id="myChart2" width="100" height="50"></canvas>
@@ -106,7 +120,7 @@
           labels: {{ x | safe}}, //Etiquetas datos
           datasets: [{
             label:'{{ cliente_input | safe}}', //Title
-            backgroundColor: "red",
+            backgroundColor: "rgb(255,155,0)",
             
             data: {{ y | safe}}, //KPI's
           }]

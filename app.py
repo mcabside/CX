@@ -228,8 +228,11 @@ def chart():
             year_input = int(date.today().year)
     
     x, y = [], [] 
-    
+    Promedio_total_q=0
     if cliente_input is None or cliente_input=="Todos":
+        
+        
+            
         
         kpi_clients = db.collection('CDC_KPIS').where('Trimestre','==',int(trimestre_input)).where('Year','==',int(year_input)).get()
         
@@ -252,7 +255,15 @@ def chart():
             
             x[aux_x_i] = aux_1
             y[aux_x_i] = aux_2
+            
+        
+        for kpi_value in y:
+            Promedio_total_q += kpi_value
+        Promedio_total_q = Promedio_total_q/len(y)
+                
+            
     else:
+        
         
         kpi_client = db.collection('CDC_KPIS').where('Trimestre','==',int(trimestre_input)).where('Year','==',int(year_input)).where('Cliente','==',cliente_input).get()
         cliente_unico = True
@@ -268,4 +279,4 @@ def chart():
             y.append(float(doc.to_dict()["kpi_lealtad"]))
             y.append(float(doc.to_dict()["kpi_valor"]))
         
-    return render_template('chart.html',x=x,y=y,kpi_name=kpi_name,Trimestres=Trimestres,Years=Years,lista_clientes=lista_clientes,cliente_unico=cliente_unico,cliente_input=cliente_input,trimestre_input=int(trimestre_input), tipos_kpi_ori=tipos_kpi_ori,tipos_kpi_nice=tipos_kpi_nice)
+    return render_template('chart.html',x=x,y=y,kpi_name=kpi_name,Trimestres=Trimestres,Years=Years,lista_clientes=lista_clientes,cliente_unico=cliente_unico,cliente_input=cliente_input,trimestre_input=int(trimestre_input), tipos_kpi_ori=tipos_kpi_ori,tipos_kpi_nice=tipos_kpi_nice,Promedio_total_q=Promedio_total_q)

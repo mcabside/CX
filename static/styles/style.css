@@ -4,3 +4,16 @@
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
+.rotate {
+    animation: rotation 8s infinite linear;
+  }
+  
+  @keyframes rotation {
+    from {
+      transform: rotate(359deg);
+    }
+    to {
+      transform: rotate(0deg);
+    }
+  }
