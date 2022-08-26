@@ -3,7 +3,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
     <script src="{{url_for('static', filename='test.js')}}"></script>
-    
 </head>
 <body >
     <div class="center">
@@ -12,11 +11,8 @@
     <a href="{{ url_for('chart') }}" class='btn btn-primary btn-lg' style="align-items:center;justify-content:center;display:flex">VER REPORTES</a>
     <br>
 
-    
-
     <img src="static\img\logo-CX ABSIDE-DEF.png"  width="600" height="300">
 
-    
     <h1>Cargar Archivo de Resultados</h1>
     <div >
         <form method=post enctype=multipart/form-data>

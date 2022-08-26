@@ -1,7 +1,23 @@
 import pandas as pd
 import json
 from static.questions.cdc_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
+import plotly.graph_objects as go
 
+#Graficar velocimetro
+def speedmeter(title, value):
+    fig_total = go.Figure(go.Indicator(
+            domain = {'x': [0, 1], 'y': [0, 1]},
+            value = value,
+            mode = "gauge+number+delta",
+            title = {'text': title},
+            gauge = {'axis': {'range': [0, 10]},
+                    'bar': {'color': "hsla(120, 100%, 50%, 0.0)"},
+                    'steps' : [
+                        {'range': [0, 7], 'color': "red"},
+                        {'range': [7, 8], 'color': "orange"},
+                        {'range': [8, 10], 'color': "green"}],
+                    'threshold' : {'line': {'color': "black", 'width': 6}, 'thickness': 0.85, 'value': value}}))
+    return fig_total
 
 def carga_preguntas(dataframe,CDC_Respuestas_Ref,Trimestre,Year):
     lista_data = []

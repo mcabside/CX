@@ -1,18 +1,19 @@
 import os
+from pickle import NONE
 from flask import Flask, flash, request, redirect, url_for,render_template,jsonify
 from werkzeug.utils import secure_filename
 import pandas as pd
 import firebase_admin
 from firebase_admin import credentials, firestore
 import json
-import threading
+#import threading
 import math
-from aux_functions import carga_preguntas,carga_kpi
+from aux_functions import carga_preguntas, carga_kpi, speedmeter
 from datetime import date
 import plotly
-import plotly.graph_objects as go
-import plotly.express as px
-from plotly.subplots import make_subplots
+#import plotly.graph_objects as go
+#import plotly.express as px
+#from plotly.subplots import make_subplots
 
 
 cred = credentials.Certificate("FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
@@ -178,7 +179,7 @@ def upload_file():
                     kpi_lealtad = round(kpi_lealtad/numero_de_respuestas,2)
                     kpi_valor = round(kpi_valor/numero_de_respuestas,2)
                     
-                    kpi_total = round((kpi_esfuerzo*0.20) + (kpi_satisfaccion*0.35) + (kpi_lealtad*0.35) + (kpi_valor*0.10),2)
+                    kpi_total = round((kpi_esfuerzo*0.20) + (kpi_satisfaccion*0.35) + (kpi_lealtad*0.35) + (kpi_valor*0.10), 2)
                     
                     carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total) 
                             
@@ -193,20 +194,20 @@ def upload_file():
 @app.route('/chart', methods=['GET', 'POST'])
 def chart():
     
+    #Lista Nombres KPI
     tipos_kpi_ori = ["kpi_total", "kpi_esfuerzo", "kpi_lealtad","kpi_satisfaccion","kpi_valor"]
     tipos_kpi_nice = ["KPI Total", "KPI Esfuerzo", "KPI Lealtad", "KPI Satisfaccion", "KPI Valor"]
     
+    #Conexion con la DB - KPI's CDC
     db = firestore.client()
     CDC_KPIS = db.collection('CDC_KPIS').get()
-    cliente_unico = False
-    graphJSON_total = False
-    graphJSON_esfuerzo = False
-    graphJSON_satisfaccion = False
-    graphJSON_lealtad = False
-    graphJSON_valor = False
 
+    #Variables
+    cliente_unico, graphJSON_total, graphJSON_esfuerzo, graphJSON_satisfaccion = False, False, False, False
+    graphJSON_lealtad, graphJSON_valor = False, False
     Years, Trimestres, lista_clientes = [], [], []
     
+    #Guardar Listas Trimestres y años
     for doc in CDC_KPIS:
         if doc.to_dict()["Trimestre"] not in Trimestres:
             Trimestres.append(doc.to_dict()["Trimestre"])
@@ -214,16 +215,19 @@ def chart():
         if doc.to_dict()["Year"] not in Years:
             Years.append(doc.to_dict()["Year"])
         
+    #Conexión con la DB - Lista clientes
     Clientes_Data = db.collection("Clientes").get()
     for doc in Clientes_Data:
         lista_clientes.append(doc.to_dict()['Cliente'])
     lista_clientes.sort()
      
+    #Parametros URL
     kpi_name = (request.args.get('kpi'))
     trimestre_input = (request.args.get('trimestre_input'))
     year_input = (request.args.get('year_input'))
     cliente_input = (request.args.get('cliente_input'))
     
+    #Validación parametros
     if kpi_name != "kpi_total" and kpi_name != "kpi_esfuerzo" and kpi_name != "kpi_lealtad" and kpi_name != "kpi_satisfaccion" and kpi_name != "kpi_valor":
         kpi_name = "kpi_total"
     if trimestre_input is None:
@@ -237,9 +241,11 @@ def chart():
         else:
             year_input = int(date.today().year)
     
+    # Lista Clientes/ Lista KPI
     x, y = [], [] 
-    Promedio_total_q=0
-    graphJSON = False
+    Promedio_total_q = 0
+    kpi_clients = None
+
     if cliente_input is None or cliente_input=="Todos":
         
         kpi_clients = db.collection('CDC_KPIS').where('Trimestre','==',int(trimestre_input)).where('Year','==',int(year_input)).get()
@@ -272,6 +278,7 @@ def chart():
         
         kpi_client = db.collection('CDC_KPIS').where('Trimestre','==',int(trimestre_input)).where('Year','==',int(year_input)).where('Cliente','==',cliente_input).get()
         cliente_unico = True
+
         for doc in kpi_client:
             x.append("total")
             x.append("esfuerzo")
@@ -285,77 +292,18 @@ def chart():
             y.append(float(doc.to_dict()["kpi_valor"]))
             
         if len(y)>0:
-                
-            fig_total = go.Figure(go.Indicator(
-            domain = {'x': [0, 1], 'y': [0, 1]},
-            value = y[0],
-            mode = "gauge+number+delta",
-            title = {'text': "Total"},
-            gauge = {'axis': {'range': [0, 10]},
-                    'bar': {'color': "hsla(120, 100%, 50%, 0.0)"},
-                    'steps' : [
-                        {'range': [0, 7], 'color': "red"},
-                        {'range': [7, 8], 'color': "orange"},
-                        {'range': [8, 10], 'color': "green"}],
-                    'threshold' : {'line': {'color': "black", 'width': 6}, 'thickness': 0.85, 'value': y[0]}}))
             
-            fig_esfuerzo = go.Figure(go.Indicator(
-            domain = {'x': [0, 1], 'y': [0, 1]},
-            value = y[1],
-            mode = "gauge+number+delta",
-            title = {'text': "Esfuerzo"},
-            gauge = {'axis': {'range': [0, 10]},
-                    'bar': {'color': "hsla(120, 100%, 50%, 0.0)"},
-                    'steps' : [
-                        {'range': [0, 7], 'color': "red"},
-                        {'range': [7, 8], 'color': "orange"},
-                        {'range': [8, 10], 'color': "green"}],
-                    'threshold' : {'line': {'color': "black", 'width': 6}, 'thickness': 0.85, 'value': y[1]}}))
-            
-            fig_satisfaccion = go.Figure(go.Indicator(
-            domain = {'x': [0, 1], 'y': [0, 1]},
-            value = y[2],
-            mode = "gauge+number+delta",
-            title = {'text': "Satisfacción"},
-            gauge = {'axis': {'range': [0, 10]},
-                    'bar': {'color': "hsla(120, 100%, 50%, 0.0)"},
-                    'steps' : [
-                        {'range': [0, 7], 'color': "red"},
-                        {'range': [7, 8], 'color': "orange"},
-                        {'range': [8, 10], 'color': "green"}],
-                    'threshold' : {'line': {'color': "black", 'width': 6}, 'thickness': 0.85, 'value': y[2]}}))
-            
-            fig_lealtad = go.Figure(go.Indicator(
-            domain = {'x': [0, 1], 'y': [0, 1]},
-            value = y[3],
-            mode = "gauge+number+delta",
-            title = {'text': "Lealtad"},
-            gauge = {'axis': {'range': [0, 10]},
-                    'bar': {'color': "hsla(120, 100%, 50%, 0.0)"},
-                    'steps' : [
-                        {'range': [0, 7], 'color': "red"},
-                        {'range': [7, 8], 'color': "orange"},
-                        {'range': [8, 10], 'color': "green"}],
-                    'threshold' : {'line': {'color': "black", 'width': 6}, 'thickness': 0.85, 'value': y[3]}}))
-            
-            fig_valor = go.Figure(go.Indicator(
-            domain = {'x': [0, 1], 'y': [0, 1]},
-            value = y[4],
-            mode = "gauge+number+delta",
-            title = {'text': "Valor"},
-            gauge = {'axis': {'range': [0, 10]},
-                    'bar': {'color': "hsla(120, 100%, 50%, 0.0)"},
-                    'steps' : [
-                        {'range': [0, 7], 'color': "red"},
-                        {'range': [7, 8], 'color': "orange"},
-                        {'range': [8, 10], 'color': "green"}],
-                    'threshold' : {'line': {'color': "black", 'width': 6}, 'thickness': 0.85, 'value': y[4]}}))
-            
-            graphJSON_total = json.dumps(fig_total, cls=plotly.utils.PlotlyJSONEncoder)
-            graphJSON_esfuerzo = json.dumps(fig_esfuerzo, cls=plotly.utils.PlotlyJSONEncoder)
-            graphJSON_satisfaccion = json.dumps(fig_satisfaccion, cls=plotly.utils.PlotlyJSONEncoder)
-            graphJSON_lealtad = json.dumps(fig_lealtad, cls=plotly.utils.PlotlyJSONEncoder)
-            graphJSON_valor = json.dumps(fig_valor, cls=plotly.utils.PlotlyJSONEncoder)
+            fig_total        = speedmeter("Total", y[0])
+            fig_esfuerzo     = speedmeter("Esfuerzo", y[1])
+            fig_satisfaccion = speedmeter("Satisfacción", y[2])
+            fig_lealtad      = speedmeter("Lealtad", y[3])
+            fig_valor        = speedmeter("Valor", y[4])
+
+            graphJSON_total         = json.dumps(fig_total, cls=plotly.utils.PlotlyJSONEncoder)
+            graphJSON_esfuerzo      = json.dumps(fig_esfuerzo, cls=plotly.utils.PlotlyJSONEncoder)
+            graphJSON_satisfaccion  = json.dumps(fig_satisfaccion, cls=plotly.utils.PlotlyJSONEncoder)
+            graphJSON_lealtad       = json.dumps(fig_lealtad, cls=plotly.utils.PlotlyJSONEncoder)
+            graphJSON_valor         = json.dumps(fig_valor, cls=plotly.utils.PlotlyJSONEncoder)
         
     return render_template('chart.html',x=x,y=y,kpi_name=kpi_name,Trimestres=Trimestres,
                            Years=Years,lista_clientes=lista_clientes,cliente_unico=cliente_unico,
@@ -363,4 +311,5 @@ def chart():
                            tipos_kpi_ori=tipos_kpi_ori,tipos_kpi_nice=tipos_kpi_nice,Promedio_total_q=round(Promedio_total_q,2),
                            graphJSON_total=graphJSON_total,graphJSON_esfuerzo=graphJSON_esfuerzo,
                            graphJSON_satisfaccion=graphJSON_satisfaccion,graphJSON_lealtad=graphJSON_lealtad,
-                           graphJSON_valor=graphJSON_valor)
+                           graphJSON_valor=graphJSON_valor,
+                           kpi_clients=kpi_clients)
