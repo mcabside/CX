@@ -246,10 +246,36 @@ def chart():
     Promedio_total_q = 0
     kpi_clients = None
 
+    kpi_q1, kpi_q2, kpi_q3, kpi_q4 = [], [], [], []
     if cliente_input is None or cliente_input=="Todos":
         
-        kpi_clients = db.collection('CDC_KPIS').where('Trimestre','==',int(trimestre_input)).where('Year','==',int(year_input)).get()
+        kpi_clients = db.collection('CDC_KPIS').order_by("Cliente").get()
+        #where('Trimestre','==',int(trimestre_input))
         
+        #PRUEBA TABLA DINAMICA
+        
+        
+        for i, doc in enumerate(kpi_clients):
+            if i == 0:
+                kpi_q1.append([doc.to_dict()['Cliente'], doc])
+                
+            else:
+                esta = False
+                posi = 0
+                for j, client in enumerate(kpi_q1):
+                    if doc.to_dict()['Cliente'] in client: 
+                        posi = j
+                        esta = True
+                        break
+                if esta:
+                    kpi_q1[posi].append(doc)
+                    
+                else:
+                    kpi_q1.append([doc.to_dict()['Cliente'], doc])
+                    
+        
+        print(kpi_q1)
+    
         for doc in kpi_clients:
             x.append(doc.to_dict()['Cliente'])
             y.append(float(doc.to_dict()[kpi_name]))
@@ -312,4 +338,4 @@ def chart():
                            graphJSON_total=graphJSON_total,graphJSON_esfuerzo=graphJSON_esfuerzo,
                            graphJSON_satisfaccion=graphJSON_satisfaccion,graphJSON_lealtad=graphJSON_lealtad,
                            graphJSON_valor=graphJSON_valor,
-                           kpi_clients=kpi_clients)
+                           kpi_clients=kpi_clients, kpi_q1=kpi_q1, kpi_q2=kpi_q2)
