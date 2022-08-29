@@ -278,11 +278,11 @@ def chart():
             cliente = cliente_kpis[0]
             kpi1 = {'Cliente':cliente,'Trimestre':1,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
                         "kpi_esfuerzo":"","kpi_total":""}
-            kpi2 = {'Cliente':cliente,'Trimestre':1,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
+            kpi2 = {'Cliente':cliente,'Trimestre':2,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
                         "kpi_esfuerzo":"","kpi_total":""}
-            kpi3 = {'Cliente':cliente,'Trimestre':1,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
+            kpi3 = {'Cliente':cliente,'Trimestre':3,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
                         "kpi_esfuerzo":"","kpi_total":""}
-            kpi4 = {'Cliente':cliente,'Trimestre':1,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
+            kpi4 = {'Cliente':cliente,'Trimestre':4,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
                         "kpi_esfuerzo":"","kpi_total":""}
             for i in range(1,len(cliente_kpis)):
                 
