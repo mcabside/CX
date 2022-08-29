@@ -300,13 +300,12 @@ def chart():
             kpi_q2.append(kpi2)
             kpi_q3.append(kpi3)
             kpi_q4.append(kpi4)
-
-        print(kpi_q1)
-        
+            
+        """
         for doc in kpi_clients:
             x.append(doc.to_dict()['Cliente'])
             y.append(float(doc.to_dict()[kpi_name]))
-            
+    
         for j in range(len(x)):
             aux_x = x[j]
             aux_x_i = j  
@@ -322,9 +321,14 @@ def chart():
             
             x[aux_x_i] = aux_1
             y[aux_x_i] = aux_2
+         """
+         
+        avg_q1, avg_q2, avg_q3, avg_q4 = 0, 0, 0, 0
         
-        for kpi_value in y:
-            Promedio_total_q += kpi_value
+        #Promedio
+        for i in kpi_q1:
+            Promedio_total_q += i['kpi_valor']
+            
         Promedio_total_q = Promedio_total_q/len(y)
                 
     else:
@@ -365,4 +369,4 @@ def chart():
                            graphJSON_total=graphJSON_total,graphJSON_esfuerzo=graphJSON_esfuerzo,
                            graphJSON_satisfaccion=graphJSON_satisfaccion,graphJSON_lealtad=graphJSON_lealtad,
                            graphJSON_valor=graphJSON_valor,
-                           kpi_clients=kpi_clients, kpi_q1=kpi_q1, kpi_q2=kpi_q2)
+                           kpi_clients=kpi_clients, kpi_q1=kpi_q1, kpi_q2=kpi_q2, kpi_q3=kpi_q3, kpi_q4=kpi_q4)
