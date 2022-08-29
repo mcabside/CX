@@ -246,7 +246,7 @@ def chart():
     Promedio_total_q = 0
     kpi_clients = None
 
-    kpi_q1, kpi_q2, kpi_q3, kpi_q4 = [], [], [], []
+    kpi_x,kpi_y,kpi_q1, kpi_q2, kpi_q3, kpi_q4 = [], [], [], [], [], []
     if cliente_input is None or cliente_input=="Todos":
         
         kpi_clients = db.collection('CDC_KPIS').order_by("Cliente").get()
@@ -257,25 +257,52 @@ def chart():
         
         for i, doc in enumerate(kpi_clients):
             if i == 0:
-                kpi_q1.append([doc.to_dict()['Cliente'], doc])
+                kpi_x.append([doc.to_dict()['Cliente'], doc])
                 
             else:
                 esta = False
                 posi = 0
-                for j, client in enumerate(kpi_q1):
+                for j, client in enumerate(kpi_x):
                     if doc.to_dict()['Cliente'] in client: 
                         posi = j
                         esta = True
                         break
                 if esta:
-                    kpi_q1[posi].append(doc)
+                    kpi_x[posi].append(doc)
                     
                 else:
-                    kpi_q1.append([doc.to_dict()['Cliente'], doc])
+                    kpi_x.append([doc.to_dict()['Cliente'], doc])
                     
         
+        for cliente_kpis in kpi_x:
+            cliente = cliente_kpis[0]
+            kpi1 = {'Cliente':cliente,'Trimestre':1,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
+                        "kpi_esfuerzo":"","kpi_total":""}
+            kpi2 = {'Cliente':cliente,'Trimestre':1,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
+                        "kpi_esfuerzo":"","kpi_total":""}
+            kpi3 = {'Cliente':cliente,'Trimestre':1,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
+                        "kpi_esfuerzo":"","kpi_total":""}
+            kpi4 = {'Cliente':cliente,'Trimestre':1,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
+                        "kpi_esfuerzo":"","kpi_total":""}
+            for i in range(1,len(cliente_kpis)):
+                
+                
+                if cliente_kpis[i].to_dict()['Trimestre'] == 1:
+                    kpi1 = cliente_kpis[i].to_dict()
+                elif cliente_kpis[i].to_dict()['Trimestre'] == 2:
+                    kpi2 = cliente_kpis[i].to_dict()
+                elif cliente_kpis[i].to_dict()['Trimestre'] == 3:
+                    kpi3 = cliente_kpis[i].to_dict()
+                elif cliente_kpis[i].to_dict()['Trimestre'] == 4:
+                    kpi4 = cliente_kpis[i].to_dict()
+                    
+            kpi_q1.append(kpi1)
+            kpi_q2.append(kpi2)
+            kpi_q3.append(kpi3)
+            kpi_q4.append(kpi4)
+
         print(kpi_q1)
-    
+        
         for doc in kpi_clients:
             x.append(doc.to_dict()['Cliente'])
             y.append(float(doc.to_dict()[kpi_name]))

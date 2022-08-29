@@ -97,15 +97,29 @@
               <thead>
                 <tr>
 
-                  <th scope="col">Cliente</th>
-                  <th scope="col">Trimestre</th>
+                  <th scope="col">Nombre</th>
+                  <th scope="col">Q</th>
                   <th scope="col">Valor</th>
                   <th scope="col">Satisfacción</th>
                   <th scope="col">Lealtad</th>
                   <th scope="col">Esfuerzo</th>
                   <th scope="col">Total</th>
 
-                  <th scope="col">Trimestre</th>
+                  <th scope="col">Q</th>
+                  <th scope="col">Valor</th>
+                  <th scope="col">Satisfacción</th>
+                  <th scope="col">Lealtad</th>
+                  <th scope="col">Esfuerzo</th>
+                  <th scope="col">Total</th>
+
+                  <th scope="col">Q</th>
+                  <th scope="col">Valor</th>
+                  <th scope="col">Satisfacción</th>
+                  <th scope="col">Lealtad</th>
+                  <th scope="col">Esfuerzo</th>
+                  <th scope="col">Total</th>
+
+                  <th scope="col">Q</th>
                   <th scope="col">Valor</th>
                   <th scope="col">Satisfacción</th>
                   <th scope="col">Lealtad</th>
@@ -116,16 +130,23 @@
               </thead>
               <tbody>
 
-                {%for doc in kpi_clientes %}
+                {%for doc in kpi_q1 %}
                 <tr>
-                  <th scope="row">{{doc.to_dict()['Cliente']}}</th>
-                  <th scope="row">Q{{doc.to_dict()['Trimestre']}}</td>
-                  <td>{{doc.to_dict()['kpi_valor']}}</td>
-                  <td>{{doc.to_dict()['kpi_satisfaccion']}}</td>
-                  <td>{{doc.to_dict()['kpi_lealtad']}}</td>
-                  <td>{{doc.to_dict()['kpi_esfuerzo']}}</td>
-                  <td>{{doc.to_dict()['kpi_total']}}</td>
-                </tr>
+                  <th scope="row">{{doc['Cliente']}}</th>
+                  <th scope="row">Q{{doc['Trimestre']}}</td>
+                  <td>{{doc['kpi_valor']}}</td>
+                  <td>{{doc['kpi_satisfaccion']}}</td>
+                  <td>{{doc['kpi_lealtad']}}</td>
+                  <td>{{doc['kpi_esfuerzo']}}</td>
+                  <td>{{doc['kpi_total']}}</td>
+
+                  <th scope="row">Q{{kpi_q2[loop.index-1]['Trimestre']}}</td>
+                  <td>{{kpi_q2[loop.index-1]['kpi_valor']}}</td>
+                  <td>{{kpi_q2[loop.index-1]['kpi_satisfaccion']}}</td>
+                  <td>{{kpi_q2[loop.index-1]['kpi_lealtad']}}</td>
+                  <td>{{kpi_q2[loop.index-1]['kpi_esfuerzo']}}</td>
+                  <td>{{kpi_q2[loop.index-1]['kpi_total']}}</td>
+                  </tr>
                 
                 {% endfor %}   
               </tbody>
