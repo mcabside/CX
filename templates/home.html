@@ -6,13 +6,30 @@
 </head>
 <body >
 
+  <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">
+        <img src="static\img\logo-CX ABSIDE-DEF.png" alt="" width="30" height="24" class="d-inline-block align-text-top">
+        Customer Experience
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/">Subir archivo</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/chart">Reportes</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
     <div class="center">
   
-    <a href="{{ url_for('chart') }}" class='btn btn-primary btn-lg' style="align-items:center;justify-content:center;display:flex">VER REPORTES</a>
-    <br>
-
-    <img src="static\img\logo-CX ABSIDE-DEF.png"  width="600" height="300">
-
     <h1>Cargar Archivo de Resultados</h1>
     <div >
         <form method=post enctype=multipart/form-data>

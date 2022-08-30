@@ -2,14 +2,16 @@ import pandas as pd
 import json
 from static.questions.cdc_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
 import plotly.graph_objects as go
+from datetime import date
 
 #Graficar velocimetro
-def speedmeter(title, value):
+def speedmeter(title, value, delta):
     fig_total = go.Figure(go.Indicator(
             domain = {'x': [0, 1], 'y': [0, 1]},
             value = value,
             mode = "gauge+number+delta",
             title = {'text': title},
+            delta = {'reference': delta},
             gauge = {'axis': {'range': [0, 10]},
                     'bar': {'color': "hsla(120, 100%, 50%, 0.0)"},
                     'steps' : [
@@ -19,7 +21,7 @@ def speedmeter(title, value):
                     'threshold' : {'line': {'color': "black", 'width': 6}, 'thickness': 0.85, 'value': value}}))
     return fig_total
 
-#Promedio Q1
+#Promedio Q'S
 def promedioQuarter(kpi_q):
     avg_q, cont_q = 0, 0
     for i in kpi_q:
@@ -96,13 +98,27 @@ def saveSelectData(CDC_KPIS):
             
         if doc.to_dict()["Cliente"] not in clientes:
             clientes.append(doc.to_dict()["Cliente"])
-          
+    #Ordenar
     Trimestres.sort()
     clientes.sort()
     Years.sort()
     return Trimestres, Years, clientes
       
-
+#Validación parametros
+def validarParametros(trimestre_input, year_input, Trimestres, Years):
+    if trimestre_input is None:
+        if len(Trimestres) > 0:
+            trimestre_input = Trimestres[len(Trimestres)-1]
+        else:
+            trimestre_input = 1
+    if year_input is None:
+        if len(Years) > 0:
+            year_input = Years[len(Years)-1]
+        else:
+            year_input = int(date.today().year)
+    return trimestre_input, year_input
+    
+    
 def carga_preguntas(dataframe,CDC_Respuestas_Ref,Trimestre,Year):
     lista_data = []
     for row in range(len(dataframe)):
