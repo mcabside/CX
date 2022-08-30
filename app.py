@@ -209,6 +209,7 @@ def chart():
     #Validación parametros URL
     trimestre_input, year_input = validarParametros(trimestre_input, year_input, Trimestres, Years)
     
+    #Show Table
     if cliente_input is None or cliente_input=="Todos":
         
         #Nota: Se necesitan que esten ordenados?
@@ -222,26 +223,26 @@ def chart():
         avg_q2 = promedioQuarter(kpi_q2)
         avg_q3 = promedioQuarter(kpi_q3)
         avg_q4 = promedioQuarter(kpi_q4)
-        
+    
+    #Show speedmeter  
     else:
         
-        #GET ALL KPI's CDC FROM A SPECIFIC YEAR
-        kpis_clients = db.collection('CDC_KPIS').where('Year','==',int(year_input)).where('Cliente','==',cliente_input).get()
+        #GET ALL KPI's CDC FROM A SPECIFIC YEAR ALL Q
+        kpis_client = db.collection('CDC_KPIS').where('Year','==',int(year_input)).where('Cliente','==',cliente_input).get()
         #KPI's CDC FROM A SPECIFIC Q
         kpi_client, kpi_delta = [], []
         #ONLY ONE CLIENT
         cliente_unico = True
                
-        #TESTING     
-        for i in kpis_clients:
+        #CALCULATE DELTA     
+        for i in kpis_client:
             #GET KPI SPECIFIC QUARTER 
             if(i.to_dict()['Trimestre'] == int(trimestre_input)):
                 kpi_client.append(i)
             
             #GET KPI PREVIUS
-            if(int(trimestre_input) != 1):
-                if(i.to_dict()['Trimestre'] == (int(trimestre_input)-1)):
-                    kpi_delta.append(i)
+            if(int(trimestre_input) != 1 and (i.to_dict()['Trimestre'] == (int(trimestre_input)-1))):
+                kpi_delta.append(i)
                     
         #SHOW GRAFICOS          
         if len(kpi_client) > 0:
