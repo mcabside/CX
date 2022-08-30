@@ -6,15 +6,10 @@ import pandas as pd
 import firebase_admin
 from firebase_admin import credentials, firestore
 import json
-#import threading
 import math
-from aux_functions import carga_preguntas, carga_kpi, speedmeter
+from aux_functions import carga_preguntas, carga_kpi, saveSelectData, speedmeter, promedioQuarter, tablaDinamica
 from datetime import date
 import plotly
-#import plotly.graph_objects as go
-#import plotly.express as px
-#from plotly.subplots import make_subplots
-
 
 cred = credentials.Certificate("FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
 firebase_admin.initialize_app(cred)
@@ -194,42 +189,24 @@ def upload_file():
 @app.route('/chart', methods=['GET', 'POST'])
 def chart():
     
-    #Lista Nombres KPI
-    tipos_kpi_ori = ["kpi_total", "kpi_esfuerzo", "kpi_lealtad","kpi_satisfaccion","kpi_valor"]
-    tipos_kpi_nice = ["KPI Total", "KPI Esfuerzo", "KPI Lealtad", "KPI Satisfaccion", "KPI Valor"]
-    
     #Conexion con la DB - KPI's CDC
     db = firestore.client()
     CDC_KPIS = db.collection('CDC_KPIS').get()
 
     #Variables
-    cliente_unico, graphJSON_total, graphJSON_esfuerzo, graphJSON_satisfaccion = False, False, False, False
-    graphJSON_lealtad, graphJSON_valor = False, False
+    cliente_unico, graphJSON_esfuerzo, graphJSON_satisfaccion, graphJSON_lealtad, graphJSON_valor = False, False, False, False, False
     Years, Trimestres, lista_clientes = [], [], []
     
     #Guardar Listas Trimestres y años
-    for doc in CDC_KPIS:
-        if doc.to_dict()["Trimestre"] not in Trimestres:
-            Trimestres.append(doc.to_dict()["Trimestre"])
-            
-        if doc.to_dict()["Year"] not in Years:
-            Years.append(doc.to_dict()["Year"])
-        
-    #Conexión con la DB - Lista clientes
-    Clientes_Data = db.collection("Clientes").get()
-    for doc in Clientes_Data:
-        lista_clientes.append(doc.to_dict()['Cliente'])
-    lista_clientes.sort()
+    Trimestres, Years, lista_clientes = saveSelectData(CDC_KPIS)
      
     #Parametros URL
-    kpi_name = (request.args.get('kpi'))
+    #kpi_name = (request.args.get('kpi'))
     trimestre_input = (request.args.get('trimestre_input'))
     year_input = (request.args.get('year_input'))
     cliente_input = (request.args.get('cliente_input'))
     
     #Validación parametros
-    if kpi_name != "kpi_total" and kpi_name != "kpi_esfuerzo" and kpi_name != "kpi_lealtad" and kpi_name != "kpi_satisfaccion" and kpi_name != "kpi_valor":
-        kpi_name = "kpi_total"
     if trimestre_input is None:
         if len(Trimestres) >0:
             trimestre_input = Trimestres[len(Trimestres)-1]
@@ -241,132 +218,61 @@ def chart():
         else:
             year_input = int(date.today().year)
     
-    # Lista Clientes/ Lista KPI
-    x, y = [], [] 
-    Promedio_total_q = 0
+    # Variables
     kpi_clients = None
-
-    kpi_x,kpi_y,kpi_q1, kpi_q2, kpi_q3, kpi_q4 = [], [], [], [], [], []
+    kpi_q1, kpi_q2, kpi_q3, kpi_q4 = [], [], [], []
+    kpi_total, avg_q1, avg_q2, avg_q3, avg_q4 = 0, 0, 0, 0, 0
+    
     if cliente_input is None or cliente_input=="Todos":
         
-        kpi_clients = db.collection('CDC_KPIS').order_by("Cliente").get()
-        #where('Trimestre','==',int(trimestre_input))
+        #Nota: Se necesitan que esten ordenados?
+        kpi_clients = db.collection('CDC_KPIS').order_by("Cliente").get()  #where('Trimestre','==',int(trimestre_input))
         
-        #PRUEBA TABLA DINAMICA
+        #Tabla dinamica
+        kpi_q1, kpi_q2, kpi_q3, kpi_q4 = tablaDinamica(kpi_clients)
         
+        #Promedio Q's
+        avg_q1 = promedioQuarter(kpi_q1)
+        avg_q2 = promedioQuarter(kpi_q2)
+        avg_q3 = promedioQuarter(kpi_q3)
+        avg_q4 = promedioQuarter(kpi_q4)
         
-        for i, doc in enumerate(kpi_clients):
-            if i == 0:
-                kpi_x.append([doc.to_dict()['Cliente'], doc])
-                
-            else:
-                esta = False
-                posi = 0
-                for j, client in enumerate(kpi_x):
-                    if doc.to_dict()['Cliente'] in client: 
-                        posi = j
-                        esta = True
-                        break
-                if esta:
-                    kpi_x[posi].append(doc)
-                    
-                else:
-                    kpi_x.append([doc.to_dict()['Cliente'], doc])
-                    
-        
-        for cliente_kpis in kpi_x:
-            cliente = cliente_kpis[0]
-            kpi1 = {'Cliente':cliente,'Trimestre':1,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
-                        "kpi_esfuerzo":"","kpi_total":""}
-            kpi2 = {'Cliente':cliente,'Trimestre':2,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
-                        "kpi_esfuerzo":"","kpi_total":""}
-            kpi3 = {'Cliente':cliente,'Trimestre':3,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
-                        "kpi_esfuerzo":"","kpi_total":""}
-            kpi4 = {'Cliente':cliente,'Trimestre':4,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
-                        "kpi_esfuerzo":"","kpi_total":""}
-            for i in range(1,len(cliente_kpis)):
-                
-                
-                if cliente_kpis[i].to_dict()['Trimestre'] == 1:
-                    kpi1 = cliente_kpis[i].to_dict()
-                elif cliente_kpis[i].to_dict()['Trimestre'] == 2:
-                    kpi2 = cliente_kpis[i].to_dict()
-                elif cliente_kpis[i].to_dict()['Trimestre'] == 3:
-                    kpi3 = cliente_kpis[i].to_dict()
-                elif cliente_kpis[i].to_dict()['Trimestre'] == 4:
-                    kpi4 = cliente_kpis[i].to_dict()
-                    
-            kpi_q1.append(kpi1)
-            kpi_q2.append(kpi2)
-            kpi_q3.append(kpi3)
-            kpi_q4.append(kpi4)
-            
-        """
-        for doc in kpi_clients:
-            x.append(doc.to_dict()['Cliente'])
-            y.append(float(doc.to_dict()[kpi_name]))
-    
-        for j in range(len(x)):
-            aux_x = x[j]
-            aux_x_i = j  
-            for i in range(j,len(x)):
-                if x[i] < aux_x:
-                    aux_x = x[i]
-                    aux_x_i = i
-            aux_1 = x[j]
-            aux_2 = y[j]
-            
-            x[j] = aux_x
-            y[j] = y[aux_x_i]
-            
-            x[aux_x_i] = aux_1
-            y[aux_x_i] = aux_2
-         """
-         
-        avg_q1, avg_q2, avg_q3, avg_q4 = 0, 0, 0, 0
-        
-        #Promedio
-        for i in kpi_q1:
-            Promedio_total_q += i['kpi_valor']
-            
-        Promedio_total_q = Promedio_total_q/len(y)
-                
     else:
         
         kpi_client = db.collection('CDC_KPIS').where('Trimestre','==',int(trimestre_input)).where('Year','==',int(year_input)).where('Cliente','==',cliente_input).get()
         cliente_unico = True
+                    
+        if len(kpi_client)>0:
+            kpi_total = float(kpi_client[0].to_dict()["kpi_esfuerzo"])
+            #fig_total        = speedmeter("Total", float(doc.to_dict()["kpi_total"])
+            fig_esfuerzo     = speedmeter("Esfuerzo",     float(kpi_client[0].to_dict()["kpi_esfuerzo"]))
+            fig_satisfaccion = speedmeter("Satisfacción", float(kpi_client[0].to_dict()["kpi_satisfaccion"]))
+            fig_lealtad      = speedmeter("Lealtad",      float(kpi_client[0].to_dict()["kpi_lealtad"]))
+            fig_valor        = speedmeter("Valor",        float(kpi_client[0].to_dict()["kpi_valor"]))
 
-        for doc in kpi_client:
-            x.append("total")
-            x.append("esfuerzo")
-            x.append("satisfaccion")
-            x.append("lealtad")
-            x.append("valor")
-            y.append(float(doc.to_dict()["kpi_total"]))
-            y.append(float(doc.to_dict()["kpi_esfuerzo"]))
-            y.append(float(doc.to_dict()["kpi_satisfaccion"]))
-            y.append(float(doc.to_dict()["kpi_lealtad"]))
-            y.append(float(doc.to_dict()["kpi_valor"]))
-            
-        if len(y)>0:
-            
-            fig_total        = speedmeter("Total", y[0])
-            fig_esfuerzo     = speedmeter("Esfuerzo", y[1])
-            fig_satisfaccion = speedmeter("Satisfacción", y[2])
-            fig_lealtad      = speedmeter("Lealtad", y[3])
-            fig_valor        = speedmeter("Valor", y[4])
-
-            graphJSON_total         = json.dumps(fig_total, cls=plotly.utils.PlotlyJSONEncoder)
-            graphJSON_esfuerzo      = json.dumps(fig_esfuerzo, cls=plotly.utils.PlotlyJSONEncoder)
+            #graphJSON_total        = json.dumps(fig_total, cls=plotly.utils.PlotlyJSONEncoder)
+            graphJSON_esfuerzo      = json.dumps(fig_esfuerzo,     cls=plotly.utils.PlotlyJSONEncoder)
             graphJSON_satisfaccion  = json.dumps(fig_satisfaccion, cls=plotly.utils.PlotlyJSONEncoder)
-            graphJSON_lealtad       = json.dumps(fig_lealtad, cls=plotly.utils.PlotlyJSONEncoder)
-            graphJSON_valor         = json.dumps(fig_valor, cls=plotly.utils.PlotlyJSONEncoder)
+            graphJSON_lealtad       = json.dumps(fig_lealtad,      cls=plotly.utils.PlotlyJSONEncoder)
+            graphJSON_valor         = json.dumps(fig_valor,        cls=plotly.utils.PlotlyJSONEncoder)
         
-    return render_template('chart.html',x=x,y=y,kpi_name=kpi_name,Trimestres=Trimestres,
-                           Years=Years,lista_clientes=lista_clientes,cliente_unico=cliente_unico,
-                           cliente_input=cliente_input,trimestre_input=int(trimestre_input), 
-                           tipos_kpi_ori=tipos_kpi_ori,tipos_kpi_nice=tipos_kpi_nice,Promedio_total_q=round(Promedio_total_q,2),
-                           graphJSON_total=graphJSON_total,graphJSON_esfuerzo=graphJSON_esfuerzo,
-                           graphJSON_satisfaccion=graphJSON_satisfaccion,graphJSON_lealtad=graphJSON_lealtad,
-                           graphJSON_valor=graphJSON_valor,
-                           kpi_clients=kpi_clients, kpi_q1=kpi_q1, kpi_q2=kpi_q2, kpi_q3=kpi_q3, kpi_q4=kpi_q4)
+    return render_template('chart.html',
+                           kpi_total = kpi_total,
+                           Trimestres = Trimestres,
+                           Years = Years,
+                           lista_clientes = lista_clientes,
+                           cliente_unico = cliente_unico,
+                           cliente_input = cliente_input,
+                           trimestre_input = int(trimestre_input), 
+                           graphJSON_esfuerzo = graphJSON_esfuerzo,
+                           graphJSON_satisfaccion = graphJSON_satisfaccion,
+                           graphJSON_lealtad = graphJSON_lealtad,
+                           graphJSON_valor = graphJSON_valor,
+                           kpi_q1 = kpi_q1, 
+                           kpi_q2 = kpi_q2, 
+                           kpi_q3 = kpi_q3, 
+                           kpi_q4 = kpi_q4,
+                           avg_q1 = round(avg_q1,2), 
+                           avg_q2 = round(avg_q2,2), 
+                           avg_q3 = round(avg_q3,2), 
+                           avg_q4 = round(avg_q4,2))

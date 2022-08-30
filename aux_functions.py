@@ -19,6 +19,90 @@ def speedmeter(title, value):
                     'threshold' : {'line': {'color': "black", 'width': 6}, 'thickness': 0.85, 'value': value}}))
     return fig_total
 
+#Promedio Q1
+def promedioQuarter(kpi_q):
+    avg_q, cont_q = 0, 0
+    for i in kpi_q:
+        if(i['kpi_total'] != ''):
+            avg_q = avg_q + i['kpi_total']
+            cont_q += 1
+        
+    if(cont_q != 0):    
+        avg_q = avg_q/cont_q
+        
+    return avg_q
+
+#Tabla dinamica
+def tablaDinamica(kpi_clients):
+    kpi, kpi_q1, kpi_q2, kpi_q3, kpi_q4  = [], [], [], [], []
+    
+    for i, doc in enumerate(kpi_clients):
+            if i == 0:
+                kpi.append([doc.to_dict()['Cliente'], doc])
+                
+            else:
+                esta = False
+                posi = 0
+                for j, client in enumerate(kpi):
+                    if doc.to_dict()['Cliente'] in client: 
+                        posi = j
+                        esta = True
+                        break
+                if esta:
+                    kpi[posi].append(doc)
+                    
+                else:
+                    kpi.append([doc.to_dict()['Cliente'], doc])
+                    
+    for cliente_kpis in kpi:
+            cliente = cliente_kpis[0]
+            kpi1 = {'Cliente':cliente,'Trimestre':1,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
+                        "kpi_esfuerzo":"","kpi_total":""}
+            kpi2 = {'Cliente':cliente,'Trimestre':2,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
+                        "kpi_esfuerzo":"","kpi_total":""}
+            kpi3 = {'Cliente':cliente,'Trimestre':3,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
+                        "kpi_esfuerzo":"","kpi_total":""}
+            kpi4 = {'Cliente':cliente,'Trimestre':4,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
+                        "kpi_esfuerzo":"","kpi_total":""}
+            
+            for i in range(1,len(cliente_kpis)):
+                
+                if cliente_kpis[i].to_dict()['Trimestre'] == 1:
+                    kpi1 = cliente_kpis[i].to_dict()
+                elif cliente_kpis[i].to_dict()['Trimestre'] == 2:
+                    kpi2 = cliente_kpis[i].to_dict()
+                elif cliente_kpis[i].to_dict()['Trimestre'] == 3:
+                    kpi3 = cliente_kpis[i].to_dict()
+                elif cliente_kpis[i].to_dict()['Trimestre'] == 4:
+                    kpi4 = cliente_kpis[i].to_dict()
+                    
+            kpi_q1.append(kpi1)
+            kpi_q2.append(kpi2)
+            kpi_q3.append(kpi3)
+            kpi_q4.append(kpi4)
+            
+    return kpi_q1, kpi_q2, kpi_q3, kpi_q4
+
+#Guardar Listas Trimestres y años
+def saveSelectData(CDC_KPIS):
+    Trimestres, Years, clientes = [], [], []
+    
+    for doc in CDC_KPIS:
+        if doc.to_dict()["Trimestre"] not in Trimestres:
+            Trimestres.append(doc.to_dict()["Trimestre"])
+            
+        if doc.to_dict()["Year"] not in Years:
+            Years.append(doc.to_dict()["Year"])
+            
+        if doc.to_dict()["Cliente"] not in clientes:
+            clientes.append(doc.to_dict()["Cliente"])
+          
+    Trimestres.sort()
+    clientes.sort()
+    Years.sort()
+    return Trimestres, Years, clientes
+      
+
 def carga_preguntas(dataframe,CDC_Respuestas_Ref,Trimestre,Year):
     lista_data = []
     for row in range(len(dataframe)):
