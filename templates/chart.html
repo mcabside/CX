@@ -13,37 +13,38 @@
 
 <body >
   
-  <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="/">
-        <img src="static\img\logo-CX ABSIDE-DEF.png" alt="" width="30" height="24" class="d-inline-block align-text-top">
-        Customer Experience
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link " aria-current="page" href="/">Subir archivo</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link active dropdown-toggle" href="/chart" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Reportes
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item" href="/chart">CDC</a></li>
-              <li><a class="dropdown-item" href="/chart">Consultoria</a></li>
-              <li><a class="dropdown-item" href="/chart">Proceso comercial</a></li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
+  
   <div>
     
+    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+          <img src="static\img\logo-CX ABSIDE-DEF.png" alt="" width="30" height="24" class="d-inline-block align-text-top">
+          Customer Experience
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link " aria-current="page" href="/">Subir archivo</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link active dropdown-toggle" href="/chart" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Reportes
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="/chart">CDC</a></li>
+                <li><a class="dropdown-item" href="/chart">Consultoria</a></li>
+                <li><a class="dropdown-item" href="/chart">Proceso comercial</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  
     <!--Salto de linea-->
     <br>
     
@@ -123,7 +124,7 @@
                       <th scope="col">CSAT</th>
                       <th scope="col">NPS</th>
                       <th scope="col">CES</th>
-                      <th scope="col">Total</th>
+                      <th scope="col">General</th>
                     {% endfor %}
                 </tr>  
               </thead>
@@ -178,7 +179,7 @@
       
       {% else %}
 
-      <h3 style="text-align:center">KPI Total :{{kpi_total}}</h3>
+      <h3 style="text-align:center">Valor General :{{kpi_total}}</h3>
       
       <div class="container">
         <div class="row row-cols-2">

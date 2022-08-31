@@ -18,16 +18,22 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/">Subir archivo</a>
+            <a class="nav-link " aria-current="page" href="/">Subir archivo</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/chart">Reportes</a>
+          <li class="nav-item dropdown">
+            <a class="nav-link active dropdown-toggle" href="/chart" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Reportes
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="/chart">CDC</a></li>
+              <li><a class="dropdown-item" href="/chart">Consultoria</a></li>
+              <li><a class="dropdown-item" href="/chart">Proceso comercial</a></li>
+            </ul>
           </li>
         </ul>
       </div>
     </div>
   </nav>
-
     <div class="center">
   
     <h1>Cargar Archivo de Resultados</h1>
@@ -36,7 +42,7 @@
           
             <input type=file name=file required>
             
-            <input class="btn btn-dark" type=submit value="Subir Archivo" style="float:right" onsubmit="carga()">
+            <input class="btn btn-primary" type=submit value="Subir Archivo" style="float:right" onsubmit="carga()">
             <br>
             <br>
             <select id="area" name="area" class="form-select">

@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 from datetime import date
 
 #Graficar velocimetro
-def speedmeter(title, value, delta):
+def speedmeter(title, value, delta, red, green):
     fig_total = go.Figure(go.Indicator(
             domain = {'x': [0, 1], 'y': [0, 1]},
             value = value,
@@ -15,9 +15,9 @@ def speedmeter(title, value, delta):
             gauge = {'axis': {'range': [0, 10]},
                     'bar': {'color': "hsla(120, 100%, 50%, 0.0)"},
                     'steps' : [
-                        {'range': [0, 7], 'color': "red"},
-                        {'range': [7, 8], 'color': "orange"},
-                        {'range': [8, 10], 'color': "green"}],
+                        {'range': [0, red], 'color': "red"},
+                        {'range': [red+0.001, green-0.001], 'color': "yellow"},
+                        {'range': [green, 10], 'color': "green"}],
                     'threshold' : {'line': {'color': "black", 'width': 6}, 'thickness': 0.85, 'value': value}}))
     return fig_total
 

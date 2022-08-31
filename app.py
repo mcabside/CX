@@ -249,16 +249,19 @@ def chart():
             
             kpi_total = float(kpi_client[0].to_dict()["kpi_total"])
             
-            if(len(kpi_delta) > 0 and kpi_delta[0].to_dict()['kpi_total'] != ""):
-                fig_esfuerzo     = speedmeter("Esfuerzo",     float(kpi_client[0].to_dict()["kpi_esfuerzo"])    ,kpi_delta[0].to_dict()['kpi_esfuerzo'])
-                fig_satisfaccion = speedmeter("Satisfacción", float(kpi_client[0].to_dict()["kpi_satisfaccion"]),kpi_delta[0].to_dict()['kpi_satisfaccion'])
-                fig_lealtad      = speedmeter("Lealtad",      float(kpi_client[0].to_dict()["kpi_lealtad"])     ,kpi_delta[0].to_dict()['kpi_lealtad'])
-                fig_valor        = speedmeter("Valor",        float(kpi_client[0].to_dict()["kpi_valor"])       ,kpi_delta[0].to_dict()['kpi_valor'])
+            print("Delta")
+            print(kpi_delta)
+                        
+            if(len(kpi_delta) > 0):
+                fig_esfuerzo     = speedmeter("Customer Effort Score (CES)",     float(kpi_client[0].to_dict()["kpi_esfuerzo"])    ,kpi_delta[0].to_dict()['kpi_esfuerzo'],7.1,8.2)
+                fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", float(kpi_client[0].to_dict()["kpi_satisfaccion"]),kpi_delta[0].to_dict()['kpi_satisfaccion'],7.4, 8.5)
+                fig_lealtad      = speedmeter("Net Promoter Score (NPS)",      float(kpi_client[0].to_dict()["kpi_lealtad"])     ,kpi_delta[0].to_dict()['kpi_lealtad'], 6.9, 9)
+                fig_valor        = speedmeter("Valor Añadido (VA)",        float(kpi_client[0].to_dict()["kpi_valor"])       ,kpi_delta[0].to_dict()['kpi_valor'], 6.4, 7.5)
             else:
-                fig_esfuerzo     = speedmeter("Esfuerzo",     float(kpi_client[0].to_dict()["kpi_esfuerzo"])    , None)
-                fig_satisfaccion = speedmeter("Satisfacción", float(kpi_client[0].to_dict()["kpi_satisfaccion"]), None)
-                fig_lealtad      = speedmeter("Lealtad",      float(kpi_client[0].to_dict()["kpi_lealtad"])     , None)
-                fig_valor        = speedmeter("Valor",        float(kpi_client[0].to_dict()["kpi_valor"])       , None)
+                fig_esfuerzo     = speedmeter("Customer Effort Score (CES)",     float(kpi_client[0].to_dict()["kpi_esfuerzo"])    , None, 7.1,8.2)
+                fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", float(kpi_client[0].to_dict()["kpi_satisfaccion"]), None, 7.4, 8.5)
+                fig_lealtad      = speedmeter("Net Promoter Score (NPS)",      float(kpi_client[0].to_dict()["kpi_lealtad"])     , None, 6.9, 9)
+                fig_valor        = speedmeter("Valor Añadido (VA)",        float(kpi_client[0].to_dict()["kpi_valor"])       , None, 6.4, 7.5)
             
             graphJSON_esfuerzo     = json.dumps(fig_esfuerzo,     cls=plotly.utils.PlotlyJSONEncoder)
             graphJSON_satisfaccion = json.dumps(fig_satisfaccion, cls=plotly.utils.PlotlyJSONEncoder)
