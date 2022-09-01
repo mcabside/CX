@@ -1,9 +1,9 @@
 import pandas as pd
 import json
-from CX.static.questions.cdc_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
+from   CX.static.questions.cdc_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
 import plotly.graph_objects as go
-from plotly.graph_objs import *
-from datetime import date
+from   plotly.graph_objs import *
+from   datetime import date
 
 #Graficar velocimetro
 def speedmeter(title, value, delta, red, green):

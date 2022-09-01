@@ -1,25 +1,23 @@
-from ctypes.wintypes import CHAR
+from   ctypes.wintypes import CHAR
 import os
-from pickle import NONE
-from flask import Flask, flash, request, redirect, url_for,render_template,jsonify
-from werkzeug.utils import secure_filename
+from   pickle import NONE
+from   flask import flash, request, redirect, url_for,render_template,jsonify
+from   werkzeug.utils import secure_filename
 import pandas as pd
 import firebase_admin
-from firebase_admin import credentials, firestore
+from   firebase_admin import credentials, firestore
 import json
 import math
 import plotly
 
-
 from CX import app
+from CX.functions import carga_preguntas, carga_kpi, saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
 
-from CX.aux_functions import carga_preguntas, carga_kpi, saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
-
-
+#Credenciales Firebase
 cred = credentials.Certificate("CX/FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
 firebase_admin.initialize_app(cred)
 
-UPLOAD_FOLDER = 'C:\\Users\Abside User\Desktop\customer experience'
+UPLOAD_FOLDER      = 'C:\\Users\Abside User\Desktop\customer experience'
 ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xlsm'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -41,9 +39,9 @@ def SaveClients():
         
         if request.is_json:
 
-            output = request.json
+            output  = request.json
             output2 = json.dumps(output)
-            result = json.loads(output2) #this converts the json output to a python dictionary
+            result  = json.loads(output2) #this converts the json output to a python dictionary
 
             lista_agregados = []
             for cliente in result:
@@ -67,7 +65,7 @@ def SaveClients():
         else:
             print("no es json")
             
-            
+#Home Page
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     
@@ -79,13 +77,14 @@ def upload_file():
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
+        
         file = request.files['file']
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
-
         if file.filename == '':
             flash('No selected file')
             return redirect(request.url)
+        
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
@@ -96,7 +95,6 @@ def upload_file():
             results.replace(["Buena Satisfacción","Gran Valor","Totalmente de Acuerdo"],8,inplace=True)
             results.replace(["Supera las Expectativas"],10,inplace=True)
 
-        not_found, found = 0, 0
         not_found_list, found_list, lista_clientes = [], [], []
         
         #Firebase
@@ -105,6 +103,7 @@ def upload_file():
         CDC_Respuestas_Ref = db.collection("CDC_Respuestas")
         for doc in Clientes_Data:
             lista_clientes.append(doc.to_dict()['Cliente'])
+            
         #Sort clients
         lista_clientes.sort()
         
@@ -140,24 +139,23 @@ def upload_file():
                             results["Nombre de la empresa a la que pertenece"] = results["Nombre de la empresa a la que pertenece"].replace([row["Nombre de la empresa a la que pertenece"]],Nombre_Cliente) 
                             break
             if Found:
-                found+=1
                 found_list.append(Nombre_Cliente)
                 print("se encontro : " + Nombre_Cliente)
             else:
-                not_found+=1
                 not_found_list.append(Nombre_Cliente)
                 print("no se encontro : " + Nombre_Cliente)
         
-        if not_found == 0:
+        if len(not_found_list) == 0:
             
             query_trimestre = db.collection('CDC_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
         
             if len(query_trimestre)>0:
                 print("ya se ingreso el archivo")
+                
             else:
-                #carga_preguntas(results, CDC_Respuestas_Ref,Trimestre,Year)
-                CDC_KPI_Ref = db.collection("CDC_KPIS")
-                found_set = set(found_list)
+                carga_preguntas(results, CDC_Respuestas_Ref,Trimestre,Year)
+                CDC_KPI_Ref       = db.collection("CDC_KPIS")
+                found_set         = set(found_list)
                 found_list_unique = list(found_set)
                 
                 for cliente in found_list_unique:
@@ -179,7 +177,7 @@ def upload_file():
                     kpi_valor        = round(kpi_valor/numero_de_respuestas,2)
                     kpi_total        = round((kpi_esfuerzo*0.20) + (kpi_satisfaccion*0.35) + (kpi_lealtad*0.35) + (kpi_valor*0.10), 2)
                     
-                    #carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total) 
+                    carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total) 
                             
             return redirect(url_for('chart'))
         
@@ -188,7 +186,8 @@ def upload_file():
 
     return render_template('home.html')
 
-@app.route('/chart', methods=['GET', 'POST'])
+#Chart Page
+@app.route('/chart_cdc', methods=['GET', 'POST'])
 def chart():
     
     # Variables
@@ -208,8 +207,8 @@ def chart():
     
     #Guardar Parametros URL
     trimestre_input = (request.args.get('trimestre_input'))
-    year_input = (request.args.get('year_input'))
-    cliente_input = (request.args.get('cliente_input'))
+    year_input      = (request.args.get('year_input'))
+    cliente_input   = (request.args.get('cliente_input'))
     
     #Validación parametros URL
     trimestre_input, year_input = validarParametros(trimestre_input, year_input, Trimestres, Years)
