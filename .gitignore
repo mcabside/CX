@@ -4,3 +4,4 @@ archivos python x/
 *.xlsx
 assets/
 __pycache__/
+CX.egg-info/

@@ -1,7 +1,8 @@
 import pandas as pd
 import json
-from static.questions.cdc_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
+from CX.static.questions.cdc_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
 import plotly.graph_objects as go
+from plotly.graph_objs import *
 from datetime import date
 
 #Graficar velocimetro
@@ -18,7 +19,10 @@ def speedmeter(title, value, delta, red, green):
                         {'range': [0, red], 'color': "red"},
                         {'range': [red+0.001, green-0.001], 'color': "yellow"},
                         {'range': [green, 10], 'color': "green"}],
-                    'threshold' : {'line': {'color': "black", 'width': 6}, 'thickness': 0.85, 'value': value}}))
+                    'threshold' : {'line': {'color': "black", 'width': 6}, 'thickness': 0.85, 'value': value}},
+            ),
+            Layout(paper_bgcolor='rgba(0,0,0,0)',plot_bgcolor='rgba(0,0,0,0)'),
+            )
     return fig_total
 
 #Promedio Q'S

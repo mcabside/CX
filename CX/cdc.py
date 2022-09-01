@@ -1,3 +1,4 @@
+from ctypes.wintypes import CHAR
 import os
 from pickle import NONE
 from flask import Flask, flash, request, redirect, url_for,render_template,jsonify
@@ -7,16 +8,20 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import json
 import math
-from aux_functions import carga_preguntas, carga_kpi, saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
 import plotly
 
-cred = credentials.Certificate("FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
+
+from CX import app
+
+from CX.aux_functions import carga_preguntas, carga_kpi, saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
+
+
+cred = credentials.Certificate("CX/FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
 firebase_admin.initialize_app(cred)
 
 UPLOAD_FOLDER = 'C:\\Users\Abside User\Desktop\customer experience'
 ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xlsm'}
 
-app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 #CHECK FILE TYPE
@@ -68,6 +73,7 @@ def upload_file():
     
     if request.method == "GET":
         return render_template('home.html')
+    
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -149,7 +155,7 @@ def upload_file():
             if len(query_trimestre)>0:
                 print("ya se ingreso el archivo")
             else:
-                carga_preguntas(results, CDC_Respuestas_Ref,Trimestre,Year)
+                #carga_preguntas(results, CDC_Respuestas_Ref,Trimestre,Year)
                 CDC_KPI_Ref = db.collection("CDC_KPIS")
                 found_set = set(found_list)
                 found_list_unique = list(found_set)
@@ -173,7 +179,7 @@ def upload_file():
                     kpi_valor        = round(kpi_valor/numero_de_respuestas,2)
                     kpi_total        = round((kpi_esfuerzo*0.20) + (kpi_satisfaccion*0.35) + (kpi_lealtad*0.35) + (kpi_valor*0.10), 2)
                     
-                    carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total) 
+                    #carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total) 
                             
             return redirect(url_for('chart'))
         
@@ -181,7 +187,6 @@ def upload_file():
              return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
 
     return render_template('home.html')
-
 
 @app.route('/chart', methods=['GET', 'POST'])
 def chart():
@@ -288,3 +293,5 @@ def chart():
                            avg_q2 = round(avg_q2,2), 
                            avg_q3 = round(avg_q3,2), 
                            avg_q4 = round(avg_q4,2))
+
+
