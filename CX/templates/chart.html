@@ -132,11 +132,14 @@
       <p class="text-center align-self-center fst-italic">No hay información registrada para este cliente en el trimestre buscado</p>
       
       {% else %}
-
+      
+      <br>
+      <h1 class="text-center align-self-center fst-italic">Reporte CDC - Q{{trimestre_input}} {{year_input}}</h1>
+      <br>
       <h3 style="text-align:center">Valor General :{{kpi_total}}</h3>
       
       <div class="container">
-        <div class="row row-cols-2">
+        <div class="row row-cols-4">
           <div class="col" id="bargraph1">
             <script>
                 var graphs1 = {{graphJSON_esfuerzo | safe}};
@@ -149,8 +152,6 @@
                 Plotly.plot('bargraph2',graphs2);
             </script>
           </div>
-        </div>
-        <div class="row row-cols-2">
           <div class="col" id="bargraph3">
             <script>
                 var graphs3 = {{graphJSON_lealtad | safe}};

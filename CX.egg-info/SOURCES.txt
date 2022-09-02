@@ -1,9 +1,0 @@
-setup.py
-CX/__init__.py
-CX/aux_functions.py
-CX/cdc.py
-CX.egg-info/PKG-INFO
-CX.egg-info/SOURCES.txt
-CX.egg-info/dependency_links.txt
-CX.egg-info/requires.txt
-CX.egg-info/top_level.txt

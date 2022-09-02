@@ -32,6 +32,7 @@ def upload_file():
         return render_template('home.html')
     
     if request.method == 'POST':
+        
         # check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
@@ -70,10 +71,18 @@ def upload_file():
         #verify client in DB
         found_list,not_found_list,results = SearchClients(results,not_found_list,found_list,Clientes_Data)
         
-        #if algo==cdc
+        #Si vacio        
         if len(not_found_list) == 0:
-            cargaRespuestas(db, Year, Trimestre, results, found_list)
-            return redirect(url_for('chart'))
+            
+            #Get area
+            area = request.form.get('area')
+            
+            if(str(area) == "CDC"):
+                print(str(area))
+                cargaRespuestasCDC(db, Year, Trimestre, results, found_list)
+                return redirect(url_for('chart_cdc'))
+            else:
+                return redirect(url_for('chart_consultoria'))
         
         else:
              return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
@@ -117,7 +126,6 @@ def SaveClients():
         else:
             print("no es json")
             
-import CX.cdc
-from   CX.cdc import cargaRespuestas
+from CX.cdc import cargaRespuestasCDC
 
 import CX.consultoria

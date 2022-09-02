@@ -6,12 +6,12 @@ from   plotly.graph_objs import *
 from   datetime import date
 
 #Graficar velocimetro
-def speedmeter(title, value, delta, red, green):
+def speedmeter(title, value, delta, red, green, porcentaje):
     fig_total = go.Figure(go.Indicator(
             domain = {'x': [0, 1], 'y': [0, 1]},
             value = value,
             mode = "gauge+number+delta",
-            title = {'text': title},
+            title = {'text': title , 'font': {'size': 18}},
             delta = {'reference': delta},
             gauge = {'axis': {'range': [0, 10]},
                     'bar': {'color': "hsla(120, 100%, 50%, 0.0)"},
@@ -21,7 +21,13 @@ def speedmeter(title, value, delta, red, green):
                         {'range': [green, 10], 'color': "green"}],
                     'threshold' : {'line': {'color': "black", 'width': 6}, 'thickness': 0.85, 'value': value}},
             ),
-            Layout(paper_bgcolor='rgba(0,0,0,0)',plot_bgcolor='rgba(0,0,0,0)'),
+            Layout(paper_bgcolor='rgba(0,0,0,0)',
+                   plot_bgcolor='rgba(0,0,0,0)',
+                   margin=dict(l=25, r=25, t=0, b=0), 
+                   annotations=[{'x': 0.5, 'y':0.25 
+                                      ,'text': porcentaje
+                                      ,'font': { 'color': "orange", 'size': 25, 'family': "Open Sans"}
+                                      ,'showarrow':False, 'xanchor':'center' },]),
             )
     return fig_total
 
