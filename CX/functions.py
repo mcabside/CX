@@ -183,8 +183,8 @@ def carga_preguntas(dataframe,CDC_Respuestas_Ref,Trimestre,Year):
         CDC_Respuestas_Ref.add(json.loads(respuesta))
             
         
-def carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total):
-    CDC_KPI_Ref.add({
+def carga_kpi(cliente,Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total):
+    Ref.add({
                         'Cliente': cliente,
                         'Trimestre': Trimestre,
                         'Year': Year,
@@ -195,12 +195,12 @@ def carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,k
                         'kpi_total':kpi_total
                     })
     
-def mappingValues(results):
-    results.replace(["No satisfecho","Ningún Valor","En Desacuerdo","No Satisfecho","En Desacuerdo	"],2,inplace=True) # no se verifica aun si hay espacios o mayusculas
-    results.replace(["Baja Satisfacción","Poco Valor","Casi Nunca"],4,inplace=True)
-    results.replace(["Satisfacción Promedio","Valor Promedio","Normalmente de Acuerdo"],6,inplace=True)
-    results.replace(["Buena Satisfacción","Gran Valor","Totalmente de Acuerdo"],8,inplace=True)
-    results.replace(["Supera las Expectativas"],10,inplace=True)
+def mappingValues(results):# no se verifica aun si hay espacios o mayusculas
+    results.replace(["No satisfecho","Ningún Valor","En Desacuerdo","No Satisfecho","En Desacuerdo	","Ningún Valor","Muy Malo","Muy insatisfecho"],2,inplace=True) 
+    results.replace(["Baja Satisfacción","Poco Valor","Casi Nunca","Poco Valor","Malo","Insatisfecho"],4,inplace=True)
+    results.replace(["Satisfacción Promedio","Valor Promedio","Normalmente de Acuerdo","Bueno","Neutral","Valor promedio"],6,inplace=True)
+    results.replace(["Buena Satisfacción","Gran Valor","Totalmente de Acuerdo","Muy Bueno","Satisfecho","Muy bueno","Gran valor"],8,inplace=True)
+    results.replace(["Supera las Expectativas","Muy satisfecho","Muy Satisfecho"],10,inplace=True)
     return results
 
 def SearchClients(results,not_found_list,found_list,Clientes_Data):
@@ -208,6 +208,7 @@ def SearchClients(results,not_found_list,found_list,Clientes_Data):
 
             Found = False
             Nombre_Cliente = row["Nombre de la empresa a la que pertenece"]
+            print(row["Nombre de la empresa a la que pertenece"])
             aux = row["Nombre de la empresa a la que pertenece"].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') 
             for doc in Clientes_Data:
                 aux2 = doc.to_dict()['Cliente'].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') 
@@ -229,13 +230,66 @@ def SearchClients(results,not_found_list,found_list,Clientes_Data):
                             results["Nombre de la empresa a la que pertenece"] = results["Nombre de la empresa a la que pertenece"].replace([row["Nombre de la empresa a la que pertenece"]],Nombre_Cliente) 
                             break
             if Found:
+                print("ENTRO EN TRUE")
                 found_list.append(Nombre_Cliente)
                 print("se encontro : " + Nombre_Cliente)
             else:
+                print("ENTRO EN FALSE")
+                print(Nombre_Cliente)
                 not_found_list.append(Nombre_Cliente)
                 print("no se encontro : " + Nombre_Cliente)
                 
-            return found_list,not_found_list,results
+    return found_list,not_found_list,results
         
     
+
+def carga_preguntas_consultoria(dataframe,Consultoria_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor):
+    lista_data = []
+    for row in range(len(dataframe)):
+        
+        data = ""
+        kpi_esfuerzo, kpi_esfuerzo_cont, kpi_satisfaccion, kpi_satisfaccion_cont = 0, 0, 0, 0
+        kpi_lealtad, kpi_lealtad_cont, kpi_valor, kpi_valor_cont = 0, 0, 0, 0
     
+        for column in range(len(dataframe.columns)):
+            colname = dataframe.columns[column]
+            if dataframe.iloc[row,column] != "" and dataframe.iloc[row,column] != "No Aplica" and not pd.isna(dataframe.iloc[row,column]):
+                
+                data = data + str('"' + colname.replace(' ','_').replace('"','').replace("'","") + '"'+ " : " + '"'+str(dataframe.iloc[row,column]).replace('"','').replace("'","") +'"'+ ',') 
+                
+                if colname in Preguntas_valor:
+                    kpi_valor += int(dataframe.iloc[row,column])
+                    kpi_valor_cont += 1
+                elif colname in Preguntas_lealtad:
+                    kpi_lealtad += int(dataframe.iloc[row,column])
+                    kpi_lealtad_cont +=1
+                elif colname in Preguntas_esfuerzo:
+                    kpi_esfuerzo += int(dataframe.iloc[row,column])
+                    kpi_esfuerzo_cont +=1
+                
+                for pregunta in Preguntas_satisfaccion:
+
+                    if pregunta in colname:
+                        
+                        kpi_satisfaccion += int(dataframe.iloc[row,column])
+                        kpi_satisfaccion_cont += 1
+                
+        kpi_valor       = kpi_valor/kpi_valor_cont
+        kpi_lealtad     = kpi_lealtad/kpi_lealtad_cont
+        kpi_esfuerzo    = kpi_esfuerzo/kpi_esfuerzo_cont
+        kpi_satisfaccion = kpi_satisfaccion/kpi_satisfaccion_cont
+                
+        #kpi_lealtad = kp
+        data = data +str('"' + 'kpi_valor"' + ':' +'"'+ str(kpi_valor)+'"' + ',') 
+        data = data +str('"' + 'kpi_lealtad"' + ':' +'"'+ str(kpi_lealtad)+'"' + ',') 
+        data = data +str('"' + 'kpi_satisfaccion"' + ':' +'"'+ str(kpi_satisfaccion)+'"' + ',') 
+        data = data +str('"' + 'kpi_esfuerzo"' + ':' +'"'+ str(kpi_esfuerzo)+'"' + ',') 
+        data = data +str('"' + 'Trimestre"' + ':' +'"'+ str(Trimestre)+'"' + ',') 
+        data = data +str('"' +'Year"'+ ':' + '"'+str(Year)+'"' )  
+        data =  data.replace("\n", "")
+
+        data = "{" + data + "}"
+        lista_data.append(data)
+        
+    for respuesta in lista_data:
+        Consultoria_Respuestas_Ref.add(json.loads(respuesta))

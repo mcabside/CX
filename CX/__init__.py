@@ -14,7 +14,7 @@ app = Flask(__name__)
 cred = credentials.Certificate("CX/FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
 firebase_admin.initialize_app(cred)
 
-UPLOAD_FOLDER      = 'CX'
+UPLOAD_FOLDER      = ''
 ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xlsm'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -69,8 +69,10 @@ def upload_file():
         Year = int(str(results.loc[0,"Marca temporal"])[0:4])
         
         #verify client in DB
+        print(results)
         found_list,not_found_list,results = SearchClients(results,not_found_list,found_list,Clientes_Data)
-        
+        print(found_list)
+        print(not_found_list)
         #Si vacio        
         if len(not_found_list) == 0:
             
@@ -81,8 +83,14 @@ def upload_file():
                 print(str(area))
                 cargaRespuestasCDC(db, Year, Trimestre, results, found_list)
                 return redirect(url_for('chart_cdc'))
+            elif str(area) == "Consultoria Corta" or str(area) =="Consultoria Larga":
+                print(str(area))
+                cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list)
+                
+                return redirect(url_for('chart_consultoria'))
             else:
                 return redirect(url_for('chart_consultoria'))
+                
         
         else:
              return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
@@ -128,4 +136,4 @@ def SaveClients():
             
 from CX.cdc import cargaRespuestasCDC
 
-import CX.consultoria
+from CX.consultoria import cargaRespuestasConsultoria
