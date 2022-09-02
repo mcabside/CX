@@ -187,6 +187,47 @@ def carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,k
                         'kpi_total':kpi_total
                     })
     
+def mappingValues(results):
+    results.replace(["No satisfecho","Ningún Valor","En Desacuerdo","No Satisfecho","En Desacuerdo	"],2,inplace=True) # no se verifica aun si hay espacios o mayusculas
+    results.replace(["Baja Satisfacción","Poco Valor","Casi Nunca"],4,inplace=True)
+    results.replace(["Satisfacción Promedio","Valor Promedio","Normalmente de Acuerdo"],6,inplace=True)
+    results.replace(["Buena Satisfacción","Gran Valor","Totalmente de Acuerdo"],8,inplace=True)
+    results.replace(["Supera las Expectativas"],10,inplace=True)
+    return results
+
+def SearchClients(results,not_found_list,found_list,Clientes_Data):
+    for index, row in results.iterrows():
+
+            Found = False
+            Nombre_Cliente = row["Nombre de la empresa a la que pertenece"]
+            aux = row["Nombre de la empresa a la que pertenece"].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') 
+            for doc in Clientes_Data:
+                aux2 = doc.to_dict()['Cliente'].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') 
+    
+                if aux in aux2 or aux2 in aux:
+                    
+                    Nombre_Cliente = doc.to_dict()['Cliente']
+                    results["Nombre de la empresa a la que pertenece"] = results["Nombre de la empresa a la que pertenece"].replace([row["Nombre de la empresa a la que pertenece"]],Nombre_Cliente) 
+                            
+                    Found = True
+                    break
+                else:
+                    for cliente_encuesta in doc.to_dict()['Encuestas']:
+                        aux3 = cliente_encuesta.lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') 
+                        
+                        if (aux in aux3 or aux3 in aux):
+                            Found = True
+                            Nombre_Cliente = doc.to_dict()['Cliente']
+                            results["Nombre de la empresa a la que pertenece"] = results["Nombre de la empresa a la que pertenece"].replace([row["Nombre de la empresa a la que pertenece"]],Nombre_Cliente) 
+                            break
+            if Found:
+                found_list.append(Nombre_Cliente)
+                print("se encontro : " + Nombre_Cliente)
+            else:
+                not_found_list.append(Nombre_Cliente)
+                print("no se encontro : " + Nombre_Cliente)
+                
+            return found_list,not_found_list,results
         
     
     
