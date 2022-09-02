@@ -63,9 +63,6 @@
     <!--SHOW TABLE-->
     {% if not cliente_unico %}
     
-    <div style="align-items:center;justify-content:center;display:flex">
-      <p class="text-center align-self-center fst-italic">Q1: {{avg_q1}} Q2: {{avg_q2}} Q3: {{avg_q3}} Q4: {{avg_q4}}</p>
-    </div>
             <table class="table table-striped table-sm table-bordered">
               <thead class="table-dark">
                 <tr>
@@ -84,6 +81,38 @@
               </thead>
 
               <tbody>
+
+                <tr>
+
+                  <td>Total</td>
+                  <th scope="row">Q1</td>
+                  <td>{{list_avg_kpi[0]}}</td>
+                  <td>{{list_avg_kpi[1]}}</td>
+                  <td>{{list_avg_kpi[2]}}</td>
+                  <td>{{list_avg_kpi[3]}}</td>
+                  <td>{{list_avg_kpi[4]}}</td>
+
+                  <th scope="row">Q2</th>
+                  <td>{{list_avg_kpi[5]}}</td>
+                  <td>{{list_avg_kpi[6]}}</td>
+                  <td>{{list_avg_kpi[7]}}</td>
+                  <td>{{list_avg_kpi[8]}}</td>
+                  <td>{{list_avg_kpi[9]}}</td>
+  
+                  <th scope="row">Q3</th>
+                  <td>{{list_avg_kpi[10]}}</td>
+                  <td>{{list_avg_kpi[11]}}</td>
+                  <td>{{list_avg_kpi[12]}}</td>
+                  <td>{{list_avg_kpi[13]}}</td>
+                  <td>{{list_avg_kpi[14]}}</td>
+
+                  <th scope="row">Q4</th>
+                  <td>{{list_avg_kpi[15]}}</td>
+                  <td>{{list_avg_kpi[16]}}</td>
+                  <td>{{list_avg_kpi[17]}}</td>
+                  <td>{{list_avg_kpi[18]}}</td>
+                  <td>{{list_avg_kpi[19]}}</td>
+                </tr>
 
                 {%for doc in kpi_q1 %}
                 <tr>
@@ -134,7 +163,7 @@
       {% else %}
       
       <br>
-      <h1 class="text-center align-self-center fst-italic">Reporte CDC - Q{{trimestre_input}} {{year_input}}</h1>
+      <h1 class="text-center align-self-center">Reporte CDC - Q{{trimestre_input}} {{year_input}}</h1>
       <br>
       <h3 style="text-align:center">Valor General: {{kpi_total}}</h3>
       

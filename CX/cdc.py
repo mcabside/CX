@@ -10,7 +10,7 @@ from CX.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinam
 def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
     
     query_trimestre = db.collection('CDC_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
-        
+    
     if len(query_trimestre)>0:
         print("ya se ingreso el archivo")
                 
@@ -26,12 +26,10 @@ def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
             query_kpi = db.collection('CDC_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where("Nombre_de_la_empresa_a_la_que_pertenece", '==', cliente).get()
             
             for doc in query_kpi:
-                
                 kpi_esfuerzo     += (float(doc.to_dict()['kpi_esfuerzo']))
                 kpi_satisfaccion += (float(doc.to_dict()['kpi_satisfaccion']))
                 kpi_lealtad      += (float(doc.to_dict()['kpi_lealtad']))
                 kpi_valor        += (float(doc.to_dict()['kpi_valor']))
-                
                 numero_de_respuestas += 1
                 
             kpi_esfuerzo     = round(kpi_esfuerzo/numero_de_respuestas, 2)
@@ -57,7 +55,7 @@ def chart_cdc():
     
     #Conexion con la DB - KPI's CDC
     db = firestore.client()
-    CDC_KPIS = db.collection('CDC_KPIS').get()
+    CDC_KPIS = db.collection('CDC_KPIS').get() #Get All CDC KPI's
     
     #Guardar Listas Trimestres y años de la DB
     Trimestres, Years, lista_clientes = saveSelectData(CDC_KPIS)
@@ -70,6 +68,15 @@ def chart_cdc():
     #Validación parametros URL
     trimestre_input, year_input = validarParametros(trimestre_input, year_input, Trimestres, Years)
     
+    #
+    q1, q2, q3, q4 = 0, 0, 0, 0
+    
+    #Average Q
+    for i in CDC_KPIS:
+        if(i.to_dict()['Trimestre'] == 1):
+            q1
+            
+    
     #Show Table
     if cliente_input is None or cliente_input=="Todos":
         
@@ -80,11 +87,15 @@ def chart_cdc():
         kpi_q1, kpi_q2, kpi_q3, kpi_q4 = tablaDinamica(kpi_clients)
        
         #Promedio Q's
-        avg_q1 = promedioQuarter(kpi_q1)
-        avg_q2 = promedioQuarter(kpi_q2)
-        avg_q3 = promedioQuarter(kpi_q3)
-        avg_q4 = promedioQuarter(kpi_q4)
+        list_avg_kpi = []
     
+        for i in range(4):
+            list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_valor', i+1))
+            list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_satisfaccion', i+1))
+            list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_esfuerzo', i+1))
+            list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_lealtad', i+1))
+            list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_total', i+1))
+            
     #Show speedmeter  
     else:
         
@@ -143,9 +154,4 @@ def chart_cdc():
                            kpi_q2 = kpi_q2, 
                            kpi_q3 = kpi_q3, 
                            kpi_q4 = kpi_q4,
-                           avg_q1 = round(avg_q1,2), 
-                           avg_q2 = round(avg_q2,2), 
-                           avg_q3 = round(avg_q3,2), 
-                           avg_q4 = round(avg_q4,2))
-
-
+                           list_avg_kpi=list_avg_kpi)

@@ -26,23 +26,25 @@ def speedmeter(title, value, delta, red, green, porcentaje):
                    margin=dict(l=25, r=25, t=0, b=0), 
                    annotations=[{'x': 0.5, 'y':0.25 
                                       ,'text': porcentaje
-                                      ,'font': { 'color': "hsl(36, 100%, 50%)", 'size': 25, 'family': "Open Sans"}
+                                      ,'font': { 'color': "hsl(36, 100%, 50%)/", 'size': 25, 'family': "Open Sans"}
                                       ,'showarrow':False, 'xanchor':'center' },]),
             )
     return fig_total
 
 #Promedio Q'S
-def promedioQuarter(kpi_q):
-    avg_q, cont_q = 0, 0
-    for i in kpi_q:
-        if(i['kpi_total'] != ''):
-            avg_q = avg_q + i['kpi_total']
+def promedioQuarter(kpi_clients, kpi_name, trimestre):
+    avg_kpi_q, cont_q = 0, 0
+    for i in kpi_clients:
+        if(i.to_dict()[kpi_name] != '' and i.to_dict()['Trimestre'] == trimestre):
+            avg_kpi_q = avg_kpi_q + i.to_dict()[kpi_name]
             cont_q += 1
-        
+    
     if(cont_q != 0):    
-        avg_q = avg_q/cont_q
+        avg_kpi_q = round(avg_kpi_q/cont_q, 1)
+    else:
+        avg_kpi_q = "" 
         
-    return avg_q
+    return avg_kpi_q
 
 #Tabla dinamica
 def tablaDinamica(kpi_clients):
