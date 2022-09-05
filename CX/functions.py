@@ -1,6 +1,5 @@
 import pandas as pd
 import json
-from   CX.static.questions.cdc_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
 import plotly.graph_objects as go
 from   plotly.graph_objs import *
 from   datetime import date
@@ -131,7 +130,7 @@ def validarParametros(trimestre_input, year_input, Trimestres, Years):
     return trimestre_input, year_input
     
     
-def carga_preguntas(dataframe,CDC_Respuestas_Ref,Trimestre,Year):
+def carga_preguntas(dataframe,Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor):
     lista_data = []
     for row in range(len(dataframe)):
         
@@ -141,9 +140,11 @@ def carga_preguntas(dataframe,CDC_Respuestas_Ref,Trimestre,Year):
     
         for column in range(len(dataframe.columns)):
             colname = dataframe.columns[column]
+            if colname == "¿Qué tan satisfecho se encuentra con el Servicio de Consultoría recibido de ABSIDE?" and str(dataframe.iloc[row,column]).isnumeric(): # en el caso de consultoria corta
+                dataframe.iloc[row,column] = int(dataframe.iloc[row,column]) *2
             if dataframe.iloc[row,column] != "" and dataframe.iloc[row,column] != "No Aplica" and not pd.isna(dataframe.iloc[row,column]):
                 
-                data = data + str('"' + colname.replace(' ','_').replace('"','').replace("'","") + '"'+ " : " + '"'+str(dataframe.iloc[row,column]).replace('"','').replace("'","") +'"'+ ',') 
+                data = data + str('"' + colname.replace(' ','_').replace('"','').replace("'","").replace(":","").replace("\t","").replace("(","_").replace(")","_") + '"'+ " : " + '"'+str(dataframe.iloc[row,column]).replace('"','').replace("'","").replace(":","") +'"'+ ',') 
                 
                 if colname in Preguntas_valor:
                     kpi_valor += int(dataframe.iloc[row,column])
@@ -180,7 +181,8 @@ def carga_preguntas(dataframe,CDC_Respuestas_Ref,Trimestre,Year):
         lista_data.append(data)
         
     for respuesta in lista_data:
-        CDC_Respuestas_Ref.add(json.loads(respuesta))
+        #print(respuesta)
+        Respuestas_Ref.add(json.loads(respuesta))
             
         
 def carga_kpi(cliente,Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total):
@@ -196,27 +198,31 @@ def carga_kpi(cliente,Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealt
                     })
     
 def mappingValues(results):# no se verifica aun si hay espacios o mayusculas
-    results.replace(["No satisfecho","Ningún Valor","En Desacuerdo","No Satisfecho","En Desacuerdo	","Ningún Valor","Muy Malo","Muy insatisfecho"],2,inplace=True) 
-    results.replace(["Baja Satisfacción","Poco Valor","Casi Nunca","Poco Valor","Malo","Insatisfecho"],4,inplace=True)
-    results.replace(["Satisfacción Promedio","Valor Promedio","Normalmente de Acuerdo","Bueno","Neutral","Valor promedio"],6,inplace=True)
-    results.replace(["Buena Satisfacción","Gran Valor","Totalmente de Acuerdo","Muy Bueno","Satisfecho","Muy bueno","Gran valor"],8,inplace=True)
-    results.replace(["Supera las Expectativas","Muy satisfecho","Muy Satisfecho"],10,inplace=True)
+    results.replace(["No satisfecho","Ningún Valor","En Desacuerdo","No Satisfecho","En Desacuerdo	","Ningún Valor","Muy Malo","Muy insatisfecho","MUY MALO","1 . MUY MALO","1.MUY MALO","1. No es Profesional"],2,inplace=True) 
+    results.replace(["Baja Satisfacción","Poco Valor","Casi Nunca","Poco Valor","Malo","Insatisfecho","MALO","2. MALO","2.MALO","2. No muy Profesional"],4,inplace=True)
+    results.replace(["Satisfacción Promedio","Valor Promedio","Normalmente de Acuerdo","Bueno","Neutral","Valor promedio","REGULAR","3. REGULAR","3.REGULAR","3. Profesional"],6,inplace=True)
+    results.replace(["Buena Satisfacción","Gran Valor","Totalmente de Acuerdo","Muy Bueno","Satisfecho","Muy bueno","Gran valor","BUENO","4. BUENO","4.BUENO","4. Muy Profesional"],8,inplace=True)
+    results.replace(["Supera las Expectativas","Muy satisfecho","Muy Satisfecho","MUY BUENO","5.MUY BUENO"],10,inplace=True)
     return results
 
 def SearchClients(results,not_found_list,found_list,Clientes_Data):
+    columna_cliente =""
+    if "Nombre de la empresa a la que pertenece" in results.columns:
+        columna_cliente = "Nombre de la empresa a la que pertenece"
+    elif "NOMBRE DE LA EMPRESA (CLIENTE):							" in results.columns:
+        columna_cliente = "NOMBRE DE LA EMPRESA (CLIENTE):							"
     for index, row in results.iterrows():
-
             Found = False
-            Nombre_Cliente = row["Nombre de la empresa a la que pertenece"]
-            print(row["Nombre de la empresa a la que pertenece"])
-            aux = row["Nombre de la empresa a la que pertenece"].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') 
+            Nombre_Cliente = row[columna_cliente]
+            print(row[columna_cliente])
+            aux = row[columna_cliente].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') 
             for doc in Clientes_Data:
                 aux2 = doc.to_dict()['Cliente'].lower().replace(",","").replace(".","").replace("á",'a').replace("é",'e').replace("í",'i').replace("ó",'o').replace("ú",'u') 
     
                 if aux in aux2 or aux2 in aux:
                     
                     Nombre_Cliente = doc.to_dict()['Cliente']
-                    results["Nombre de la empresa a la que pertenece"] = results["Nombre de la empresa a la que pertenece"].replace([row["Nombre de la empresa a la que pertenece"]],Nombre_Cliente) 
+                    results[columna_cliente] = results[columna_cliente].replace([row[columna_cliente]],Nombre_Cliente) 
                             
                     Found = True
                     break
@@ -227,7 +233,7 @@ def SearchClients(results,not_found_list,found_list,Clientes_Data):
                         if (aux in aux3 or aux3 in aux):
                             Found = True
                             Nombre_Cliente = doc.to_dict()['Cliente']
-                            results["Nombre de la empresa a la que pertenece"] = results["Nombre de la empresa a la que pertenece"].replace([row["Nombre de la empresa a la que pertenece"]],Nombre_Cliente) 
+                            results[columna_cliente] = results[columna_cliente].replace([row[columna_cliente]],Nombre_Cliente) 
                             break
             if Found:
                 print("ENTRO EN TRUE")
@@ -241,55 +247,3 @@ def SearchClients(results,not_found_list,found_list,Clientes_Data):
                 
     return found_list,not_found_list,results
         
-    
-
-def carga_preguntas_consultoria(dataframe,Consultoria_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor):
-    lista_data = []
-    for row in range(len(dataframe)):
-        
-        data = ""
-        kpi_esfuerzo, kpi_esfuerzo_cont, kpi_satisfaccion, kpi_satisfaccion_cont = 0, 0, 0, 0
-        kpi_lealtad, kpi_lealtad_cont, kpi_valor, kpi_valor_cont = 0, 0, 0, 0
-    
-        for column in range(len(dataframe.columns)):
-            colname = dataframe.columns[column]
-            if dataframe.iloc[row,column] != "" and dataframe.iloc[row,column] != "No Aplica" and not pd.isna(dataframe.iloc[row,column]):
-                
-                data = data + str('"' + colname.replace(' ','_').replace('"','').replace("'","") + '"'+ " : " + '"'+str(dataframe.iloc[row,column]).replace('"','').replace("'","") +'"'+ ',') 
-                
-                if colname in Preguntas_valor:
-                    kpi_valor += int(dataframe.iloc[row,column])
-                    kpi_valor_cont += 1
-                elif colname in Preguntas_lealtad:
-                    kpi_lealtad += int(dataframe.iloc[row,column])
-                    kpi_lealtad_cont +=1
-                elif colname in Preguntas_esfuerzo:
-                    kpi_esfuerzo += int(dataframe.iloc[row,column])
-                    kpi_esfuerzo_cont +=1
-                
-                for pregunta in Preguntas_satisfaccion:
-
-                    if pregunta in colname:
-                        
-                        kpi_satisfaccion += int(dataframe.iloc[row,column])
-                        kpi_satisfaccion_cont += 1
-                
-        kpi_valor       = kpi_valor/kpi_valor_cont
-        kpi_lealtad     = kpi_lealtad/kpi_lealtad_cont
-        kpi_esfuerzo    = kpi_esfuerzo/kpi_esfuerzo_cont
-        kpi_satisfaccion = kpi_satisfaccion/kpi_satisfaccion_cont
-                
-        #kpi_lealtad = kp
-        data = data +str('"' + 'kpi_valor"' + ':' +'"'+ str(kpi_valor)+'"' + ',') 
-        data = data +str('"' + 'kpi_lealtad"' + ':' +'"'+ str(kpi_lealtad)+'"' + ',') 
-        data = data +str('"' + 'kpi_satisfaccion"' + ':' +'"'+ str(kpi_satisfaccion)+'"' + ',') 
-        data = data +str('"' + 'kpi_esfuerzo"' + ':' +'"'+ str(kpi_esfuerzo)+'"' + ',') 
-        data = data +str('"' + 'Trimestre"' + ':' +'"'+ str(Trimestre)+'"' + ',') 
-        data = data +str('"' +'Year"'+ ':' + '"'+str(Year)+'"' )  
-        data =  data.replace("\n", "")
-
-        data = "{" + data + "}"
-        lista_data.append(data)
-        
-    for respuesta in lista_data:
-        Consultoria_Respuestas_Ref.add(json.loads(respuesta))

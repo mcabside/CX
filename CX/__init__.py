@@ -88,6 +88,9 @@ def upload_file():
                 cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list)
                 
                 return redirect(url_for('chart_consultoria'))
+            elif str(area) == "Proceso Comercial Satsifaccion":
+                cargaRespuestasPC(db, Year,Trimestre, results, found_list)
+                return redirect(url_for('chart_pc'))
             else:
                 return redirect(url_for('chart_consultoria'))
                 
@@ -137,3 +140,5 @@ def SaveClients():
 from CX.cdc import cargaRespuestasCDC
 
 from CX.consultoria import cargaRespuestasConsultoria
+
+from CX.proceso_comercial import cargaRespuestasPC

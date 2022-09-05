@@ -4,7 +4,7 @@ import json
 import plotly
 from CX.static.questions.consultoria_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
 from CX import app
-from CX.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas,carga_preguntas_consultoria
+from CX.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas
 
 #Carga Respuestas CDC
 def cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list):
@@ -16,7 +16,7 @@ def cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list):
                 
     else:
         Consultoria_Respuestas_Ref = db.collection("Consultoria_Respuestas")
-        carga_preguntas_consultoria(results, Consultoria_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor)
+        carga_preguntas(results, Consultoria_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor)
         Consultoria_KPI_Ref       = db.collection("Consultoria_KPIS")
         found_set         = set(found_list)
         found_list_unique = list(found_set)
