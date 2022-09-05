@@ -71,6 +71,8 @@ def chart_consultoria():
     #Validación parametros URL
     trimestre_input, year_input = validarParametros(trimestre_input, year_input, Trimestres, Years)
     
+    list_avg_kpi = []
+
     #Show Table
     if cliente_input is None or cliente_input=="Todos":
         
@@ -79,12 +81,14 @@ def chart_consultoria():
         
         #Tabla dinamica
         kpi_q1, kpi_q2, kpi_q3, kpi_q4 = tablaDinamica(kpi_clients)
-       
-        #Promedio Q's
-        avg_q1 = promedioQuarter(kpi_q1)
-        avg_q2 = promedioQuarter(kpi_q2)
-        avg_q3 = promedioQuarter(kpi_q3)
-        avg_q4 = promedioQuarter(kpi_q4)
+        
+        #Promedio Q's    
+        for i in range(4):
+            list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_valor', i+1))
+            list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_satisfaccion', i+1))
+            list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_esfuerzo', i+1))
+            list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_lealtad', i+1))
+            list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_total', i+1))
     
     #Show speedmeter  
     else:
@@ -144,10 +148,7 @@ def chart_consultoria():
                            kpi_q2 = kpi_q2, 
                            kpi_q3 = kpi_q3, 
                            kpi_q4 = kpi_q4,
-                           avg_q1 = round(avg_q1,2), 
-                           avg_q2 = round(avg_q2,2), 
-                           avg_q3 = round(avg_q3,2), 
-                           avg_q4 = round(avg_q4,2))
+                           list_avg_kpi=None)
     
     
 

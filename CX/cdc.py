@@ -75,7 +75,8 @@ def chart_cdc():
     for i in CDC_KPIS:
         if(i.to_dict()['Trimestre'] == 1):
             q1
-            
+    
+    list_avg_kpi = []
     
     #Show Table
     if cliente_input is None or cliente_input=="Todos":
@@ -86,9 +87,7 @@ def chart_cdc():
         #Tabla dinamica
         kpi_q1, kpi_q2, kpi_q3, kpi_q4 = tablaDinamica(kpi_clients)
        
-        #Promedio Q's
-        list_avg_kpi = []
-    
+        #Promedio Q's    
         for i in range(4):
             list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_valor', i+1))
             list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_satisfaccion', i+1))
