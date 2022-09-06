@@ -68,14 +68,6 @@ def chart_cdc():
     #Validación parametros URL
     trimestre_input, year_input = validarParametros(trimestre_input, year_input, Trimestres, Years)
     
-    #
-    q1, q2, q3, q4 = 0, 0, 0, 0
-    
-    #Average Q
-    for i in CDC_KPIS:
-        if(i.to_dict()['Trimestre'] == 1):
-            q1
-    
     list_avg_kpi = []
     
     #Show Table

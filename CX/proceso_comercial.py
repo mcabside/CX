@@ -148,7 +148,7 @@ def chart_pc():
                            kpi_q2 = kpi_q2, 
                            kpi_q3 = kpi_q3, 
                            kpi_q4 = kpi_q4,
-                           list_avg_kpi=None)
+                           list_avg_kpi=list_avg_kpi)
     
     
 
