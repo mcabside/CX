@@ -1,3 +1,4 @@
+from os import remove
 import pandas as pd
 import json
 import plotly.graph_objects as go
@@ -19,14 +20,14 @@ def speedmeter(title, value, delta, red, green, porcentaje):
                         {'range': [red+0.001, green-0.001], 'color': "yellow"},
                         {'range': [green, 10], 'color': "green"}],
                     'threshold' : {'line': {'color': "black", 'width': 6}, 'thickness': 0.85, 'value': value}},
-            ),
-            Layout(paper_bgcolor='rgba(0,0,0,0)',
-                   plot_bgcolor='rgba(0,0,0,0)',
-                   margin=dict(l=25, r=25, t=0, b=0), 
-                   annotations=[{'x': 0.5, 'y':0.25 
+            ),Layout(
+                   paper_bgcolor='rgba(0,0,0,0)',
+                   plot_bgcolor='rgba(0,0,0,0)',                   
+                   margin=dict(l=25, r=25, t=0, b=0),
+                   annotations=[{'x': 0.5, 'y':0.25
                                       ,'text': porcentaje
                                       ,'font': { 'color': "hsl(36, 100%, 50%)", 'size': 25, 'family': "Open Sans"}
-                                      ,'showarrow':False, 'xanchor':'center' },]),
+                                      ,'showarrow':False, 'xanchor':'center' }]),
             )
     return fig_total
 
@@ -48,11 +49,9 @@ def promedioQuarter(kpi_clients, kpi_name, trimestre):
 #Tabla dinamica
 def tablaDinamica(kpi_clients):
     kpi, kpi_q1, kpi_q2, kpi_q3, kpi_q4  = [], [], [], [], []
-    
     for i, doc in enumerate(kpi_clients):
             if i == 0:
                 kpi.append([doc.to_dict()['Cliente'], doc])
-                
             else:
                 esta = False
                 posi = 0
@@ -63,7 +62,6 @@ def tablaDinamica(kpi_clients):
                         break
                 if esta:
                     kpi[posi].append(doc)
-                    
                 else:
                     kpi.append([doc.to_dict()['Cliente'], doc])
                     

@@ -9,15 +9,17 @@ from CX.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinam
 #Carga Respuestas CDC
 def cargaRespuestasPC(db, Year,Trimestre, results, found_list):
     
+    #Cargar respuesta para un trimestre en particular
     query_trimestre = db.collection('PC_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
         
+    #Verificar si ya se ingreso el archivo
     if len(query_trimestre)>0:
         print("ya se ingreso el archivo")
                 
     else:
         PC_Respuestas_Ref = db.collection("PC_Respuestas")
         carga_preguntas(results, PC_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor)
-        PC_KPI_Ref       = db.collection("PC_KPIS")
+        PC_KPI_Ref        = db.collection("PC_KPIS")
         found_set         = set(found_list)
         found_list_unique = list(found_set)
         
@@ -52,7 +54,7 @@ def chart_pc():
     kpi_clients = None
     kpi_q1, kpi_q2, kpi_q3, kpi_q4 = [], [], [], []
     Trimestres, Years, lista_clientes = [], [], []
-    kpi_total, avg_q1, avg_q2, avg_q3, avg_q4 = 0, 0, 0, 0, 0
+    kpi_total = 0
     cliente_unico, graphJSON_esfuerzo, graphJSON_satisfaccion = False, False, False
     graphJSON_lealtad, graphJSON_valor = False, False
     
@@ -71,6 +73,7 @@ def chart_pc():
     #Validación parametros URL
     trimestre_input, year_input = validarParametros(trimestre_input, year_input, Trimestres, Years)
     
+    #Lista Avg Kpi's
     list_avg_kpi = []
 
     #Show Table
@@ -148,7 +151,8 @@ def chart_pc():
                            kpi_q2 = kpi_q2, 
                            kpi_q3 = kpi_q3, 
                            kpi_q4 = kpi_q4,
-                           list_avg_kpi=list_avg_kpi)
+                           list_avg_kpi=list_avg_kpi,
+                           area = "Proceso Comercial")
     
     
 

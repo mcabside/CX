@@ -9,8 +9,10 @@ from CX.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinam
 #Carga Respuestas CDC
 def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
     
+    #Cargar respuesta para un trimestre en particular
     query_trimestre = db.collection('CDC_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
     
+    #Verificar si ya se ingreso el archivo
     if len(query_trimestre)>0:
         print("ya se ingreso el archivo")
                 
@@ -49,7 +51,7 @@ def chart_cdc():
     kpi_clients = None
     kpi_q1, kpi_q2, kpi_q3, kpi_q4 = [], [], [], []
     Trimestres, Years, lista_clientes = [], [], []
-    kpi_total, avg_q1, avg_q2, avg_q3, avg_q4 = 0, 0, 0, 0, 0
+    kpi_total = 0
     cliente_unico, graphJSON_esfuerzo, graphJSON_satisfaccion = False, False, False
     graphJSON_lealtad, graphJSON_valor = False, False
     
@@ -68,6 +70,7 @@ def chart_cdc():
     #Validación parametros URL
     trimestre_input, year_input = validarParametros(trimestre_input, year_input, Trimestres, Years)
     
+    #Lista Avg Kpi's
     list_avg_kpi = []
     
     #Show Table
@@ -113,7 +116,7 @@ def chart_cdc():
             client    = kpi_client[0].to_dict()
                         
             if(len(kpi_delta) > 0):
-                delta     = kpi_delta[0].to_dict()
+                delta = kpi_delta[0].to_dict()
                 fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", float(client["kpi_esfuerzo"]), delta['kpi_esfuerzo'],7.1,8.2, "20%")
                 fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", float(client["kpi_satisfaccion"]), delta['kpi_satisfaccion'],7.4, 8.5,"35%")
                 fig_lealtad      = speedmeter("Net Promoter Score (NPS)", float(client["kpi_lealtad"]), delta['kpi_lealtad'], 6.9, 9,"35%")
@@ -145,4 +148,5 @@ def chart_cdc():
                            kpi_q2 = kpi_q2, 
                            kpi_q3 = kpi_q3, 
                            kpi_q4 = kpi_q4,
-                           list_avg_kpi=list_avg_kpi)
+                           list_avg_kpi = list_avg_kpi,
+                           area = "CDC")
