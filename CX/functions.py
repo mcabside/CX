@@ -140,6 +140,10 @@ def carga_preguntas(dataframe,Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,P
             colname = dataframe.columns[column]
             if colname == "¿Qué tan satisfecho se encuentra con el Servicio de Consultoría recibido de ABSIDE?" and str(dataframe.iloc[row,column]).isnumeric(): # en el caso de consultoria corta
                 dataframe.iloc[row,column] = int(dataframe.iloc[row,column]) *2
+                
+            if colname == "¿Como le parece en general el aspecto Profesional de nuestra Compañía?": #va del 1 al 4, quizas revisar area si esta pregunta se repite
+                dataframe.iloc[row,column] = int(dataframe.iloc[row,column]) + (int(dataframe.iloc[row,column])/4)
+                
             if dataframe.iloc[row,column] != "" and dataframe.iloc[row,column] != "No Aplica" and not pd.isna(dataframe.iloc[row,column]):
                 
                 data = data + str('"' + colname.replace(' ','_').replace('"','').replace("'","").replace(":","").replace("\t","").replace("(","_").replace(")","_") + '"'+ " : " + '"'+str(dataframe.iloc[row,column]).replace('"','').replace("'","").replace(":","") +'"'+ ',') 
