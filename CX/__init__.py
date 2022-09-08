@@ -11,7 +11,6 @@ from   CX.functions import mappingValues,SearchClients
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-
 #Credenciales Firebase
 cred = credentials.Certificate("CX/FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
 firebase_admin.initialize_app(cred)
@@ -83,18 +82,22 @@ def upload_file():
             area = request.form.get('area')
             
             if(str(area) == "CDC"):
-                print(str(area))
+                #print(str(area))
                 cargaRespuestasCDC(db, Year, Trimestre, results, found_list)
                 return redirect(url_for('chart_cdc'))
             
             elif str(area) == "Consultoria Corta" or str(area) =="Consultoria Larga":
-                print(str(area))
+                #print(str(area))
                 cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list, area)
                 return redirect(url_for('chart_consultoria'))
             
-            elif str(area) == "Proceso Comercial Satsifaccion":
-                cargaRespuestasPC(db, Year,Trimestre, results, found_list)
-                return redirect(url_for('chart_pc'))
+            elif str(area) == "Proceso Comercial Satisfacción":
+                cargaRespuestasPCS(db, Year,Trimestre, results, found_list)
+                return redirect(url_for('chart_pcs'))
+            
+            elif str(area) == "Proceso Comercial Declinación":
+                cargaRespuestasPCD(db, Year,Trimestre, results, found_list)
+                return redirect(url_for('chart_pcd'))
             
             else:
                 return redirect(url_for('chart_consultoria'))
@@ -145,4 +148,6 @@ from CX.cdc import cargaRespuestasCDC
 
 from CX.consultoria import cargaRespuestasConsultoria
 
-from CX.proceso_comercial import cargaRespuestasPC
+from CX.pc_satisfaccion import cargaRespuestasPCS
+
+from CX.pc_declinacion import cargaRespuestasPCD
