@@ -13,13 +13,23 @@
             <br>
             <br>
             <select id="area" name="area" class="form-select">
-                <option value="CDC" >CDC</option>
-                <option value="Proceso Comercial Declinacion" >Proceso Comercial Declinación</option>
-                <option value="Proceso Comercial Satsifaccion" >Proceso Comercial Satsifacción</option>
-                <option value="Consultoria Corta" >Consultoria Corta</option>
-                <option value="Consultoria Larga" >Consultoria Larga</option>
+                <option value="CDC">CDC</option>
+                <option value="Proceso Comercial Declinacion">Proceso Comercial Declinación</option>
+                <option value="Proceso Comercial Satsifaccion">Proceso Comercial Satsifacción</option>
+                <option value="Consultoria Corta">Consultoria Corta</option>
+                <option value="Consultoria Larga">Consultoria Larga</option>
             </select>
           </form>
+
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              <ul class=flashes>
+              {% for message in messages %}
+                <li>{{ message }}</li>
+              {% endfor %}
+              </ul>
+            {% endif %}
+          {% endwith %}
 
           <!-- Modal -->
 <!--

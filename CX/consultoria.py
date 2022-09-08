@@ -4,10 +4,10 @@ import json
 import plotly
 from CX.static.questions.consultoria_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
 from CX import app
-from CX.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas
+from CX.functions import deltaKPI, saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas, deltaKPI
 
 #Carga Respuestas CDC
-def cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list):
+def cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list, area):
     
     #Cargar respuesta para un trimestre en particular
     query_trimestre = db.collection('Consultoria_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
@@ -18,7 +18,7 @@ def cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list):
                 
     else:
         Consultoria_Respuestas_Ref = db.collection("Consultoria_Respuestas")
-        carga_preguntas(results, Consultoria_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor)
+        carga_preguntas(results, Consultoria_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor,area)
         Consultoria_KPI_Ref       = db.collection("Consultoria_KPIS")
         found_set         = set(found_list)
         found_list_unique = list(found_set)
@@ -29,12 +29,10 @@ def cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list):
             query_kpi = db.collection('Consultoria_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where("Nombre_de_la_empresa_a_la_que_pertenece", '==', cliente).get()
             
             for doc in query_kpi:
-                
                 kpi_esfuerzo     += (float(doc.to_dict()['kpi_esfuerzo']))
                 kpi_satisfaccion += (float(doc.to_dict()['kpi_satisfaccion']))
                 kpi_lealtad      += (float(doc.to_dict()['kpi_lealtad']))
                 kpi_valor        += (float(doc.to_dict()['kpi_valor']))
-                
                 numero_de_respuestas += 1
                 
             kpi_esfuerzo     = round(kpi_esfuerzo/numero_de_respuestas, 2)
@@ -95,41 +93,32 @@ def chart_consultoria():
     
     #Show speedmeter  
     else:
-        
         #GET ALL KPI's CDC FROM A SPECIFIC YEAR ALL Q
         kpis_client = db.collection('Consultoria_KPIS').where('Year','==',int(year_input)).where('Cliente','==',cliente_input).get()
+        
         #KPI's CDC FROM A SPECIFIC Q
-        kpi_client, kpi_delta = [], []
+        kpi_client, kpi_delta = deltaKPI(kpis_client, trimestre_input)
+        
         #ONLY ONE CLIENT
         cliente_unico = True
-               
-        #CALCULATE DELTA     
-        for i in kpis_client:
-            #GET KPI SPECIFIC QUARTER 
-            if(i.to_dict()['Trimestre'] == int(trimestre_input)):
-                kpi_client.append(i)
-            
-            #GET KPI PREVIUS
-            if(int(trimestre_input) != 1 and (i.to_dict()['Trimestre'] == (int(trimestre_input)-1))):
-                kpi_delta.append(i)
-                    
+    
         #SHOW GRAFICOS          
         if len(kpi_client) > 0:
             kpi_total = float(kpi_client[0].to_dict()["kpi_total"])
             client    = kpi_client[0].to_dict()
                         
             if(len(kpi_delta) > 0):
-                delta     = kpi_delta[0].to_dict()
-                fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", float(client["kpi_esfuerzo"]), delta['kpi_esfuerzo'],7.1,8.2, "20%")
-                fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", float(client["kpi_satisfaccion"]), delta['kpi_satisfaccion'],7.4, 8.5,"35%")
-                fig_lealtad      = speedmeter("Net Promoter Score (NPS)", float(client["kpi_lealtad"]), delta['kpi_lealtad'], 6.9, 9,"35%")
-                fig_valor        = speedmeter("Valor Añadido (VA)",  float(client["kpi_valor"]), delta['kpi_valor'], 6.4, 7.5, "10%")
+                delta = kpi_delta[0].to_dict()
+                fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", float(client["kpi_esfuerzo"]),7.1, 8.2, "20%", delta['kpi_esfuerzo'])
+                fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", float(client["kpi_satisfaccion"]), 7.4, 8.5, "35%", delta['kpi_satisfaccion'])
+                fig_lealtad      = speedmeter("Net Promoter Score (NPS)", float(client["kpi_lealtad"]), 6.9, 9,"35%", delta['kpi_lealtad'])
+                fig_valor        = speedmeter("Valor Añadido (VA)",  float(client["kpi_valor"]), 6.4, 7.5, "10%", delta['kpi_valor'])
             else:
-                fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", float(client["kpi_esfuerzo"]), None, 7.1,8.2, "20%")
-                fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", float(client["kpi_satisfaccion"]), None, 7.4, 8.5,"35%")
-                fig_lealtad      = speedmeter("Net Promoter Score (NPS)", float(client["kpi_lealtad"]), None, 6.9, 9, "35%")
-                fig_valor        = speedmeter("Valor Añadido (VA)", float(client["kpi_valor"]), None, 6.4, 7.5, "10%")
-            
+                fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", float(client["kpi_esfuerzo"]),7.1, 8.2, "20%")
+                fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", float(client["kpi_satisfaccion"]), 7.4, 8.5, "35%")
+                fig_lealtad      = speedmeter("Net Promoter Score (NPS)", float(client["kpi_lealtad"]), 6.9, 9,"35%")
+                fig_valor        = speedmeter("Valor Añadido (VA)",  float(client["kpi_valor"]), 6.4, 7.5, "10%")
+                
             graphJSON_esfuerzo     = json.dumps(fig_esfuerzo,     cls=plotly.utils.PlotlyJSONEncoder)
             graphJSON_satisfaccion = json.dumps(fig_satisfaccion, cls=plotly.utils.PlotlyJSONEncoder)
             graphJSON_lealtad      = json.dumps(fig_lealtad,      cls=plotly.utils.PlotlyJSONEncoder)

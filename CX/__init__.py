@@ -9,6 +9,8 @@ import math
 from   CX.functions import mappingValues,SearchClients
 
 app = Flask(__name__)
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+
 
 #Credenciales Firebase
 cred = credentials.Certificate("CX/FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
@@ -73,6 +75,7 @@ def upload_file():
         found_list,not_found_list,results = SearchClients(results,not_found_list,found_list,Clientes_Data)
         print(found_list)
         print(not_found_list)
+        
         #Si vacio        
         if len(not_found_list) == 0:
             
@@ -83,18 +86,19 @@ def upload_file():
                 print(str(area))
                 cargaRespuestasCDC(db, Year, Trimestre, results, found_list)
                 return redirect(url_for('chart_cdc'))
+            
             elif str(area) == "Consultoria Corta" or str(area) =="Consultoria Larga":
                 print(str(area))
-                cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list)
-                
+                cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list, area)
                 return redirect(url_for('chart_consultoria'))
+            
             elif str(area) == "Proceso Comercial Satsifaccion":
                 cargaRespuestasPC(db, Year,Trimestre, results, found_list)
                 return redirect(url_for('chart_pc'))
+            
             else:
                 return redirect(url_for('chart_consultoria'))
-                
-        
+            
         else:
              return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
 

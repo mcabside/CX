@@ -5,8 +5,25 @@ import plotly.graph_objects as go
 from   plotly.graph_objs import *
 from   datetime import date
 
+#Delta KPI Qi vs KPI Qi-1
+def deltaKPI(kpis_client, trimestre_input):
+    kpi_client, kpi_delta = [], []
+    
+    #CALCULATE DELTA     
+    for i in kpis_client:
+    
+    #GET KPI SPECIFIC QUARTER 
+        if(i.to_dict()['Trimestre'] == int(trimestre_input)):
+            kpi_client.append(i)
+            
+    #GET KPI PREVIUS
+        if(int(trimestre_input) != 1 and (i.to_dict()['Trimestre'] == (int(trimestre_input)-1))):
+            kpi_delta.append(i)
+            
+    return kpi_client, kpi_delta
+
 #Graficar velocimetro
-def speedmeter(title, value, delta, red, green, porcentaje):
+def speedmeter(title, value, red, green, porcentaje, delta=None):
     fig_total = go.Figure(go.Indicator(
             domain = {'x': [0, 1], 'y': [0, 1]},
             value = value,
@@ -38,7 +55,6 @@ def promedioQuarter(kpi_clients, kpi_name, trimestre):
         if(i.to_dict()[kpi_name] != '' and i.to_dict()['Trimestre'] == trimestre):
             avg_kpi_q = avg_kpi_q + i.to_dict()[kpi_name]
             cont_q += 1
-    
     if(cont_q != 0):    
         avg_kpi_q = round(avg_kpi_q/cont_q, 1)
     else:
@@ -77,7 +93,6 @@ def tablaDinamica(kpi_clients):
                         "kpi_esfuerzo":"","kpi_total":""}
             
             for i in range(1,len(cliente_kpis)):
-                
                 if cliente_kpis[i].to_dict()['Trimestre'] == 1:
                     kpi1 = cliente_kpis[i].to_dict()
                 elif cliente_kpis[i].to_dict()['Trimestre'] == 2:
@@ -128,17 +143,17 @@ def validarParametros(trimestre_input, year_input, Trimestres, Years):
     return trimestre_input, year_input
     
     
-def carga_preguntas(dataframe,Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor):
+def carga_preguntas(dataframe,Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor,area=False):
     lista_data = []
     for row in range(len(dataframe)):
         
         data = ""
-        kpi_esfuerzo, kpi_esfuerzo_cont, kpi_satisfaccion, kpi_satisfaccion_cont = 0, 0, 0, 0
-        kpi_lealtad, kpi_lealtad_cont, kpi_valor, kpi_valor_cont = 0, 0, 0, 0
+        kpi_valor_cont, kpi_esfuerzo_cont, kpi_satisfaccion_cont, kpi_lealtad_cont = 0, 0, 0, 0
+        kpi_satisfaccion, kpi_lealtad, kpi_valor, kpi_esfuerzo = 0, 0, 0, 0
     
         for column in range(len(dataframe.columns)):
             colname = dataframe.columns[column]
-            if colname == "¿Qué tan satisfecho se encuentra con el Servicio de Consultoría recibido de ABSIDE?" and str(dataframe.iloc[row,column]).isnumeric(): # en el caso de consultoria corta
+            if colname == "¿Qué tan satisfecho se encuentra con el Servicio de Consultoría recibido de ABSIDE?" and str(dataframe.iloc[row,column]).isnumeric() and area == 'Consultoria Corta': # en el caso de consultoria corta
                 dataframe.iloc[row,column] = int(dataframe.iloc[row,column]) *2
                 
             if colname == "¿Como le parece en general el aspecto Profesional de nuestra Compañía?": #va del 1 al 4, quizas revisar area si esta pregunta se repite
@@ -165,9 +180,9 @@ def carga_preguntas(dataframe,Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,P
                         kpi_satisfaccion += int(dataframe.iloc[row,column])
                         kpi_satisfaccion_cont += 1
                 
-        kpi_valor       = kpi_valor/kpi_valor_cont
-        kpi_lealtad     = kpi_lealtad/kpi_lealtad_cont
-        kpi_esfuerzo    = kpi_esfuerzo/kpi_esfuerzo_cont
+        kpi_valor        = kpi_valor/kpi_valor_cont
+        kpi_lealtad      = kpi_lealtad/kpi_lealtad_cont
+        kpi_esfuerzo     = kpi_esfuerzo/kpi_esfuerzo_cont
         kpi_satisfaccion = kpi_satisfaccion/kpi_satisfaccion_cont
                 
         #kpi_lealtad = kp
