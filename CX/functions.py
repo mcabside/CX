@@ -170,16 +170,27 @@ def carga_preguntas(dataframe,Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,P
                     kpi_lealtad += int(dataframe.iloc[row,column])
                     kpi_lealtad_cont +=1
                 elif colname in Preguntas_esfuerzo:
-                    kpi_esfuerzo += int(dataframe.iloc[row,column])
+                    
+                    if area == "Proceso Comercial Declinación":
+                        kpi_esfuerzo += int(dataframe.iloc[row,column])*2
+                        
+                    else:
+                        kpi_esfuerzo += int(dataframe.iloc[row,column])
                     kpi_esfuerzo_cont +=1
-                
+                                        
                 for pregunta in Preguntas_satisfaccion:
 
                     if pregunta in colname:
                         
-                        kpi_satisfaccion += int(dataframe.iloc[row,column])
+                        if area == "Proceso Comercial Declinación":
+                        
+                            kpi_satisfaccion += int(dataframe.iloc[row,column])*2
+                            
+                        else:
+                            kpi_satisfaccion += int(dataframe.iloc[row,column])
                         kpi_satisfaccion_cont += 1
-                
+                            
+                            
         kpi_valor        = kpi_valor/kpi_valor_cont
         kpi_lealtad      = kpi_lealtad/kpi_lealtad_cont
         kpi_esfuerzo     = kpi_esfuerzo/kpi_esfuerzo_cont

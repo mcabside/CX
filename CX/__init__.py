@@ -96,11 +96,11 @@ def upload_file():
                 return redirect(url_for('chart_pcs'))
             
             elif str(area) == "Proceso Comercial Declinación":
-                cargaRespuestasPCD(db, Year,Trimestre, results, found_list)
+                cargaRespuestasPCD(db, Year,Trimestre, results, found_list,area)
                 return redirect(url_for('chart_pcd'))
             
             else:
-                return redirect(url_for('chart_consultoria'))
+                return redirect(url_for('upload_file'))
             
         else:
              return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
