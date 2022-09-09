@@ -142,4 +142,5 @@ def chart_cdc():
                            kpi_q3 = kpi_q3, 
                            kpi_q4 = kpi_q4,
                            list_avg_kpi = list_avg_kpi,
-                           area = "CDC")
+                           area = "CDC",
+                           year=year_input)

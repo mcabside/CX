@@ -86,7 +86,7 @@ def speedmeter(title, value, red, green, porcentaje, delta=None):
             domain = {'x': [0, 1], 'y': [0, 1]},
             value = value,
             mode = "gauge+number+delta",
-            title = {'text': title , 'font': {'size': 18}},
+            title = {'text': title , 'font': {'size': 16}},
             delta = {'reference': delta},
             gauge = {'axis': {'range': [0, 10]},
                     'bar': {'color': "hsla(120, 100%, 50%, 0.0)"},

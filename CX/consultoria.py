@@ -141,7 +141,8 @@ def chart_consultoria():
                            kpi_q3 = kpi_q3, 
                            kpi_q4 = kpi_q4,
                            list_avg_kpi=list_avg_kpi,
-                           area = "Consultoria")
+                           area = "Consultoria",
+                           year=year_input)
     
     
 

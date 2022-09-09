@@ -139,7 +139,8 @@ def chart_pcs():
                            kpi_q3 = kpi_q3, 
                            kpi_q4 = kpi_q4,
                            list_avg_kpi = list_avg_kpi,
-                           area = "Proceso Comercial Satisfacción")
+                           area = "Proceso Comercial Satisfacción",
+                           year=year_input)
     
     
 

@@ -63,7 +63,7 @@
     <!--SHOW TABLE-->
     {% if not cliente_unico %}
 
-      <h1 class="text-center align-self-center">Reporte {{area}} </h1>
+      <h1 class="text-center align-self-center">Reporte {{area}} - {{year}}</h1>
       <br>
             <table class="table table-striped table-sm table-bordered">
               <thead class="table-dark">
@@ -72,7 +72,7 @@
                     {% if i == 0 %}
                       <th scope="col">Nombre</th>
                     {% endif %} 
-                      <th scope="col">Trimestre</th>
+                      <th scope="col">Q</th>
                       <th scope="col">VA</th>
                       <th scope="col">CSAT</th>
                       <th scope="col">NPS</th>
@@ -86,7 +86,7 @@
 
                 <tr>
 
-                  <td>Total</td>
+                  <td style="font-weight: bold;">Total trimestre</td>
 
                   <th scope="row">Q1</td>
                   <td>{{list_avg_kpi[0]}}</td>

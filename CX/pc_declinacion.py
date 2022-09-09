@@ -7,7 +7,7 @@ from CX import app
 from CX.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas, deltaKPI
 
 #Carga Respuestas Proceso comercial declinación
-def cargaRespuestasPCD(db, Year,Trimestre, results, found_list):
+def cargaRespuestasPCD(db, Year,Trimestre, results, found_list,area):
     
     #Cargar respuesta para un trimestre en particular
     query_trimestre = db.collection('PCD_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
@@ -139,7 +139,8 @@ def chart_pcd():
                            kpi_q3 = kpi_q3, 
                            kpi_q4 = kpi_q4,
                            list_avg_kpi = list_avg_kpi,
-                           area = "Proceso Comercial Declinación")
+                           area = "Proceso Comercial Declinación",
+                           year=year_input)
     
     
 

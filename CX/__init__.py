@@ -15,7 +15,7 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 cred = credentials.Certificate("CX/FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
 firebase_admin.initialize_app(cred)
 
-UPLOAD_FOLDER      = ''
+UPLOAD_FOLDER      = 'CX\\static\\files'
 ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xlsm'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -49,7 +49,7 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            results = pd.read_excel(filename)
+            results = pd.read_excel(UPLOAD_FOLDER + "\\" + filename)
             results = mappingValues(results) 
             
         not_found_list, found_list, lista_clientes = [], [], []
@@ -153,3 +153,5 @@ from CX.pc_satisfaccion import cargaRespuestasPCS
 from CX.pc_declinacion import cargaRespuestasPCD
 
 from CX.general import reporteGeneral
+
+from CX.delete import delete

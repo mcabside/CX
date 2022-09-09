@@ -1,0 +1,57 @@
+{% extends 'base.html' %}  
+
+{% block content %}
+
+<br>
+
+<h1 class="text-center align-self-center">Eliminar información</h1>
+
+<br>
+
+<div style="align-items:center;justify-content:center;display:flex">
+      
+    <form method="post" class="row gy-2 gx-3 align-items-center">
+
+        <div class="col">
+            <p>Seleccione el area: </p>
+            <select id="area_delete" name="area_delete" class="form-select">
+                <option value="CDC" selected="selected">CDC</option>
+                <option value="Proceso Comercial Declinación">Proceso Comercial Declinación</option>
+                <option value="Proceso Comercial Satisfacción">Proceso Comercial Satisfacción</option>
+                <option value="Consultoria">Consultoria</option>
+            </select>
+        <div class="col"> 
+
+            <br>
+
+        <div class="col"> 
+            <p>Seleccione el trimestre: </p>
+            <select id="trimestre_delete" name="trimestre_delete" class="form-select" >
+                <option value="1" selected="selected">Q1</option>
+                <option value="2">Q2</option>
+                <option value="3">Q3</option>
+                <option value="4">Q4</option>
+           </select>
+         </div>  
+
+            <br>
+                       
+        <div class="col"> 
+            <p>Seleccione el año: </p>
+            <select id="year_delete" name="year_delete" class="form-select" >
+                <option value="2022" selected="selected">2022</option>
+                <option value="2023">2023</option>
+           </select>
+        </div>  
+            <br>
+            
+        <div class="d-grid gap-2 col-6 mx-auto" >
+            <div class="form-check">
+            <input class="btn btn-primary" type=submit value="Borrar">
+            </div>
+        </div>
+
+    </form>
+  </div>
+
+{% endblock %}
