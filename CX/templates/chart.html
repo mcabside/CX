@@ -7,7 +7,7 @@
       
       <form method = "get" class="row gy-2 gx-3 align-items-center">
 
-          <div class="col-sm-2"> 
+          <div class="col-sm-3"> 
 
             {% if cliente_input  != "Todos" and cliente_input %}
               <select id="trimestre_input" name="trimestre_input" class="form-select" >
@@ -28,7 +28,7 @@
 
            </div>  
                          
-        <div class="col-sm-2">   
+        <div class="col-sm-3">   
           <select id="year_input" name="year_input" class="form-select" >
            {% for Year in Years %}
             <option value="{{Year}}" >{{ Year}}</option>
@@ -36,7 +36,7 @@
            </select>
         </div>
 
-        <div class="col-sm-2">
+        <div class="col-sm-3">
           <select id="cliente_input" name="cliente_input" class="form-select" onchange="changeSelect()">
             <option value="Todos" default>Todos</option>
            {% for cliente in lista_clientes %}
@@ -62,7 +62,9 @@
 
     <!--SHOW TABLE-->
     {% if not cliente_unico %}
-    
+
+      <h1 class="text-center align-self-center">Reporte {{area}} </h1>
+      <br>
             <table class="table table-striped table-sm table-bordered">
               <thead class="table-dark">
                 <tr>
@@ -164,7 +166,18 @@
       {% else %}
       
       <br>
-      <h1 class="text-center align-self-center">Reporte {{area}} - Q{{trimestre_input}} {{year_input}}</h1>
+      
+      <div class="container"> 
+        <div class="row">
+          <div class="col">
+            <h1 class="text-center align-self-center">Reporte {{area}} - Q{{trimestre_input}} {{year_input}}</h1>
+          </div>
+          <!--<div class="col col-lg-1">
+            <img src="/static/img/innovation_logo.png" class="img-thumbnail" alt="...">
+          </div> -->
+        </div>
+      </div>
+
       <br>
       <h3 style="text-align:center">Valor General: {{kpi_total}}</h3>
       

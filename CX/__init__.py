@@ -151,3 +151,5 @@ from CX.consultoria import cargaRespuestasConsultoria
 from CX.pc_satisfaccion import cargaRespuestasPCS
 
 from CX.pc_declinacion import cargaRespuestasPCD
+
+from CX.general import reporteGeneral

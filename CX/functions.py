@@ -1,9 +1,67 @@
-from os import remove
+from   os import remove
 import pandas as pd
 import json
 import plotly.graph_objects as go
 from   plotly.graph_objs import *
 from   datetime import date
+
+def reporteGeneral(KPIS):
+    # Variables
+    q1, q2, q3, q4 = [], [], [], []
+    # Q1
+    q1.append(promedioQuarter(KPIS, "kpi_total", 1))
+    q1.append(promedioQuarter(KPIS, "kpi_lealtad", 1))
+    q1.append(promedioQuarter(KPIS, "kpi_satisfaccion", 1))
+    q1.append(promedioQuarter(KPIS, "kpi_esfuerzo", 1))
+    q1.append(promedioQuarter(KPIS, "kpi_valor", 1))
+    # Q2
+    q2.append(promedioQuarter(KPIS, "kpi_total", 2))
+    q2.append(promedioQuarter(KPIS, "kpi_lealtad", 2))
+    q2.append(promedioQuarter(KPIS, "kpi_satisfaccion", 2))
+    q2.append(promedioQuarter(KPIS, "kpi_esfuerzo", 2))
+    q2.append(promedioQuarter(KPIS, "kpi_valor", 2))
+    # Q3
+    q3.append(promedioQuarter(KPIS, "kpi_total", 3))
+    q3.append(promedioQuarter(KPIS, "kpi_lealtad", 3))
+    q3.append(promedioQuarter(KPIS, "kpi_satisfaccion", 3))
+    q3.append(promedioQuarter(KPIS, "kpi_esfuerzo", 3))
+    q3.append(promedioQuarter(KPIS, "kpi_valor", 3))
+    # Q4
+    q4.append(promedioQuarter(KPIS, "kpi_total", 4))
+    q4.append(promedioQuarter(KPIS, "kpi_lealtad", 4))
+    q4.append(promedioQuarter(KPIS, "kpi_satisfaccion", 4))
+    q4.append(promedioQuarter(KPIS, "kpi_esfuerzo", 4))
+    q4.append(promedioQuarter(KPIS, "kpi_valor", 4))
+    return q1, q2, q3, q4
+
+#Promedio Qi Reporte General
+def testReporteGeneral(consul, cdc, pc):
+    #Contador
+    cont = 3     #Es 3 porque hay 3 reportes
+    avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor = 0, 0, 0, 0, 0
+    
+    #Check Vacio
+    if(consul[0] == ''):   #Si no hay datos de ese reporte para ese trimestre
+        consul = [0, 0, 0, 0, 0]
+        cont = cont -1
+        
+    if(cdc[0] == ''):      #Si no hay datos de ese reporte para ese trimestre
+        cdc = [0, 0, 0, 0, 0]
+        cont = cont -1
+        
+    if(pc[0] == ''):       #Si no hay datos de ese reporte para ese trimestre
+        pc = [0, 0, 0, 0, 0]
+        cont = cont -1
+    
+    #Verificar divisin entre 0
+    if(cont > 0):
+        avg_general      = (consul[0] + cdc[0] + pc[0]) / cont
+        avg_esfuerzo     = (consul[1] + cdc[1] + pc[1]) / cont 
+        avg_satisfaccion = (consul[2] + cdc[2] + pc[2]) / cont
+        avg_lealtad      = (consul[3] + cdc[3] + pc[3]) / cont
+        avg_valor        = (consul[4] + cdc[4] + pc[4]) / cont
+    
+    return avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor
 
 #Delta KPI Qi vs KPI Qi-1
 def deltaKPI(kpis_client, trimestre_input):
