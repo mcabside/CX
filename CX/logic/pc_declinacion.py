@@ -2,30 +2,30 @@ from   flask import request, render_template
 from   firebase_admin import firestore
 import json
 import plotly
-from CX.static.questions.pc_satisfaccion_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
+from CX.static.questions.pc_declinacion_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
 from CX import app
-from CX.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas, deltaKPI
+from CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas, deltaKPI
 
-#Carga Respuestas Proceso comercial Satisfacción
-def cargaRespuestasPCS(db, Year,Trimestre, results, found_list):
+#Carga Respuestas Proceso comercial declinación
+def cargaRespuestasPCD(db, Year,Trimestre, results, found_list,area):
     
     #Cargar respuesta para un trimestre en particular
-    query_trimestre = db.collection('PCS_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
+    query_trimestre = db.collection('PCD_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
         
     #Verificar si ya se ingreso el archivo
     if len(query_trimestre)>0:
         print("ya se ingreso el archivo")
                 
     else:
-        PC_Respuestas_Ref = db.collection("PCS_Respuestas")
+        PC_Respuestas_Ref = db.collection("PCD_Respuestas")
         carga_preguntas(results, PC_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor)
-        PC_KPI_Ref        = db.collection("PCS_KPIS")
+        PC_KPI_Ref        = db.collection("PCD_KPIS")
         found_set         = set(found_list)
         found_list_unique = list(found_set)
         
         for cliente in found_list_unique:
             kpi_esfuerzo, kpi_satisfaccion, kpi_lealtad, kpi_valor, numero_de_respuestas = 0, 0, 0, 0, 0
-            query_kpi = db.collection('PCS_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where('NOMBRE_DE_LA_EMPRESA__CLIENTE_', '==', cliente).get()
+            query_kpi = db.collection('PCD_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where('NOMBRE_DE_LA_EMPRESA__CLIENTE_', '==', cliente).get()
             
             for doc in query_kpi:
                 kpi_esfuerzo     += (float(doc.to_dict()['kpi_esfuerzo']))
@@ -43,8 +43,8 @@ def cargaRespuestasPCS(db, Year,Trimestre, results, found_list):
             carga_kpi(cliente,PC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total) 
 
 #Chart Page
-@app.route('/chart_pcs', methods=['GET', 'POST'])
-def chart_pcs():
+@app.route('/chart_pcd', methods=['GET', 'POST'])
+def chart_pcd():
     
     # Variables
     kpi_clients = None
@@ -56,7 +56,7 @@ def chart_pcs():
     
     #Conexion con la DB - KPI's CDC
     db = firestore.client()
-    PC_KPIS = db.collection('PCS_KPIS').get()
+    PC_KPIS = db.collection('PCD_KPIS').get()
     
     #Guardar Listas Trimestres y años de la DB
     Trimestres, Years, lista_clientes = saveSelectData(PC_KPIS)
@@ -76,7 +76,7 @@ def chart_pcs():
     if cliente_input is None or cliente_input=="Todos":
         
         #Nota: Se necesitan que esten ordenados?
-        kpi_clients = db.collection('PCS_KPIS').order_by("Cliente").get()  #where('Trimestre','==',int(trimestre_input))
+        kpi_clients = db.collection('PCD_KPIS').order_by("Cliente").get()  #where('Trimestre','==',int(trimestre_input))
         
         #Tabla dinamica
         kpi_q1, kpi_q2, kpi_q3, kpi_q4 = tablaDinamica(kpi_clients)
@@ -92,7 +92,7 @@ def chart_pcs():
     #Show speedmeter  
     else:
         #GET ALL KPI's CDC FROM A SPECIFIC YEAR ALL Q
-        kpis_client = db.collection('PCS_KPIS').where('Year','==',int(year_input)).where('Cliente','==',cliente_input).get()
+        kpis_client = db.collection('PCD_KPIS').where('Year','==',int(year_input)).where('Cliente','==',cliente_input).get()
         
         #KPI's CDC FROM A SPECIFIC Q
         kpi_client, kpi_delta = deltaKPI(kpis_client, trimestre_input)
@@ -139,7 +139,7 @@ def chart_pcs():
                            kpi_q3 = kpi_q3, 
                            kpi_q4 = kpi_q4,
                            list_avg_kpi = list_avg_kpi,
-                           area = "Proceso Comercial Satisfacción",
+                           area = "Proceso Comercial Declinación",
                            year=year_input)
     
     

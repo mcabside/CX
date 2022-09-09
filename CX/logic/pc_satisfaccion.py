@@ -2,31 +2,30 @@ from   flask import request, render_template
 from   firebase_admin import firestore
 import json
 import plotly
-from CX.static.questions.consultoria_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
+from CX.static.questions.pc_satisfaccion_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
 from CX import app
-from CX.functions import deltaKPI, saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas, deltaKPI
+from CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas, deltaKPI
 
-#Carga Respuestas CDC
-def cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list, area):
+#Carga Respuestas Proceso comercial Satisfacción
+def cargaRespuestasPCS(db, Year,Trimestre, results, found_list):
     
     #Cargar respuesta para un trimestre en particular
-    query_trimestre = db.collection('Consultoria_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
+    query_trimestre = db.collection('PCS_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
         
     #Verificar si ya se ingreso el archivo
     if len(query_trimestre)>0:
         print("ya se ingreso el archivo")
                 
     else:
-        Consultoria_Respuestas_Ref = db.collection("Consultoria_Respuestas")
-        carga_preguntas(results, Consultoria_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor,area)
-        Consultoria_KPI_Ref       = db.collection("Consultoria_KPIS")
+        PC_Respuestas_Ref = db.collection("PCS_Respuestas")
+        carga_preguntas(results, PC_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor)
+        PC_KPI_Ref        = db.collection("PCS_KPIS")
         found_set         = set(found_list)
         found_list_unique = list(found_set)
         
-        
         for cliente in found_list_unique:
             kpi_esfuerzo, kpi_satisfaccion, kpi_lealtad, kpi_valor, numero_de_respuestas = 0, 0, 0, 0, 0
-            query_kpi = db.collection('Consultoria_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where("Nombre_de_la_empresa_a_la_que_pertenece", '==', cliente).get()
+            query_kpi = db.collection('PCS_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where('NOMBRE_DE_LA_EMPRESA__CLIENTE_', '==', cliente).get()
             
             for doc in query_kpi:
                 kpi_esfuerzo     += (float(doc.to_dict()['kpi_esfuerzo']))
@@ -41,12 +40,11 @@ def cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list, area):
             kpi_valor        = round(kpi_valor/numero_de_respuestas,2)
             kpi_total        = round((kpi_esfuerzo*0.20) + (kpi_satisfaccion*0.35) + (kpi_lealtad*0.35) + (kpi_valor*0.10), 2)
             
-            carga_kpi(cliente,Consultoria_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total) 
-
+            carga_kpi(cliente,PC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total) 
 
 #Chart Page
-@app.route('/chart_consultoria', methods=['GET', 'POST'])
-def chart_consultoria():
+@app.route('/chart_pcs', methods=['GET', 'POST'])
+def chart_pcs():
     
     # Variables
     kpi_clients = None
@@ -58,10 +56,10 @@ def chart_consultoria():
     
     #Conexion con la DB - KPI's CDC
     db = firestore.client()
-    Consultoria_KPIS = db.collection('Consultoria_KPIS').get()
+    PC_KPIS = db.collection('PCS_KPIS').get()
     
     #Guardar Listas Trimestres y años de la DB
-    Trimestres, Years, lista_clientes = saveSelectData(Consultoria_KPIS)
+    Trimestres, Years, lista_clientes = saveSelectData(PC_KPIS)
     
     #Guardar Parametros URL
     trimestre_input = (request.args.get('trimestre_input'))
@@ -78,7 +76,7 @@ def chart_consultoria():
     if cliente_input is None or cliente_input=="Todos":
         
         #Nota: Se necesitan que esten ordenados?
-        kpi_clients = db.collection('Consultoria_KPIS').order_by("Cliente").get()  #where('Trimestre','==',int(trimestre_input))
+        kpi_clients = db.collection('PCS_KPIS').order_by("Cliente").get()  #where('Trimestre','==',int(trimestre_input))
         
         #Tabla dinamica
         kpi_q1, kpi_q2, kpi_q3, kpi_q4 = tablaDinamica(kpi_clients)
@@ -94,21 +92,21 @@ def chart_consultoria():
     #Show speedmeter  
     else:
         #GET ALL KPI's CDC FROM A SPECIFIC YEAR ALL Q
-        kpis_client = db.collection('Consultoria_KPIS').where('Year','==',int(year_input)).where('Cliente','==',cliente_input).get()
+        kpis_client = db.collection('PCS_KPIS').where('Year','==',int(year_input)).where('Cliente','==',cliente_input).get()
         
         #KPI's CDC FROM A SPECIFIC Q
         kpi_client, kpi_delta = deltaKPI(kpis_client, trimestre_input)
         
         #ONLY ONE CLIENT
         cliente_unico = True
-    
+                    
         #SHOW GRAFICOS          
         if len(kpi_client) > 0:
             kpi_total = float(kpi_client[0].to_dict()["kpi_total"])
             client    = kpi_client[0].to_dict()
-                        
+            
             if(len(kpi_delta) > 0):
-                delta = kpi_delta[0].to_dict()
+                delta = kpi_delta[0].to_dict() 
                 fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", float(client["kpi_esfuerzo"]),7.1, 8.2, "20%", delta['kpi_esfuerzo'])
                 fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", float(client["kpi_satisfaccion"]), 7.4, 8.5, "35%", delta['kpi_satisfaccion'])
                 fig_lealtad      = speedmeter("Net Promoter Score (NPS)", float(client["kpi_lealtad"]), 6.9, 9,"35%", delta['kpi_lealtad'])
@@ -140,8 +138,8 @@ def chart_consultoria():
                            kpi_q2 = kpi_q2, 
                            kpi_q3 = kpi_q3, 
                            kpi_q4 = kpi_q4,
-                           list_avg_kpi=list_avg_kpi,
-                           area = "Consultoria",
+                           list_avg_kpi = list_avg_kpi,
+                           area = "Proceso Comercial Satisfacción",
                            year=year_input)
     
     

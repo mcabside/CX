@@ -4,7 +4,7 @@ from   firebase_admin import firestore
 import json
 import plotly
 from CX import app
-from CX.functions import reporteGeneral, speedmeter, testReporteGeneral
+from CX.logic.functions import reporteGeneral, speedmeter, testReporteGeneral
 
 #Chart Page
 @app.route('/chart_general', methods=['GET', 'POST'])

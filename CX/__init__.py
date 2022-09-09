@@ -6,7 +6,7 @@ from   werkzeug.utils import secure_filename
 import os
 import pandas as pd
 import math
-from   CX.functions import mappingValues,SearchClients
+from   CX.logic.functions import mappingValues,SearchClients
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
@@ -144,14 +144,14 @@ def SaveClients():
         else:
             print("no es json")
             
-from CX.cdc import cargaRespuestasCDC
+from CX.logic.cdc import cargaRespuestasCDC
 
-from CX.consultoria import cargaRespuestasConsultoria
+from CX.logic.consultoria import cargaRespuestasConsultoria
 
-from CX.pc_satisfaccion import cargaRespuestasPCS
+from CX.logic.pc_satisfaccion import cargaRespuestasPCS
 
-from CX.pc_declinacion import cargaRespuestasPCD
+from CX.logic.pc_declinacion import cargaRespuestasPCD
 
-from CX.general import reporteGeneral
+from CX.logic.general import reporteGeneral
 
-from CX.delete import delete
+from CX.logic.delete import delete
