@@ -2,9 +2,9 @@ from   flask import request, render_template
 from   firebase_admin import firestore
 import json
 import plotly
-from CX.static.questions.pc_satisfaccion_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
-from CX import app
-from CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas, deltaKPI
+from   CX.static.questions.pc_satisfaccion_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
+from   CX import app
+from   CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas, deltaKPI
 
 #Carga Respuestas Proceso comercial Satisfacción
 def cargaRespuestasPCS(db, Year,Trimestre, results, found_list):

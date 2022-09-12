@@ -1,8 +1,6 @@
 from   flask import request, render_template,redirect,url_for
 from   firebase_admin import firestore
-import json
-import plotly
-from CX import app
+from   CX import app
 
 def delete_collection(coll_ref, batch_size):
     docs = coll_ref.limit(batch_size).stream()

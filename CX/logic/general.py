@@ -1,10 +1,9 @@
-from tkinter.tix import Tree
 from   flask import request, render_template
 from   firebase_admin import firestore
 import json
 import plotly
-from CX import app
-from CX.logic.functions import reporteGeneral, speedmeter, testReporteGeneral
+from   CX import app
+from   CX.logic.functions import reporteGeneral, speedmeter, testReporteGeneral
 
 #Chart Page
 @app.route('/chart_general', methods=['GET', 'POST'])
