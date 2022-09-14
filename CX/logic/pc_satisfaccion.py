@@ -107,15 +107,15 @@ def chart_pcs():
             
             if(len(kpi_delta) > 0):
                 delta = kpi_delta[0].to_dict() 
-                fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", float(client["kpi_esfuerzo"]),7.1, 8.2, "20%", delta['kpi_esfuerzo'])
-                fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", float(client["kpi_satisfaccion"]), 7.4, 8.5, "35%", delta['kpi_satisfaccion'])
-                fig_lealtad      = speedmeter("Net Promoter Score (NPS)", float(client["kpi_lealtad"]), 6.9, 9,"35%", delta['kpi_lealtad'])
-                fig_valor        = speedmeter("Valor Añadido (VA)",  float(client["kpi_valor"]), 6.4, 7.5, "10%", delta['kpi_valor'])
+                fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", client["kpi_esfuerzo"],7.1, 8.2, "20%", delta['kpi_esfuerzo'])
+                fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", client["kpi_satisfaccion"], 7.4, 8.5, "35%", delta['kpi_satisfaccion'])
+                fig_lealtad      = speedmeter("Net Promoter Score (NPS)", client["kpi_lealtad"], 6.9, 9,"35%", delta['kpi_lealtad'])
+                fig_valor        = speedmeter("Valor Añadido (VA)",  client["kpi_valor"], 6.4, 7.5, "10%", delta['kpi_valor'])
             else:
-                fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", float(client["kpi_esfuerzo"]),7.1, 8.2, "20%")
-                fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", float(client["kpi_satisfaccion"]), 7.4, 8.5, "35%")
-                fig_lealtad      = speedmeter("Net Promoter Score (NPS)", float(client["kpi_lealtad"]), 6.9, 9,"35%")
-                fig_valor        = speedmeter("Valor Añadido (VA)",  float(client["kpi_valor"]), 6.4, 7.5, "10%")
+                fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", client["kpi_esfuerzo"],7.1, 8.2, "20%")
+                fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", client["kpi_satisfaccion"], 7.4, 8.5, "35%")
+                fig_lealtad      = speedmeter("Net Promoter Score (NPS)", client["kpi_lealtad"], 6.9, 9,"35%")
+                fig_valor        = speedmeter("Valor Añadido (VA)",  client["kpi_valor"], 6.4, 7.5, "10%")
                 
             graphJSON_esfuerzo     = json.dumps(fig_esfuerzo,     cls=plotly.utils.PlotlyJSONEncoder)
             graphJSON_satisfaccion = json.dumps(fig_satisfaccion, cls=plotly.utils.PlotlyJSONEncoder)

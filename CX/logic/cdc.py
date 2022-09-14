@@ -4,7 +4,7 @@ import json
 import plotly
 from   CX.static.questions.cdc_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
 from   CX import app
-from   CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas, deltaKPI
+from   CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas, deltaKPI, getRangosyPonderaciones
 
 #Carga Respuestas CDC
 def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
@@ -106,19 +106,25 @@ def chart_cdc():
             kpi_total = float(kpi_client[0].to_dict()["kpi_total"])
             client    = kpi_client[0].to_dict()
             
-            #flash('Viva Chavez')
+            #Rangos y ponderaciones
+            config = db.collection('Rangos_Ponderaciones').where('year','==',int(year_input)).get()
+            
+            #Recuperar rangos y ponderaciones desde Firebase
+            kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
+               
+            #flash('Test')
             
             if(len(kpi_delta) > 0):
                 delta = kpi_delta[0].to_dict()
-                fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", float(client["kpi_esfuerzo"]),7.1, 8.2, "20%", delta['kpi_esfuerzo'])
-                fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", float(client["kpi_satisfaccion"]), 7.4, 8.5, "35%", delta['kpi_satisfaccion'])
-                fig_lealtad      = speedmeter("Net Promoter Score (NPS)", float(client["kpi_lealtad"]), 6.9, 9,"35%", delta['kpi_lealtad'])
-                fig_valor        = speedmeter("Valor Añadido (VA)",  float(client["kpi_valor"]), 6.4, 7.5, "10%", delta['kpi_valor'])
+                fig_esfuerzo     = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  str(kpi_ces['ponderacion']*100)+"%",  delta['kpi_esfuerzo'])
+                fig_satisfaccion = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], str(kpi_csat['ponderacion']*100)+"%", delta['kpi_satisfaccion'])
+                fig_lealtad      = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  str(kpi_nps['ponderacion']*100)+"%",  delta['kpi_lealtad'])
+                fig_valor        = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   str(kpi_va['ponderacion']*100)+"%",   delta['kpi_valor'])
             else:
-                fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", float(client["kpi_esfuerzo"]),7.1, 8.2, "20%")
-                fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", float(client["kpi_satisfaccion"]), 7.4, 8.5, "35%")
-                fig_lealtad      = speedmeter("Net Promoter Score (NPS)", float(client["kpi_lealtad"]), 6.9, 9,"35%")
-                fig_valor        = speedmeter("Valor Añadido (VA)",  float(client["kpi_valor"]), 6.4, 7.5, "10%")
+                fig_esfuerzo     = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  str(kpi_ces['ponderacion']*100)+"%")
+                fig_satisfaccion = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], str(kpi_csat['ponderacion']*100)+"%")
+                fig_lealtad      = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  str(kpi_nps['ponderacion']*100)+"%")
+                fig_valor        = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   str(kpi_va['ponderacion']*100)+"%")
             
             graphJSON_esfuerzo     = json.dumps(fig_esfuerzo,     cls=plotly.utils.PlotlyJSONEncoder)
             graphJSON_satisfaccion = json.dumps(fig_satisfaccion, cls=plotly.utils.PlotlyJSONEncoder)

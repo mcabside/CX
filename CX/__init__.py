@@ -82,12 +82,10 @@ def upload_file():
             area = request.form.get('area')
             
             if(str(area) == "CDC"):
-                #print(str(area))
                 cargaRespuestasCDC(db, Year, Trimestre, results, found_list)
                 return redirect(url_for('chart_cdc'))
             
             elif str(area) == "Consultoria Corta" or str(area) =="Consultoria Larga":
-                #print(str(area))
                 cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list, area)
                 return redirect(url_for('chart_consultoria'))
             
@@ -155,3 +153,5 @@ from CX.logic.pc_declinacion import cargaRespuestasPCD
 from CX.logic.general import reporteGeneral
 
 from CX.logic.delete import delete
+
+from CX.logic.config import config_ranges_pond

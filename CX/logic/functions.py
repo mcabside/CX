@@ -5,6 +5,28 @@ import plotly.graph_objects as go
 from   plotly.graph_objs import *
 from   datetime import date
 
+
+#Recuperar rangos y ponderaciones desde Firebase
+def getRangosyPonderaciones(config):
+    print("config")
+    print(len(config))
+
+    for i in config:
+        aux = i.to_dict()
+        if aux['kpi_name'] == "Net Promoter Score (NPS)":
+            kpi_nps = aux
+            
+        elif(aux['kpi_name'] == "Customer Satisfaction Score (CSAT)"):
+            kpi_csat = aux
+           
+        elif(aux['kpi_name'] == "Valor Añadido (VA)"):
+            kpi_va = aux
+          
+        elif(aux['kpi_name'] == "Customer Effort Score (CES)"):
+            kpi_ces = aux
+            
+    return kpi_nps, kpi_csat, kpi_va, kpi_ces
+    
 def reporteGeneral(KPIS):
     # Variables
     q1, q2, q3, q4 = [], [], [], []
@@ -84,7 +106,7 @@ def deltaKPI(kpis_client, trimestre_input):
 def speedmeter(title, value, red, green, porcentaje, delta=None):
     fig_total = go.Figure(go.Indicator(
             domain = {'x': [0, 1], 'y': [0, 1]},
-            value = value,
+            value = float(value),
             mode = "gauge+number+delta",
             title = {'text': title , 'font': {'size': 16}},
             delta = {'reference': delta},

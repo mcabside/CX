@@ -44,7 +44,7 @@ def chart_general():
         avg_general_q3, avg_lealtad_q3, avg_satisfaccion_q3, avg_esfuerzo_q3, avg_valor_q3 = testReporteGeneral(c_q3, cdc_q3, pc_q3)   
         avg_general_q4, avg_lealtad_q4, avg_satisfaccion_q4, avg_esfuerzo_q4, avg_valor_q4 = testReporteGeneral(c_q4, cdc_q4, pc_q4)
 
-        #Vacio
+        #Trimestres vacios
         if(avg_general_q1 == 0):
             cont = cont - 1
         if(avg_general_q2 == 0):
