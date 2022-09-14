@@ -142,6 +142,56 @@ def SaveClients():
         else:
             print("no es json")
             
+@app.route('/SaveKPISPercents',methods=["GET", "POST"]) 
+def SaveKPISPercents():
+    
+    if request.method == 'POST':
+        
+        db = firestore.client()
+        Kpis_Ref = db.collection("Rangos_Ponderaciones")
+        
+        if request.is_json:
+
+            output  = request.json
+            output2 = json.dumps(output)
+            result  = json.loads(output2) #this converts the json output to a python dictionary
+
+            print(result)
+            
+            Kpis_Ref.add({
+                        'kpi_name': "Net Promoter Score (NPS)",
+                        'min': result[0]['min_nps'],
+                        'max': result[0]['max_nps'],
+                        'ponderacion': result[0]['ponde_nps'],
+                        'fecha':result[0]['dateInput']
+                    })
+            Kpis_Ref.add({
+                        'kpi_name': "Customer Satisfaction Score (CSAT)",
+                        'min': result[0]['min_csat'],
+                        'max': result[0]['max_csat'],
+                        'ponderacion': result[0]['ponde_csat'],
+                        'fecha':result[0]['dateInput']
+                    })
+            Kpis_Ref.add({
+                        'kpi_name': "Valor Añadido (VA)",
+                        'min': result[0]['min_va'],
+                        'max': result[0]['max_va'],
+                        'ponderacion': result[0]['ponde_va'],
+                        'fecha':result[0]['dateInput']
+                    })
+            Kpis_Ref.add({
+                        'kpi_name': "Customer Effort Score (CES)",
+                        'min': result[0]['min_ces'],
+                        'max': result[0]['max_ces'],
+                        'ponderacion': result[0]['ponde_ces'],
+                        'fecha':result[0]['dateInput']
+                    })
+            
+            return jsonify(success=True)        
+            
+        else:
+            print("no es json")
+            
 from CX.logic.cdc import cargaRespuestasCDC
 
 from CX.logic.consultoria import cargaRespuestasConsultoria
