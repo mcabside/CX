@@ -122,7 +122,7 @@ def speedmeter(title, value, red, green, porcentaje, delta=None):
                    plot_bgcolor='rgba(0,0,0,0)',                   
                    margin=dict(l=25, r=25, t=0, b=0),
                    annotations=[{'x': 0.5, 'y':0.25
-                                      ,'text': porcentaje
+                                      ,'text':str(porcentaje*100)+"%"
                                       ,'font': { 'color': "hsl(36, 100%, 50%)", 'size': 25, 'family': "Open Sans"}
                                       ,'showarrow':False, 'xanchor':'center' }]),
             )
