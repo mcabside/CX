@@ -4,7 +4,8 @@ import json
 import plotly
 from   CX.static.questions.cdc_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
 from   CX import app
-from   CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas, deltaKPI, getRangosyPonderaciones
+from   CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
+from   CX.logic.functions import carga_kpi, carga_preguntas, deltaKPI, getRangosyPonderaciones, filtrarxyear
 
 #Carga Respuestas CDC
 def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
@@ -26,7 +27,15 @@ def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
         
         for cliente in found_list_unique:
             kpi_esfuerzo, kpi_satisfaccion, kpi_lealtad, kpi_valor, numero_de_respuestas = 0, 0, 0, 0, 0
+           
+            #Firebare
             query_kpi = db.collection('CDC_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where("Nombre_de_la_empresa_a_la_que_pertenece", '==', cliente).get()
+            
+            #Rangos y ponderaciones
+            config = db.collection('Rangos_Ponderaciones').where('year','==',int(Year)).get()
+            
+            #Recuperar rangos y ponderaciones desde Firebase
+            kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
             
             for doc in query_kpi:
                 kpi_esfuerzo         += (float(doc.to_dict()['kpi_esfuerzo']))
@@ -39,7 +48,7 @@ def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
             kpi_satisfaccion = round(kpi_satisfaccion/numero_de_respuestas,2)
             kpi_lealtad      = round(kpi_lealtad/numero_de_respuestas,2)
             kpi_valor        = round(kpi_valor/numero_de_respuestas,2)
-            kpi_total        = round((kpi_esfuerzo*0.20) + (kpi_satisfaccion*0.35) + (kpi_lealtad*0.35) + (kpi_valor*0.10), 2)
+            kpi_total        = round((kpi_esfuerzo*(kpi_ces['ponderacion']/100)) + (kpi_satisfaccion*(kpi_csat['ponderacion']/100)) + (kpi_lealtad*(kpi_nps['ponderacion']/100)) + (kpi_valor*(kpi_va['ponderacion']/100)), 2)
             
             carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total) 
 
@@ -77,7 +86,10 @@ def chart_cdc():
     if cliente_input is None or cliente_input=="Todos":
         
         #Nota: Se necesitan que esten ordenados?
-        kpi_clients = db.collection('CDC_KPIS').order_by("Cliente").get()  #where('Trimestre','==',int(trimestre_input))
+        kpi_clients = db.collection('CDC_KPIS').order_by("Cliente").get() 
+      
+        #Filtrar por año
+        kpi_clients = filtrarxyear(kpi_clients, int(year_input))        
         
         #Tabla dinamica
         kpi_q1, kpi_q2, kpi_q3, kpi_q4 = tablaDinamica(kpi_clients)
@@ -149,4 +161,4 @@ def chart_cdc():
                            kpi_q4 = kpi_q4,
                            list_avg_kpi = list_avg_kpi,
                            area = "CDC",
-                           year=year_input)
+                           year=int(year_input))

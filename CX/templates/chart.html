@@ -31,7 +31,11 @@
         <div class="col-sm-3">   
           <select id="year_input" name="year_input" class="form-select" >
            {% for Year in Years %}
-            <option value="{{Year}}" >{{ Year}}</option>
+              {% if Year == year %}
+                <option value="{{Year}}"  selected="selected"> {{ Year}} </option>
+              {% else %}
+                <option value="{{Year}}"> {{ Year}} </option> 
+              {% endif %}
            {% endfor %}   
            </select>
         </div>
@@ -170,7 +174,7 @@
       <div class="container"> 
         <div class="row">
           <div class="col">
-            <h1 class="text-center align-self-center">Reporte {{area}} - Q{{trimestre_input}} {{year_input}}</h1>
+            <h1 class="text-center align-self-center">Reporte {{area}} - Q{{trimestre_input}}/{{year}}</h1>
           </div>
           <!--<div class="col col-lg-1">
             <img src="/static/img/innovation_logo.png" class="img-thumbnail" alt="...">

@@ -5,6 +5,13 @@ import plotly.graph_objects as go
 from   plotly.graph_objs import *
 from   datetime import date
 
+#FiltrarKPIxAño
+def filtrarxyear(kpi_clients, year_input):
+    aux = [] 
+    for i in kpi_clients:
+            if(i.to_dict()['Year'] == year_input):
+                aux.append(i)
+    return aux
 
 #Recuperar rangos y ponderaciones desde Firebase
 def getRangosyPonderaciones(config):
@@ -122,7 +129,7 @@ def speedmeter(title, value, red, green, porcentaje, delta=None):
                    plot_bgcolor='rgba(0,0,0,0)',                   
                    margin=dict(l=25, r=25, t=0, b=0),
                    annotations=[{'x': 0.5, 'y':0.25
-                                      ,'text':str(porcentaje*100)+"%"
+                                      ,'text':str(porcentaje)+"%"
                                       ,'font': { 'color': "hsl(36, 100%, 50%)", 'size': 25, 'family': "Open Sans"}
                                       ,'showarrow':False, 'xanchor':'center' }]),
             )
@@ -295,15 +302,15 @@ def carga_preguntas(dataframe,Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,P
         
 def carga_kpi(cliente,Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total):
     Ref.add({
-                        'Cliente': cliente,
-                        'Trimestre': Trimestre,
-                        'Year': Year,
-                        'kpi_esfuerzo':kpi_esfuerzo,
-                        'kpi_lealtad':kpi_lealtad,
-                        'kpi_valor':kpi_valor,
-                        'kpi_satisfaccion':kpi_satisfaccion,
-                        'kpi_total':kpi_total
-                    })
+                'Cliente': cliente,
+                'Trimestre': Trimestre,
+                'Year': Year,
+                'kpi_esfuerzo':kpi_esfuerzo,
+                'kpi_lealtad':kpi_lealtad,
+                'kpi_valor':kpi_valor,
+                'kpi_satisfaccion':kpi_satisfaccion,
+                'kpi_total':kpi_total
+         })
     
 def mappingValues(results):# no se verifica aun si hay espacios o mayusculas
     results.replace(["No satisfecho","Ningún Valor","En Desacuerdo","No Satisfecho","En Desacuerdo	","Ningún Valor","Muy Malo","Muy insatisfecho","MUY MALO","1 . MUY MALO","1.MUY MALO","1. No es Profesional"],2,inplace=True) 

@@ -4,7 +4,8 @@ import json
 import plotly
 from   CX.static.questions.pc_declinacion_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
 from   CX import app
-from   CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros, carga_kpi, carga_preguntas, deltaKPI, getRangosyPonderaciones
+from   CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
+from   CX.logic.functions import carga_kpi, carga_preguntas, deltaKPI, getRangosyPonderaciones, filtrarxyear
 
 #Carga Respuestas Proceso comercial declinación
 def cargaRespuestasPCD(db, Year,Trimestre, results, found_list,area):
@@ -78,6 +79,9 @@ def chart_pcd():
         #Nota: Se necesitan que esten ordenados?
         kpi_clients = db.collection('PCD_KPIS').order_by("Cliente").get()  #where('Trimestre','==',int(trimestre_input))
         
+        #Filtrar por año
+        kpi_clients = filtrarxyear(kpi_clients, int(year_input))      
+        
         #Tabla dinamica
         kpi_q1, kpi_q2, kpi_q3, kpi_q4 = tablaDinamica(kpi_clients)
         
@@ -148,7 +152,7 @@ def chart_pcd():
                            kpi_q4 = kpi_q4,
                            list_avg_kpi = list_avg_kpi,
                            area = "Proceso Comercial Declinación",
-                           year=year_input)
+                           year=int(year_input))
     
     
 
