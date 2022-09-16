@@ -89,8 +89,8 @@ def chart_pcd():
         for i in range(4):
             list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_valor', i+1))
             list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_satisfaccion', i+1))
-            list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_esfuerzo', i+1))
             list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_lealtad', i+1))
+            list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_esfuerzo', i+1))
             list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_total', i+1))
     
     #Show speedmeter  

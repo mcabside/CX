@@ -5,6 +5,47 @@ import plotly.graph_objects as go
 from   plotly.graph_objs import *
 from   datetime import date
 
+#Add Kpi rango y ponderaciones
+def addKPIRange(Kpis_Ref, name, min, max, pond, fecha):
+     Kpis_Ref.add({
+        'kpi_name': name,
+        'min': min,
+        'max': max,
+        'ponderacion': pond,
+        'fecha': fecha,
+        'year': int(fecha[:4])
+    })
+
+#Update Kpi rango y ponderaciones
+def updateKPIRange(Kpis_Ref, kpi_q, result):
+    for i in kpi_q:
+        id = i.id
+        if(i.to_dict()['kpi_name'] == "Customer Effort Score (CES)"):
+            Kpis_Ref.document(id).update({
+                'min': result[0]['min_ces'],
+                'max': result[0]['max_ces'],
+                'ponderacion': result[0]['ponde_ces']
+            })
+        elif(i.to_dict()['kpi_name'] == "Net Promoter Score (NPS)"):
+            Kpis_Ref.document(id).update({
+                'min': result[0]['min_nps'],
+                'max': result[0]['max_nps'],
+                'ponderacion': result[0]['ponde_nps']
+            })
+        elif(i.to_dict()['kpi_name'] == "Customer Satisfaction Score (CSAT)"):
+            Kpis_Ref.document(id).update({
+                'min': result[0]['min_csat'],
+                'max': result[0]['max_csat'],
+                'ponderacion': result[0]['ponde_csat']
+            })
+        elif(i.to_dict()['kpi_name'] == "Valor Añadido (VA)"):
+            Kpis_Ref.document(id).update({
+                'min': result[0]['min_va'],
+                'max': result[0]['max_va'],
+                'ponderacion': result[0]['ponde_va']
+                        })
+           
+     
 #FiltrarKPIxAño
 def filtrarxyear(kpi_clients, year_input):
     aux = [] 
