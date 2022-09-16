@@ -1,9 +1,9 @@
-from   os import remove
 import pandas as pd
 import json
 import plotly.graph_objects as go
 from   plotly.graph_objs import *
 from   datetime import date
+from   flask import flash
 
 #Add Kpi rango y ponderaciones
 def addKPIRange(Kpis_Ref, name, min, max, pond, fecha):
@@ -339,16 +339,19 @@ def carga_preguntas(dataframe,Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,P
             
         
 def carga_kpi(cliente,Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total):
-    Ref.add({
-                'Cliente': cliente,
-                'Trimestre': Trimestre,
-                'Year': Year,
-                'kpi_esfuerzo':kpi_esfuerzo,
-                'kpi_lealtad':kpi_lealtad,
-                'kpi_valor':kpi_valor,
-                'kpi_satisfaccion':kpi_satisfaccion,
-                'kpi_total':kpi_total
-         })
+    try:
+        Ref.add({
+                    'Cliente': cliente,
+                    'Trimestre': Trimestre,
+                    'Year': Year,
+                    'kpi_esfuerzo':kpi_esfuerzo,
+                    'kpi_lealtad':kpi_lealtad,
+                    'kpi_valor':kpi_valor,
+                    'kpi_satisfaccion':kpi_satisfaccion,
+                    'kpi_total':kpi_total
+            })
+    except:
+        flash("Error al cargar KPI's", "error")
     
 def mappingValues(results):# no se verifica aun si hay espacios o mayusculas
     results.replace(["No satisfecho","Ningún Valor","En Desacuerdo","No Satisfecho","En Desacuerdo	","Ningún Valor","Muy Malo","Muy insatisfecho","MUY MALO","1 . MUY MALO","1.MUY MALO","1. No es Profesional"],2,inplace=True) 

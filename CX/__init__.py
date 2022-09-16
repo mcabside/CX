@@ -41,13 +41,12 @@ def upload_file():
             flash("Debe ingresar un archivo", 'error')
             return redirect(request.url)
         
-        file = request.files['file']
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename.
-        if file.filename == '':
+        file = request.files['file']        # If the user does not select a file, the browser submits an
+        if file.filename == '':             # empty file without a filename.
             flash('Debe ingresar un archivo', 'error')
             return redirect(request.url)
         
+        #
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
@@ -57,54 +56,55 @@ def upload_file():
         not_found_list, found_list, lista_clientes = [], [], []
         
         #Firebase
-        db = firestore.client()
-        Clientes_Data = db.collection("Clientes").get()
-        for doc in Clientes_Data:
-            lista_clientes.append(doc.to_dict()['Cliente'])
+        try:
             
-        #Sort clients
-        lista_clientes.sort()
+            #Check clients
+            db = firestore.client()
+            Clientes_Data = db.collection("Clientes").get()
+            for doc in Clientes_Data:
+                lista_clientes.append(doc.to_dict()['Cliente'])
+                
+            #Sort clients
+            lista_clientes.sort()
+           
+            #Get trimestre from file
+            Trimestre = math.ceil(int(str(results.loc[0,"Marca temporal"])[5:7])/3)
+            
+            #Get trimestre from year
+            Year = int(str(results.loc[0,"Marca temporal"])[0:4])
+            
+            #verify client in DB
+            found_list,not_found_list,results = SearchClients(results,not_found_list,found_list,Clientes_Data)
         
-        #Get trimestre from file
-        Trimestre = math.ceil(int(str(results.loc[0,"Marca temporal"])[5:7])/3)
-        
-        #Get trimestre from year
-        Year = int(str(results.loc[0,"Marca temporal"])[0:4])
-        
-        #verify client in DB
-        print(results)
-        found_list,not_found_list,results = SearchClients(results,not_found_list,found_list,Clientes_Data)
-        print(found_list)
-        print(not_found_list)
-        
-        #Si vacio        
-        if len(not_found_list) == 0:
-            
-            #Get area
-            area = request.form.get('area')
-            
-            if(str(area) == "CDC"):
-                cargaRespuestasCDC(db, Year, Trimestre, results, found_list)
-                return redirect(url_for('chart_cdc'))
-            
-            elif str(area) == "Consultoria Corta" or str(area) =="Consultoria Larga":
-                cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list, area)
-                return redirect(url_for('chart_consultoria'))
-            
-            elif str(area) == "Proceso Comercial Satisfacción":
-                cargaRespuestasPCS(db, Year,Trimestre, results, found_list)
-                return redirect(url_for('chart_pcs'))
-            
-            elif str(area) == "Proceso Comercial Declinación":
-                cargaRespuestasPCD(db, Year,Trimestre, results, found_list,area)
-                return redirect(url_for('chart_pcd'))
-            
+            #Si vacio        
+            if len(not_found_list) == 0:
+                                
+                #Get area
+                area = request.form.get('area')
+                
+                if(str(area) == "CDC"):
+                    cargaRespuestasCDC(db, Year, Trimestre, results, found_list)
+                    return redirect(url_for('chart_cdc'))
+                
+                elif str(area) == "Consultoria Corta" or str(area) =="Consultoria Larga":
+                    cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list, area)
+                    return redirect(url_for('chart_consultoria'))
+                
+                elif str(area) == "Proceso Comercial Satisfacción":
+                    cargaRespuestasPCS(db, Year,Trimestre, results, found_list)
+                    return redirect(url_for('chart_pcs'))
+                
+                elif str(area) == "Proceso Comercial Declinación":
+                    cargaRespuestasPCD(db, Year,Trimestre, results, found_list,area)
+                    return redirect(url_for('chart_pcd'))
+                
             else:
-                return redirect(url_for('upload_file'))
-            
-        else:
-             return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
-
+                flash("No se han encontrado estos cliente en la base de datos", 'info')
+                return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
+                        
+        except:
+            flash("Error al cargar el archivo",'error')
+       
     return render_template('upload_file.html')
 
 #SAVE NEW CLIENTS IN FIREBASE
@@ -123,6 +123,7 @@ def SaveClients():
             result  = json.loads(output2) #this converts the json output to a python dictionary
 
             lista_agregados = []
+            
             for cliente in result:
                 
                 if cliente['Es_nuevo'] == "True" and cliente['Input'] not in lista_agregados : 
@@ -154,23 +155,28 @@ def SaveKPISPercents():
         
         if request.is_json:
 
-            output  = request.json
-            output2 = json.dumps(output)
-            result  = json.loads(output2) #this converts the json output to a python dictionary
+            output2 = json.dumps(request.json)
+            result  = json.loads(output2)       #this converts the json output to a python dictionary
             
-            #Check
+            #Check if exists KPI ranges
             kpi_q = db.collection('Rangos_Ponderaciones').where('year', '==', int(result[0]['dateInput'][:4])).get()
             
-            if(len(kpi_q) == 0):
-                addKPIRange(Kpis_Ref, "Net Promoter Score (NPS)", result[0]['min_nps'], result[0]['max_nps'], result[0]['ponde_nps'], result[0]['dateInput'])
-                addKPIRange(Kpis_Ref, "Customer Satisfaction Score (CSAT)", result[0]['min_csat'], result[0]['max_csat'], result[0]['ponde_csat'], result[0]['dateInput'])
-                addKPIRange(Kpis_Ref, "Valor Añadido (VA)", result[0]['min_va'], result[0]['max_va'], result[0]['ponde_va'], result[0]['dateInput'])
-                addKPIRange(Kpis_Ref, "Customer Effort Score (CES)", result[0]['min_ces'], result[0]['max_ces'], result[0]['ponde_ces'], result[0]['dateInput'])
-            else:
-                # Actualizar campos
-                updateKPIRange(Kpis_Ref, kpi_q, result)
+            try:
+                if(len(kpi_q) == 0):
+                    #Agregar KPI
+                    addKPIRange(Kpis_Ref, "Net Promoter Score (NPS)", result[0]['min_nps'], result[0]['max_nps'], result[0]['ponde_nps'], result[0]['dateInput'])
+                    addKPIRange(Kpis_Ref, "Customer Satisfaction Score (CSAT)", result[0]['min_csat'], result[0]['max_csat'], result[0]['ponde_csat'], result[0]['dateInput'])
+                    addKPIRange(Kpis_Ref, "Valor Añadido (VA)", result[0]['min_va'], result[0]['max_va'], result[0]['ponde_va'], result[0]['dateInput'])
+                    addKPIRange(Kpis_Ref, "Customer Effort Score (CES)", result[0]['min_ces'], result[0]['max_ces'], result[0]['ponde_ces'], result[0]['dateInput'])
+                else:
+                    # Actualizar campos
+                    updateKPIRange(Kpis_Ref, kpi_q, result)
+                    
+                flash("Información cargada correctamente", 'success')
                 
-            flash("Información cargada correctamente", 'success')
+            except:
+                flash("Error al actualizar/agregar rangos y ponderaciones")
+           
             return jsonify(success=True)        
             
         else:
