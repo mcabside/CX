@@ -41,70 +41,75 @@ def upload_file():
             flash("Debe ingresar un archivo", 'error')
             return redirect(request.url)
         
-        file = request.files['file']        # If the user does not select a file, the browser submits an
-        if file.filename == '':             # empty file without a filename.
+        # If the user does not select a file, the browser submits an
+        file = request.files['file']                  
+        
+        # Empty file without a filename.
+        if file.filename == '':                         
             flash('Debe ingresar un archivo', 'error')
             return redirect(request.url)
         
-        #
+        # Verificar si existe el archivo y si tiene el formato correcto
         if file and allowed_file(file.filename):
+            
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            results = pd.read_excel(UPLOAD_FOLDER + "\\" + filename)
-            results = mappingValues(results) 
+            results  = pd.read_excel(UPLOAD_FOLDER + "\\" + filename)
+            results  = mappingValues(results)
             
-        not_found_list, found_list, lista_clientes = [], [], []
+            #Variables aux
+            not_found_list, found_list, lista_clientes = [], [], []
         
-        #Firebase
-        try:
+            #Firebase
+            try:
+                #Check clients
+                db = firestore.client()
+                Clientes_Data = db.collection("Clientes").get()
+                for doc in Clientes_Data:
+                    lista_clientes.append(doc.to_dict()['Cliente'])
+                    
+                #Sort clients list
+                lista_clientes.sort()
             
-            #Check clients
-            db = firestore.client()
-            Clientes_Data = db.collection("Clientes").get()
-            for doc in Clientes_Data:
-                lista_clientes.append(doc.to_dict()['Cliente'])
+                #Get trimestre and year from file
+                Trimestre = math.ceil(int(str(results.loc[0,"Marca temporal"])[5:7])/3)
+                Year      = int(str(results.loc[0,"Marca temporal"])[0:4])
                 
-            #Sort clients
-            lista_clientes.sort()
-           
-            #Get trimestre from file
-            Trimestre = math.ceil(int(str(results.loc[0,"Marca temporal"])[5:7])/3)
+                #verify client in DB
+                found_list, not_found_list, results = SearchClients(results,not_found_list,found_list,Clientes_Data)
             
-            #Get trimestre from year
-            Year = int(str(results.loc[0,"Marca temporal"])[0:4])
-            
-            #verify client in DB
-            found_list,not_found_list,results = SearchClients(results,not_found_list,found_list,Clientes_Data)
+                #Si se consiguen todos los clientes        
+                if len(not_found_list) == 0:
+                                    
+                    #Get area
+                    area = request.form.get('area')
+                    
+                    if(str(area) == "CDC"):
+                        cargaRespuestasCDC(db, Year, Trimestre, results, found_list)
+                        return redirect(url_for('chart_cdc'))
+                    
+                    elif str(area) == "Consultoria Corta" or str(area) =="Consultoria Larga":
+                        cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list, area)
+                        return redirect(url_for('chart_consultoria'))
+                    
+                    elif str(area) == "Proceso Comercial Satisfacción":
+                        cargaRespuestasPCS(db, Year,Trimestre, results, found_list)
+                        return redirect(url_for('chart_pcs'))
+                    
+                    elif str(area) == "Proceso Comercial Declinación":
+                        cargaRespuestasPCD(db, Year,Trimestre, results, found_list,area)
+                        return redirect(url_for('chart_pcd'))
+                    
+                else:
+                    flash("No se han encontrado estos cliente en la base de datos", 'info')
+                    return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
+                            
+            except:
+                flash("Error al cargar el archivo",'error')
         
-            #Si vacio        
-            if len(not_found_list) == 0:
-                                
-                #Get area
-                area = request.form.get('area')
-                
-                if(str(area) == "CDC"):
-                    cargaRespuestasCDC(db, Year, Trimestre, results, found_list)
-                    return redirect(url_for('chart_cdc'))
-                
-                elif str(area) == "Consultoria Corta" or str(area) =="Consultoria Larga":
-                    cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list, area)
-                    return redirect(url_for('chart_consultoria'))
-                
-                elif str(area) == "Proceso Comercial Satisfacción":
-                    cargaRespuestasPCS(db, Year,Trimestre, results, found_list)
-                    return redirect(url_for('chart_pcs'))
-                
-                elif str(area) == "Proceso Comercial Declinación":
-                    cargaRespuestasPCD(db, Year,Trimestre, results, found_list,area)
-                    return redirect(url_for('chart_pcd'))
-                
-            else:
-                flash("No se han encontrado estos cliente en la base de datos", 'info')
-                return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
-                        
-        except:
-            flash("Error al cargar el archivo",'error')
-       
+        else:
+            flash("Error formato del archivo erroneo", "error") 
+            
     return render_template('upload_file.html')
 
 #SAVE NEW CLIENTS IN FIREBASE
@@ -113,38 +118,41 @@ def SaveClients():
     
     if request.method == 'POST':
         
-        db = firestore.client()
-        Clientes_Ref = db.collection("Clientes")
-        
-        if request.is_json:
-
-            output  = request.json
-            output2 = json.dumps(output)
-            result  = json.loads(output2) #this converts the json output to a python dictionary
-
-            lista_agregados = []
+        try:
+            db = firestore.client()
+            Clientes_Ref = db.collection("Clientes")
             
-            for cliente in result:
+            if request.is_json:
+
+                output2 = json.dumps(request.json)
+                result  = json.loads(output2) #this converts the json output to a python dictionary
+
+                lista_agregados = []
                 
-                if cliente['Es_nuevo'] == "True" and cliente['Input'] not in lista_agregados : 
-                    Clientes_Ref.add({
-                        'Cliente': cliente['Input'],
-                        'Encuestas': [cliente['Excel']]
-                    })
-                    lista_agregados.append(cliente['Input'])
-                else:
-                    docs = Clientes_Ref.where("Cliente","==", cliente['Input']).get()
-                    for doc in docs:
-                        id = doc.id
-                        array = doc.to_dict()['Encuestas']
-                        array.append(cliente['Excel'])
-                    Clientes_Ref.document(id).update({'Encuestas':array})
+                for cliente in result:
                     
-            return jsonify(success=True)        
-            
-        else:
-            flash("Error en el formato del archivo", 'error')
-            
+                    if cliente['Es_nuevo'] == "True" and cliente['Input'] not in lista_agregados : 
+                        Clientes_Ref.add({
+                            'Cliente': cliente['Input'],
+                            'Encuestas': [cliente['Excel']]
+                        })
+                        lista_agregados.append(cliente['Input'])
+                    else:
+                        docs = Clientes_Ref.where("Cliente","==", cliente['Input']).get()
+                        for doc in docs:
+                            id = doc.id
+                            array = doc.to_dict()['Encuestas']
+                            array.append(cliente['Excel'])
+                        Clientes_Ref.document(id).update({'Encuestas':array})
+                        
+                return jsonify(success=True)        
+                
+            else:
+                flash("Error en el formato del archivo", 'error')
+        except:
+            flash("Error al cargar los clientes","error")
+           
+#Save KPI's and Percents
 @app.route('/SaveKPISPercents',methods=["GET", "POST"]) 
 def SaveKPISPercents():
     

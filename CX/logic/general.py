@@ -73,24 +73,24 @@ def chart_general():
     if(avg_general != 0):
          hayDatos = True
          
-    fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", avg_esfuerzo,7.1, 8.2, "20%")
-    fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", avg_satisfaccion, 7.4, 8.5, "35%")
-    fig_lealtad      = speedmeter("Net Promoter Score (NPS)", avg_lealtad, 6.9, 9,"35%")
-    fig_valor        = speedmeter("Valor Añadido (VA)",  avg_valor, 6.4, 7.5, "10%")
+    fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", avg_esfuerzo,7.1, 8.2, "20")
+    fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", avg_satisfaccion, 7.4, 8.5, "35")
+    fig_lealtad      = speedmeter("Net Promoter Score (NPS)", avg_lealtad, 6.9, 9,"35")
+    fig_valor        = speedmeter("Valor Añadido (VA)",  avg_valor, 6.4, 7.5, "10")
 
-    graphJSON_esfuerzo     = json.dumps(fig_esfuerzo,     cls=plotly.utils.PlotlyJSONEncoder)
-    graphJSON_satisfaccion = json.dumps(fig_satisfaccion, cls=plotly.utils.PlotlyJSONEncoder)
-    graphJSON_lealtad      = json.dumps(fig_lealtad,      cls=plotly.utils.PlotlyJSONEncoder)
-    graphJSON_valor        = json.dumps(fig_valor,        cls=plotly.utils.PlotlyJSONEncoder)
+    graph_esfuerzo     = json.dumps(fig_esfuerzo,     cls=plotly.utils.PlotlyJSONEncoder)
+    graph_satisfaccion = json.dumps(fig_satisfaccion, cls=plotly.utils.PlotlyJSONEncoder)
+    graph_lealtad      = json.dumps(fig_lealtad,      cls=plotly.utils.PlotlyJSONEncoder)
+    graph_valor        = json.dumps(fig_valor,        cls=plotly.utils.PlotlyJSONEncoder)
                 
     return render_template('general.html', 
                            kpi_total=round(avg_general, 2), 
                            trimestre = trimestre,
                            year = year,
-                           graphJSON_esfuerzo     = graphJSON_esfuerzo,
-                           graphJSON_satisfaccion = graphJSON_satisfaccion,
-                           graphJSON_lealtad      = graphJSON_lealtad,
-                           graphJSON_valor        = graphJSON_valor,
+                           graphJSON_esfuerzo     = graph_esfuerzo,
+                           graphJSON_satisfaccion = graph_satisfaccion,
+                           graphJSON_lealtad      = graph_lealtad,
+                           graphJSON_valor        = graph_valor,
                            hayDatos = hayDatos)
     
     
