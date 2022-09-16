@@ -7,8 +7,10 @@ import os
 import pandas as pd
 import math
 from   CX.logic.functions import mappingValues, SearchClients, addKPIRange, updateKPIRange
+from   flask_toastr import Toastr
 
 app = Flask(__name__)
+toastr = Toastr(app)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 #Credenciales Firebase
@@ -25,25 +27,25 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
             
-#Home Page
+#Home Page / upload file page
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     
     if request.method == "GET":
-        return render_template('home.html')
+        return render_template('upload_file.html')
     
     if request.method == 'POST':
         
         # check if the post request has the file part
         if 'file' not in request.files:
-            flash('No file part')
+            flash("Debe ingresar un archivo", 'error')
             return redirect(request.url)
         
         file = request.files['file']
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
         if file.filename == '':
-            flash('No selected file')
+            flash('Debe ingresar un archivo', 'error')
             return redirect(request.url)
         
         if file and allowed_file(file.filename):
@@ -103,7 +105,7 @@ def upload_file():
         else:
              return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
 
-    return render_template('home.html')
+    return render_template('upload_file.html')
 
 #SAVE NEW CLIENTS IN FIREBASE
 @app.route('/SaveClients',methods=["GET", "POST"]) 
@@ -140,7 +142,7 @@ def SaveClients():
             return jsonify(success=True)        
             
         else:
-            print("no es json")
+            flash("Error en el formato del archivo", 'error')
             
 @app.route('/SaveKPISPercents',methods=["GET", "POST"]) 
 def SaveKPISPercents():
@@ -168,10 +170,11 @@ def SaveKPISPercents():
                 # Actualizar campos
                 updateKPIRange(Kpis_Ref, kpi_q, result)
                 
+            flash("Información cargada correctamente", 'success')
             return jsonify(success=True)        
             
         else:
-            print("No es json")
+            flash("Error en el formato del archivo", 'error')
             
 from CX.logic.cdc import cargaRespuestasCDC
 

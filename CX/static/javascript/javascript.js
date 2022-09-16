@@ -34,9 +34,9 @@ function submitfunc(list){
             console.log("success",response)
             goHome();
           },
-          error: function(err) {
+        error: function(err) {
             console.log("error",err);
-          }
+        }
         
     });
     
@@ -77,18 +77,13 @@ function validarkpipond(){
     
     var dateInput = document.getElementById('date_kpi');
 
-    
-
-
-    if((ponde_nps + ponde_csat + ponde_va +  ponde_ces != 100) || (max_ces<=min_ces) || (max_va<=min_va) || (max_csat<=min_csat) || (max_nps<=min_nps) || (!dateInput.value)){
+    if((ponde_nps + ponde_csat + ponde_va +  ponde_ces != 100) || (max_ces<=min_ces) || (max_va<=min_va) || 
+    (max_csat<=min_csat) || (max_nps<=min_nps) || (!dateInput.value)){
         document.getElementById("boton_kpis").disabled = true;
     }else{
         document.getElementById("boton_kpis").disabled = false;
     }
-
-
 }
-
 
 function submitfunckpi(){
 

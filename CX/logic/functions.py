@@ -56,9 +56,6 @@ def filtrarxyear(kpi_clients, year_input):
 
 #Recuperar rangos y ponderaciones desde Firebase
 def getRangosyPonderaciones(config):
-    print("config")
-    print(len(config))
-
     for i in config:
         aux = i.to_dict()
         if aux['kpi_name'] == "Net Promoter Score (NPS)":
@@ -392,11 +389,9 @@ def SearchClients(results,not_found_list,found_list,Clientes_Data):
                             results[columna_cliente] = results[columna_cliente].replace([row[columna_cliente]],Nombre_Cliente) 
                             break
             if Found:
-                print("ENTRO EN TRUE")
                 found_list.append(Nombre_Cliente)
                 print("se encontro : " + Nombre_Cliente)
             else:
-                print("ENTRO EN FALSE")
                 print(Nombre_Cliente)
                 not_found_list.append(Nombre_Cliente)
                 print("no se encontro : " + Nombre_Cliente)

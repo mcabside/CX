@@ -15,8 +15,7 @@ def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
     
     #Verificar si ya se ingreso el archivo
     if len(query_trimestre)>0:
-        flash('Ya se ingreso el archivo')
-        print("ya se ingreso el archivo")
+        flash('Ya se ingreso el archivo', 'error')
                 
     else:
         CDC_Respuestas_Ref = db.collection("CDC_Respuestas")
@@ -55,7 +54,7 @@ def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
 #Chart Page
 @app.route('/chart_cdc', methods=['GET', 'POST'])
 def chart_cdc():
-    
+        
     # Variables
     kpi_clients = None
     kpi_q1, kpi_q2, kpi_q3, kpi_q4 = [], [], [], []
@@ -123,9 +122,7 @@ def chart_cdc():
             
             #Recuperar rangos y ponderaciones desde Firebase
             kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
-               
-            #flash('Test')
-            
+                           
             if(len(kpi_delta) > 0):
                 delta = kpi_delta[0].to_dict()
                 fig_esfuerzo     = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'],  delta['kpi_esfuerzo'])
