@@ -143,3 +143,9 @@ function submitfunckpi(){
     });
     
 }
+
+//Show Loader
+function hidden_func() {
+    document.getElementById("loading").style.display = 'block';
+    document.getElementById("div_form").style.display = 'none';
+}

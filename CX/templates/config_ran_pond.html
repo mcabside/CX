@@ -6,70 +6,81 @@
 </head>
 <br>
 
-<h1 class="text-center align-self-center">Configurar rangos y ponderaciones</h1>
+    <div id="div_form">
 
-<br>
+        <h1 class="text-center align-self-center">Configurar rangos y ponderaciones</h1>
 
-<div style="align-items:center;justify-content:center;display:flex">
-      
-    <form method="post" class="row gy-2 gx-3 align-items-center">
+        <br>
+
+        <div style="align-items:center;justify-content:center;display:flex">
             
-        <div style="margin: auto; width: 70% !important;">
+            <form method="post" class="row gy-2 gx-3 align-items-center">
+                    
+                <div style="margin: auto; width: 70% !important;">
 
-            <div class="col"> 
-                <input type="date" id="date_kpi" name="date_kpi" oninput="validarkpipond()">
-            </div>
+                    <div class="col"> 
+                        <input type="date" id="date_kpi" name="date_kpi" oninput="validarkpipond()">
+                    </div>
 
-            <table class="table table-striped" style=" border: 1px solid grey; border-collapse: collapse; border-radius:10px">
-        
-                <thead class="thead-dark">
-                    <tr>
-                        <th scope="col">KPI</th>
-                        <th scope="col">Valor Min Amarillo</th>
-                        <th scope="col">Valor Max Amarillo</th>
-                        <th scope="col">Ponderacion (%)</th>
-                    </tr>
-
-                </thead>
-            
-                <tbody>
+                    <table class="table table-striped" style=" border: 1px solid grey; border-collapse: collapse; border-radius:10px">
                 
-                <tr>
-                    <td style="width: 35%"> Net Promoter Score (NPS)</td>
-                    <td><input type="number" value="6.0" step="0.1" min="1" max="10" id="min_nps" oninput="validarkpipond()"></td>
-                    <td><input type="number" value="8.0" step="0.1" min="1" max="10" id="max_nps" oninput="validarkpipond()"></td>
-                    <td><input type="number" value="25" step="1" min="1" max="100" id="ponde_nps" oninput="validarkpipond()"></td>
-                </tr>
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col">KPI</th>
+                                <th scope="col">Valor Min Amarillo</th>
+                                <th scope="col">Valor Max Amarillo</th>
+                                <th scope="col">Ponderacion (%)</th>
+                            </tr>
 
-                <tr>
-                    <td style="width: 35%">Customer Satisfaction Score (CSAT)</td>
-                    <td><input type="number" value="6.0" step="0.1" min="1" max="10" id="min_csat" oninput="validarkpipond()"></td>
-                    <td><input type="number" value="8.0" step="0.1" min="1" max="10" id="max_csat" oninput="validarkpipond()"></td>
-                    <td><input type="number" value="25" step="1" min="1" max="100" id="ponde_csat" oninput="validarkpipond()"></td>
-                </tr>
+                        </thead>
+                    
+                        <tbody>
+                        
+                        <tr>
+                            <td style="width: 35%"> Net Promoter Score (NPS)</td>
+                            <td><input type="number" value="6.0" step="0.1" min="1" max="10" id="min_nps" oninput="validarkpipond()"></td>
+                            <td><input type="number" value="8.0" step="0.1" min="1" max="10" id="max_nps" oninput="validarkpipond()"></td>
+                            <td><input type="number" value="25" step="1" min="1" max="100" id="ponde_nps" oninput="validarkpipond()"></td>
+                        </tr>
 
-                <tr>
-                    <td style="width: 35%"> Valor Añadido (VA)</td>
-                    <td><input type="number" value="6.0" step="0.1" min="1" max="10" id="min_va" oninput="validarkpipond()"></td>
-                    <td><input type="number" value="8.0" step="0.1" min="1" max="10" id="max_va" oninput="validarkpipond()"></td>
-                    <td><input type="number" value="25" step="1" min="1" max="100" id="ponde_va" oninput="validarkpipond()"></td>
-                </tr>
+                        <tr>
+                            <td style="width: 35%">Customer Satisfaction Score (CSAT)</td>
+                            <td><input type="number" value="6.0" step="0.1" min="1" max="10" id="min_csat" oninput="validarkpipond()"></td>
+                            <td><input type="number" value="8.0" step="0.1" min="1" max="10" id="max_csat" oninput="validarkpipond()"></td>
+                            <td><input type="number" value="25" step="1" min="1" max="100" id="ponde_csat" oninput="validarkpipond()"></td>
+                        </tr>
 
-                <tr>
-                    <td style="width: 35%"> Customer Effort Score (CES)</td>
-                    <td><input type="number" value="6.0" step="0.1" min="1" max="10" id="min_ces" oninput="validarkpipond()"></td>
-                    <td><input type="number" value="8.0" step="0.1" min="1" max="10" id="max_ces" oninput="validarkpipond()"></td>
-                    <td><input type="number" value="25" step="1" min="1" max="100" id="ponde_ces" oninput="validarkpipond()"></td>
-                </tr>
+                        <tr>
+                            <td style="width: 35%"> Valor Añadido (VA)</td>
+                            <td><input type="number" value="6.0" step="0.1" min="1" max="10" id="min_va" oninput="validarkpipond()"></td>
+                            <td><input type="number" value="8.0" step="0.1" min="1" max="10" id="max_va" oninput="validarkpipond()"></td>
+                            <td><input type="number" value="25" step="1" min="1" max="100" id="ponde_va" oninput="validarkpipond()"></td>
+                        </tr>
+
+                        <tr>
+                            <td style="width: 35%"> Customer Effort Score (CES)</td>
+                            <td><input type="number" value="6.0" step="0.1" min="1" max="10" id="min_ces" oninput="validarkpipond()"></td>
+                            <td><input type="number" value="8.0" step="0.1" min="1" max="10" id="max_ces" oninput="validarkpipond()"></td>
+                            <td><input type="number" value="25" step="1" min="1" max="100" id="ponde_ces" oninput="validarkpipond()"></td>
+                        </tr>
+                        
+                        </tbody>   
+                    
+                    </table>
+                        
+                    <button id="boton_kpis" type="button" style="float:right" class="btn btn-dark btn-lg" onclick="hidden_func(); submitfunckpi()" disabled>Ingresar Ponderaciones KPIS</button>
                 
-                </tbody>   
-            
-            </table>
-                
-            <button id="boton_kpis" type="button" style="float:right" class="btn btn-dark btn-lg" onclick="submitfunckpi()" disabled>Ingresar Ponderaciones KPIS</button>
-        
+                </div>
+            </form>
         </div>
-    </form>
-  </div>
+    </div>
+
+    <div class="center" id="loading" style="display:none;">
+        <h4 class="text-center align-self-center">Cargando la información..</h4>
+        <div class="lds-roller" style="left: 50%;transform: translate(-50%);">
+        <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+        <p class="text-center align-self-center">Por favor espere...</p>
+    </div>
 
 {% endblock %}
