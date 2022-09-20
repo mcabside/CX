@@ -62,7 +62,7 @@ def chart_cdc():
         kpi_clients = None
         kpi_q1, kpi_q2, kpi_q3, kpi_q4,  Trimestres, Years, lista_clientes = [], [], [], [], [], [], []
         kpi_total = 0
-        cliente_unico, graph_esfuerzo, graph_satisfaccion, graph_lealtad, graph_valor = False, False, False, False, False
+        cliente_unico, graph_esfuerzo, graph_satisfaccion, graph_lealtad, graph_valor,imagen_cliente = False, False, False, False, False,False
         
         #Conexion con la DB - KPI's CDC
         db = firestore.client()
@@ -106,6 +106,10 @@ def chart_cdc():
         else:
             #GET ALL KPI's CDC FROM A SPECIFIC YEAR ALL Q
             kpis_client = db.collection('CDC_KPIS').where('Year','==',int(year_input)).where('Cliente','==',cliente_input).get()
+            
+            #GET Cliente IMAGE
+            Cliente = db.collection('Clientes').where('Cliente','==',cliente_input).get()
+            imagen_cliente = Cliente[0].to_dict()["Imagen"]
             
             #KPI's CDC FROM A SPECIFIC Q
             kpi_client, kpi_delta = deltaKPI(kpis_client, trimestre_input)
@@ -155,6 +159,7 @@ def chart_cdc():
                            graphJSON_satisfaccion = graph_satisfaccion,
                            graphJSON_lealtad      = graph_lealtad,
                            graphJSON_valor        = graph_valor,
+                           imagen_cliente = imagen_cliente,
                            kpi_q1 = kpi_q1, 
                            kpi_q2 = kpi_q2, 
                            kpi_q3 = kpi_q3, 
