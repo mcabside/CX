@@ -46,10 +46,6 @@ function goHome(){
     window.location.href="http://127.0.0.1:5000/"
 }
 
-function carga() {
-    document.getElementById("area").value
-}
-
 function changeSelect(){
     var cliente_input = document.getElementById("cliente_input").value
     if(cliente_input != "Todos")

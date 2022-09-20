@@ -101,8 +101,8 @@ def reporteGeneral(KPIS):
     q4.append(promedioQuarter(KPIS, "kpi_valor", 4))
     return q1, q2, q3, q4
 
-#Promedio Qi Reporte General
-def testReporteGeneral(consul, cdc, pc):
+#Table Reporte General
+def tablaReporteGeneral(consul, cdc, pc):
     #Contador
     cont = 3     #Es 3 porque hay 3 reportes
     avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor = 0, 0, 0, 0, 0
@@ -267,7 +267,7 @@ def validarParametros(trimestre_input, year_input, Trimestres, Years):
             year_input = int(date.today().year)
     return trimestre_input, year_input
     
-    
+#Cargar preguntas en Firebase
 def carga_preguntas(dataframe,Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor,area=False):
     lista_data = []
     for row in range(len(dataframe)):
@@ -337,7 +337,7 @@ def carga_preguntas(dataframe,Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,P
         #print(respuesta)
         Respuestas_Ref.add(json.loads(respuesta))
             
-        
+#Cargar KPI's en firebase    
 def carga_kpi(cliente,Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total):
     try:
         Ref.add({
@@ -352,7 +352,8 @@ def carga_kpi(cliente,Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealt
             })
     except:
         flash("Error al cargar KPI's", "error")
-    
+        
+#Reemplazar valores de los archivos planos por valores numericos    
 def mappingValues(results):# no se verifica aun si hay espacios o mayusculas
     results.replace(["No satisfecho","Ningún Valor","En Desacuerdo","No Satisfecho","En Desacuerdo	","Ningún Valor","Muy Malo","Muy insatisfecho","MUY MALO","1 . MUY MALO","1.MUY MALO","1. No es Profesional"],2,inplace=True) 
     results.replace(["Baja Satisfacción","Poco Valor","Casi Nunca","Poco Valor","Malo","Insatisfecho","MALO","2. MALO","2.MALO","2. No muy Profesional"],4,inplace=True)
@@ -361,6 +362,7 @@ def mappingValues(results):# no se verifica aun si hay espacios o mayusculas
     results.replace(["Supera las Expectativas","Muy satisfecho","Muy Satisfecho","MUY BUENO","5.MUY BUENO"],10,inplace=True)
     return results
 
+#Buscar clientes en Firebase
 def SearchClients(results,not_found_list,found_list,Clientes_Data):
     columna_cliente =""
     if "Nombre de la empresa a la que pertenece" in results.columns:

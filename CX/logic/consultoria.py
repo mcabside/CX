@@ -10,44 +10,55 @@ from   CX.logic.functions import carga_kpi, carga_preguntas, deltaKPI, getRangos
 #Carga Respuestas CDC
 def cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list, area):
     
-    #Cargar respuesta para un trimestre en particular
-    query_trimestre = db.collection('Consultoria_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
-        
-    #Verificar si ya se ingreso el archivo
-    if len(query_trimestre)>0:
-        print("ya se ingreso el archivo")
-                
-    else:
-        Consultoria_Respuestas_Ref = db.collection("Consultoria_Respuestas")
-        carga_preguntas(results, Consultoria_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor,area)
-        Consultoria_KPI_Ref       = db.collection("Consultoria_KPIS")
-        found_set         = set(found_list)
-        found_list_unique = list(found_set)
-        
-        
-        for cliente in found_list_unique:
-            kpi_esfuerzo, kpi_satisfaccion, kpi_lealtad, kpi_valor, numero_de_respuestas = 0, 0, 0, 0, 0
-            query_kpi = db.collection('Consultoria_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where("Nombre_de_la_empresa_a_la_que_pertenece", '==', cliente).get()
+    try:
+        #Cargar respuesta para un trimestre en particular
+        query_trimestre = db.collection('Consultoria_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
             
-            for doc in query_kpi:
-                kpi_esfuerzo     += (float(doc.to_dict()['kpi_esfuerzo']))
-                kpi_satisfaccion += (float(doc.to_dict()['kpi_satisfaccion']))
-                kpi_lealtad      += (float(doc.to_dict()['kpi_lealtad']))
-                kpi_valor        += (float(doc.to_dict()['kpi_valor']))
-                numero_de_respuestas += 1
-                
-            kpi_esfuerzo     = round(kpi_esfuerzo/numero_de_respuestas, 2)
-            kpi_satisfaccion = round(kpi_satisfaccion/numero_de_respuestas,2)
-            kpi_lealtad      = round(kpi_lealtad/numero_de_respuestas,2)
-            kpi_valor        = round(kpi_valor/numero_de_respuestas,2)
-            kpi_total        = round((kpi_esfuerzo*0.20) + (kpi_satisfaccion*0.35) + (kpi_lealtad*0.35) + (kpi_valor*0.10), 2)
+        #Verificar si ya se ingreso el archivo
+        if len(query_trimestre)>0:
+            print("ya se ingreso el archivo")
+                    
+        else:
+            Consultoria_Respuestas_Ref = db.collection("Consultoria_Respuestas")
+            carga_preguntas(results, Consultoria_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor,area)
+            Consultoria_KPI_Ref       = db.collection("Consultoria_KPIS")
+            found_set         = set(found_list)
+            found_list_unique = list(found_set)
             
-            carga_kpi(cliente,Consultoria_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total) 
-
+            for cliente in found_list_unique:
+                
+                kpi_esfuerzo, kpi_satisfaccion, kpi_lealtad, kpi_valor, numero_de_respuestas = 0, 0, 0, 0, 0
+                
+                #Firebase
+                query_kpi = db.collection('Consultoria_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where("Nombre_de_la_empresa_a_la_que_pertenece", '==', cliente).get()
+                
+                #Rangos y ponderaciones
+                config = db.collection('Rangos_Ponderaciones').where('year','==',int(Year)).get()
+                    
+                #Recuperar rangos y ponderaciones desde Firebase
+                kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
+                
+                for doc in query_kpi:
+                    kpi_esfuerzo     += (float(doc.to_dict()['kpi_esfuerzo']))
+                    kpi_satisfaccion += (float(doc.to_dict()['kpi_satisfaccion']))
+                    kpi_lealtad      += (float(doc.to_dict()['kpi_lealtad']))
+                    kpi_valor        += (float(doc.to_dict()['kpi_valor']))
+                    numero_de_respuestas += 1
+                    
+                kpi_esfuerzo     = round(kpi_esfuerzo/numero_de_respuestas, 2)
+                kpi_satisfaccion = round(kpi_satisfaccion/numero_de_respuestas,2)
+                kpi_lealtad      = round(kpi_lealtad/numero_de_respuestas,2)
+                kpi_valor        = round(kpi_valor/numero_de_respuestas,2)
+                kpi_total        = round((kpi_esfuerzo*(kpi_ces['ponderacion']/100)) + (kpi_satisfaccion*(kpi_csat['ponderacion']/100)) + (kpi_lealtad*(kpi_nps['ponderacion']/100)) + (kpi_valor*(kpi_va['ponderacion']/100)), 2)
+        
+                carga_kpi(cliente,Consultoria_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total) 
+    except:
+        flash("Error al carga información consultoria", "error")
 
 #Chart Page
 @app.route('/chart_consultoria', methods=['GET', 'POST'])
 def chart_consultoria():
+    
     try:
         # Variables
         kpi_clients = None
@@ -87,11 +98,11 @@ def chart_consultoria():
             
             #Promedio Q's    
             for i in range(4):
-                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_valor', i+1))
+                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_valor',        i+1))
                 list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_satisfaccion', i+1))
-                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_lealtad', i+1))
-                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_esfuerzo', i+1))
-                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_total', i+1))
+                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_lealtad',      i+1))
+                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_esfuerzo',     i+1))
+                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_total',        i+1))
         
         #Show speedmeter  
         else:

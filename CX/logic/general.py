@@ -3,7 +3,7 @@ from   firebase_admin import firestore
 import json
 import plotly
 from   CX import app
-from   CX.logic.functions import reporteGeneral, speedmeter, testReporteGeneral
+from   CX.logic.functions import reporteGeneral, speedmeter, tablaReporteGeneral, getRangosyPonderaciones
 
 #Chart Page
 @app.route('/chart_general', methods=['GET', 'POST'])
@@ -39,10 +39,10 @@ def chart_general():
     
     if(trimestre == "Todos"):
         cont = 4
-        avg_general_q1, avg_lealtad_q1, avg_satisfaccion_q1, avg_esfuerzo_q1, avg_valor_q1 = testReporteGeneral(c_q1, cdc_q1, pc_q1)    
-        avg_general_q2, avg_lealtad_q2, avg_satisfaccion_q2, avg_esfuerzo_q2, avg_valor_q2 = testReporteGeneral(c_q2, cdc_q2, pc_q2)   
-        avg_general_q3, avg_lealtad_q3, avg_satisfaccion_q3, avg_esfuerzo_q3, avg_valor_q3 = testReporteGeneral(c_q3, cdc_q3, pc_q3)   
-        avg_general_q4, avg_lealtad_q4, avg_satisfaccion_q4, avg_esfuerzo_q4, avg_valor_q4 = testReporteGeneral(c_q4, cdc_q4, pc_q4)
+        avg_general_q1, avg_lealtad_q1, avg_satisfaccion_q1, avg_esfuerzo_q1, avg_valor_q1 = tablaReporteGeneral(c_q1, cdc_q1, pc_q1)    
+        avg_general_q2, avg_lealtad_q2, avg_satisfaccion_q2, avg_esfuerzo_q2, avg_valor_q2 = tablaReporteGeneral(c_q2, cdc_q2, pc_q2)   
+        avg_general_q3, avg_lealtad_q3, avg_satisfaccion_q3, avg_esfuerzo_q3, avg_valor_q3 = tablaReporteGeneral(c_q3, cdc_q3, pc_q3)   
+        avg_general_q4, avg_lealtad_q4, avg_satisfaccion_q4, avg_esfuerzo_q4, avg_valor_q4 = tablaReporteGeneral(c_q4, cdc_q4, pc_q4)
 
         #Trimestres vacios
         if(avg_general_q1 == 0):
@@ -62,22 +62,28 @@ def chart_general():
             avg_valor        = (avg_valor_q1 + avg_valor_q2 + avg_valor_q3 + avg_valor_q4) / cont
           
     elif(trimestre == "Q1"):
-        avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor = testReporteGeneral(c_q1, cdc_q1, pc_q1)           
+        avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor = tablaReporteGeneral(c_q1, cdc_q1, pc_q1)           
     elif(trimestre == "Q2"):
-        avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor = testReporteGeneral(c_q2, cdc_q2, pc_q2)    
+        avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor = tablaReporteGeneral(c_q2, cdc_q2, pc_q2)    
     elif(trimestre == "Q3"):
-        avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor = testReporteGeneral(c_q3, cdc_q3, pc_q3) 
+        avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor = tablaReporteGeneral(c_q3, cdc_q3, pc_q3) 
     elif(trimestre == "Q4"):
-        avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor = testReporteGeneral(c_q4, cdc_q4, pc_q4) 
+        avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor = tablaReporteGeneral(c_q4, cdc_q4, pc_q4) 
         
     if(avg_general != 0):
          hayDatos = True
          
-    fig_esfuerzo     = speedmeter("Customer Effort Score (CES)", avg_esfuerzo,7.1, 8.2, "20")
-    fig_satisfaccion = speedmeter("Customer Satisfaction Score (CSAT)", avg_satisfaccion, 7.4, 8.5, "35")
-    fig_lealtad      = speedmeter("Net Promoter Score (NPS)", avg_lealtad, 6.9, 9,"35")
-    fig_valor        = speedmeter("Valor Añadido (VA)",  avg_valor, 6.4, 7.5, "10")
+    #Rangos y ponderaciones
+    config = db.collection('Rangos_Ponderaciones').where('year','==',int(year)).get()
+    
+    #Recuperar rangos y ponderaciones desde Firebase
+    kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
 
+    fig_esfuerzo     = speedmeter(kpi_ces['kpi_name'],  avg_esfuerzo,     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'])
+    fig_satisfaccion = speedmeter(kpi_csat['kpi_name'], avg_satisfaccion, kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'])
+    fig_lealtad      = speedmeter(kpi_nps['kpi_name'],  avg_lealtad,      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'])
+    fig_valor        = speedmeter(kpi_va['kpi_name'],   avg_valor,        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'])
+                    
     graph_esfuerzo     = json.dumps(fig_esfuerzo,     cls=plotly.utils.PlotlyJSONEncoder)
     graph_satisfaccion = json.dumps(fig_satisfaccion, cls=plotly.utils.PlotlyJSONEncoder)
     graph_lealtad      = json.dumps(fig_lealtad,      cls=plotly.utils.PlotlyJSONEncoder)

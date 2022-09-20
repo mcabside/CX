@@ -59,6 +59,9 @@ def upload_file():
             
             #Variables aux
             not_found_list, found_list, lista_clientes = [], [], []
+            
+            #Message to user (NO FUNCIONA)
+            #flash("Por favor espere se está subiendo la información", "info")
         
             #Firebase
             try:
