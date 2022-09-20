@@ -2,51 +2,39 @@
 
 {% block content %}
       
-    <div class="center">
-    <h1>Cargar Archivo de Resultados</h1>
-    <div >
-        <form method=post enctype=multipart/form-data>
-          
-            <input type=file name=file>
-            
-            <input class="btn btn-primary" type=submit value="Subir Archivo" style="float:right" onsubmit="carga()">
-            <br>
-            <br>
-            <select id="area" name="area" class="form-select">
-                <option value="CDC">CDC</option>
-                <option value="Proceso Comercial Declinación">Proceso Comercial Declinación</option>
-                <option value="Proceso Comercial Satisfacción">Proceso Comercial Satisfacción</option>
-                <option value="Consultoria Corta">Consultoria Corta</option>
-                <option value="Consultoria Larga">Consultoria Larga</option>
-            </select>
-          </form>
+    <div id="div_form" class="center">
 
-                <!-- Modal -->
-<!--
-          <img src="static\img\spinner.png" class="rotate" width="100" height="100" />
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span >&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          ...
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  -->
+      <h1>Cargar Archivo de Resultados</h1>
 
-    </div>
+      <form method=post enctype=multipart/form-data>
         
+          <input type=file name=file>
+          
+          <input class="btn btn-primary" type=submit value="Subir Archivo" style="float:right" onclick="hidden_func()"><br><br>
+          
+          <select id="area" name="area" class="form-select">
+              <option value="CDC">CDC</option>
+              <option value="Proceso Comercial Declinación">Proceso Comercial Declinación</option>
+              <option value="Proceso Comercial Satisfacción">Proceso Comercial Satisfacción</option>
+              <option value="Consultoria Corta">Consultoria Corta</option>
+              <option value="Consultoria Larga">Consultoria Larga</option>
+          </select>
+          
+      </form>
+
     </div>
-    
-    {% endblock %}
+
+    <div class="center" id="loading" style="display:none;">
+        <h4 class="text-center align-self-center">Cargando la información..</h4>
+        <div class="loader"></div>
+        <p class="text-center align-self-center">Por favor espere...</p>
+    </div>
+
+    <script type="text/javascript">
+      function hidden_func() {
+        document.getElementById("loading").style.display = 'block';
+        document.getElementById("div_form").style.display = 'none';
+      }
+    </script>
+       
+{% endblock %}

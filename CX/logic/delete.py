@@ -20,6 +20,10 @@ def delete():
     if request.method == 'POST':
         
         try:
+            
+            #Message to user (no FUNCIONA)
+            #flash("Por favor espere se está borrando la información", "info")
+            
             #Guardar Parametros URL
             trimestre_delete = request.form.get('trimestre_delete')
             year_delete      = request.form.get('year_delete')
@@ -27,7 +31,7 @@ def delete():
             
             db = firestore.client()
         
-            if(str(area_delete) == "CDC"):
+            if  str(area_delete) == "CDC":
                 delete_collection(db.collection('CDC_Respuestas').where('Year', '==',str(year_delete) ).where('Trimestre', '==', str(trimestre_delete)),32)
                 delete_collection(db.collection('CDC_KPIS').where('Year', '==',int(year_delete) ).where('Trimestre', '==', int(trimestre_delete)),32)
                 flash("Se borro " + area_delete + " Q"+ trimestre_delete + " " + year_delete, "success")

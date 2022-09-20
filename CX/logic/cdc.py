@@ -28,7 +28,7 @@ def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
             for cliente in found_list_unique:
                 kpi_esfuerzo, kpi_satisfaccion, kpi_lealtad, kpi_valor, numero_de_respuestas = 0, 0, 0, 0, 0
             
-                #Firebare
+                #Firebase
                 query_kpi = db.collection('CDC_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where("Nombre_de_la_empresa_a_la_que_pertenece", '==', cliente).get()
                 
                 #Rangos y ponderaciones
