@@ -59,10 +59,7 @@ def upload_file():
             
             #Variables aux
             not_found_list, found_list, lista_clientes = [], [], []
-            
-            #Message to user (NO FUNCIONA)
-            #flash("Por favor espere se está subiendo la información", "info")
-        
+                
             #Firebase
             try:
                 #Check clients
@@ -179,12 +176,12 @@ def SaveKPISPercents():
                     addKPIRange(Kpis_Ref, "Customer Satisfaction Score (CSAT)", result[0]['min_csat'], result[0]['max_csat'], result[0]['ponde_csat'], result[0]['dateInput'])
                     addKPIRange(Kpis_Ref, "Valor Añadido (VA)", result[0]['min_va'], result[0]['max_va'], result[0]['ponde_va'], result[0]['dateInput'])
                     addKPIRange(Kpis_Ref, "Customer Effort Score (CES)", result[0]['min_ces'], result[0]['max_ces'], result[0]['ponde_ces'], result[0]['dateInput'])
+                    flash("Información cargada correctamente", 'success')
                 else:
                     # Actualizar campos
                     updateKPIRange(Kpis_Ref, kpi_q, result)
+                    flash("Información actualizada correctamente", 'success')
                     
-                flash("Información cargada correctamente", 'success')
-                
             except:
                 flash("Error al actualizar/agregar rangos y ponderaciones")
            

@@ -16,7 +16,7 @@ def cargaRespuestasPCD(db, Year,Trimestre, results, found_list,area):
             
         #Verificar si ya se ingreso el archivo
         if len(query_trimestre)>0:
-            print("ya se ingreso el archivo")
+            flash('Ya se ingreso el archivo', 'warning')
                     
         else:
             PC_Respuestas_Ref = db.collection("PCD_Respuestas")
@@ -133,20 +133,20 @@ def chart_pcd():
                 
                 if(len(kpi_delta) > 0):
                     delta = kpi_delta[0].to_dict()
-                    fig_esfuerzo     = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'],  delta['kpi_esfuerzo'])
-                    fig_satisfaccion = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'], delta['kpi_satisfaccion'])
-                    fig_lealtad      = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'],  delta['kpi_lealtad'])
-                    fig_valor        = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'],   delta['kpi_valor'])
+                    fig_ces  = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'],  delta['kpi_esfuerzo'])
+                    fig_csat = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'], delta['kpi_satisfaccion'])
+                    fig_nps  = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'],  delta['kpi_lealtad'])
+                    fig_va   = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'],   delta['kpi_valor'])
                 else:
-                    fig_esfuerzo     = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'])
-                    fig_satisfaccion = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'])
-                    fig_lealtad      = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'])
-                    fig_valor        = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'])
+                    fig_ces  = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'])
+                    fig_csat = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'])
+                    fig_nps  = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'])
+                    fig_va   = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'])
                 
-                graph_esfuerzo     = json.dumps(fig_esfuerzo,     cls=plotly.utils.PlotlyJSONEncoder)
-                graph_satisfaccion = json.dumps(fig_satisfaccion, cls=plotly.utils.PlotlyJSONEncoder)
-                graph_lealtad      = json.dumps(fig_lealtad,      cls=plotly.utils.PlotlyJSONEncoder)
-                graph_valor        = json.dumps(fig_valor,        cls=plotly.utils.PlotlyJSONEncoder)
+                graph_esfuerzo     = json.dumps(fig_ces,  cls=plotly.utils.PlotlyJSONEncoder)
+                graph_satisfaccion = json.dumps(fig_csat, cls=plotly.utils.PlotlyJSONEncoder)
+                graph_lealtad      = json.dumps(fig_nps,  cls=plotly.utils.PlotlyJSONEncoder)
+                graph_valor        = json.dumps(fig_va,   cls=plotly.utils.PlotlyJSONEncoder)
     except:
         flash("Error al carga el reporte Declinación", "error")
             

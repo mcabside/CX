@@ -37,9 +37,7 @@ function submitfunc(list){
         error: function(err) {
             console.log("error",err);
         }
-        
     });
-    
 }
 
 function goHome(){
@@ -141,7 +139,6 @@ function submitfunckpi(){
           }
         
     });
-    
 }
 
 //Show Loader

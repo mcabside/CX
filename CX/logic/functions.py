@@ -76,29 +76,29 @@ def reporteGeneral(KPIS):
     # Variables
     q1, q2, q3, q4 = [], [], [], []
     # Q1
-    q1.append(promedioQuarter(KPIS, "kpi_total", 1))
-    q1.append(promedioQuarter(KPIS, "kpi_lealtad", 1))
+    q1.append(promedioQuarter(KPIS, "kpi_total",        1))
+    q1.append(promedioQuarter(KPIS, "kpi_lealtad",      1))
     q1.append(promedioQuarter(KPIS, "kpi_satisfaccion", 1))
-    q1.append(promedioQuarter(KPIS, "kpi_esfuerzo", 1))
-    q1.append(promedioQuarter(KPIS, "kpi_valor", 1))
+    q1.append(promedioQuarter(KPIS, "kpi_esfuerzo",     1))
+    q1.append(promedioQuarter(KPIS, "kpi_valor",        1))
     # Q2
-    q2.append(promedioQuarter(KPIS, "kpi_total", 2))
-    q2.append(promedioQuarter(KPIS, "kpi_lealtad", 2))
+    q2.append(promedioQuarter(KPIS, "kpi_total",        2))
+    q2.append(promedioQuarter(KPIS, "kpi_lealtad",      2))
     q2.append(promedioQuarter(KPIS, "kpi_satisfaccion", 2))
-    q2.append(promedioQuarter(KPIS, "kpi_esfuerzo", 2))
-    q2.append(promedioQuarter(KPIS, "kpi_valor", 2))
+    q2.append(promedioQuarter(KPIS, "kpi_esfuerzo",     2))
+    q2.append(promedioQuarter(KPIS, "kpi_valor",        2))
     # Q3
-    q3.append(promedioQuarter(KPIS, "kpi_total", 3))
-    q3.append(promedioQuarter(KPIS, "kpi_lealtad", 3))
+    q3.append(promedioQuarter(KPIS, "kpi_total",        3))
+    q3.append(promedioQuarter(KPIS, "kpi_lealtad",      3))
     q3.append(promedioQuarter(KPIS, "kpi_satisfaccion", 3))
-    q3.append(promedioQuarter(KPIS, "kpi_esfuerzo", 3))
-    q3.append(promedioQuarter(KPIS, "kpi_valor", 3))
+    q3.append(promedioQuarter(KPIS, "kpi_esfuerzo",     3))
+    q3.append(promedioQuarter(KPIS, "kpi_valor",        3))
     # Q4
-    q4.append(promedioQuarter(KPIS, "kpi_total", 4))
-    q4.append(promedioQuarter(KPIS, "kpi_lealtad", 4))
+    q4.append(promedioQuarter(KPIS, "kpi_total",        4))
+    q4.append(promedioQuarter(KPIS, "kpi_lealtad",      4))
     q4.append(promedioQuarter(KPIS, "kpi_satisfaccion", 4))
-    q4.append(promedioQuarter(KPIS, "kpi_esfuerzo", 4))
-    q4.append(promedioQuarter(KPIS, "kpi_valor", 4))
+    q4.append(promedioQuarter(KPIS, "kpi_esfuerzo",     4))
+    q4.append(promedioQuarter(KPIS, "kpi_valor",        4))
     return q1, q2, q3, q4
 
 #Table Reporte General

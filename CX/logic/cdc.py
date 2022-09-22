@@ -19,13 +19,17 @@ def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
             flash('Ya se ingreso el archivo', 'warning')
                     
         else:
+            #Firebase CDC Respuestas
             CDC_Respuestas_Ref = db.collection("CDC_Respuestas")
             carga_preguntas(results, CDC_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor)
+            
+            #Firebase CDC KPI's
             CDC_KPI_Ref        = db.collection("CDC_KPIS")
             found_set          = set(found_list)
             found_list_unique  = list(found_set)
             
             for cliente in found_list_unique:
+                #Variables
                 kpi_esfuerzo, kpi_satisfaccion, kpi_lealtad, kpi_valor, numero_de_respuestas = 0, 0, 0, 0, 0
             
                 #Firebase
@@ -62,14 +66,15 @@ def chart_cdc():
         kpi_clients = None
         kpi_q1, kpi_q2, kpi_q3, kpi_q4,  Trimestres, Years, lista_clientes = [], [], [], [], [], [], []
         kpi_total = 0
-        cliente_unico, graph_esfuerzo, graph_satisfaccion, graph_lealtad, graph_valor,imagen_cliente = False, False, False, False, False,False
+        cliente_unico, graph_ces, graph_csat, graph_nps, graph_va, imagen_cliente = False, False, False, False, False,False
+        error = "Error al cargar reporte CDC"
         
         #Conexion con la DB - KPI's CDC
         db = firestore.client()
-        CDC_KPIS = db.collection('CDC_KPIS').get() #Get All CDC KPI's
+        kpi_clients = db.collection('CDC_KPIS').order_by("Cliente").get() #Get All CDC KPI's
         
         #Guardar Listas Trimestres y años de la DB
-        Trimestres, Years, lista_clientes = saveSelectData(CDC_KPIS)
+        Trimestres, Years, lista_clientes = saveSelectData(kpi_clients)
         
         #Guardar Parametros URL
         trimestre_input = (request.args.get('trimestre_input'))
@@ -85,9 +90,6 @@ def chart_cdc():
         #Show Table
         if cliente_input is None or cliente_input=="Todos":
             
-            #Nota: Se necesitan que esten ordenados?
-            kpi_clients = db.collection('CDC_KPIS').order_by("Cliente").get() 
-        
             #Filtrar por año
             kpi_clients = filtrarxyear(kpi_clients, int(year_input))        
             
@@ -96,11 +98,11 @@ def chart_cdc():
         
             #Promedio Q's    
             for i in range(4):
-                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_valor', i+1))
+                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_valor',        i+1))
                 list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_satisfaccion', i+1))
-                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_lealtad', i+1))
-                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_esfuerzo', i+1))
-                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_total', i+1))
+                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_lealtad',      i+1))
+                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_esfuerzo',     i+1))
+                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_total',        i+1))
                 
         #Show speedmeter  
         else:
@@ -125,27 +127,31 @@ def chart_cdc():
                 #Rangos y ponderaciones
                 config = db.collection('Rangos_Ponderaciones').where('year','==',int(year_input)).get()
                 
+                #Check get rangos
+                if(len(config) == 0):
+                    error = "Error, no se encontraron los rangos para ese trimestre"
+                
                 #Recuperar rangos y ponderaciones desde Firebase
                 kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
                             
                 if(len(kpi_delta) > 0):
                     delta = kpi_delta[0].to_dict()
-                    fig_esfuerzo     = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'],  delta['kpi_esfuerzo'])
-                    fig_satisfaccion = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'], delta['kpi_satisfaccion'])
-                    fig_lealtad      = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'],  delta['kpi_lealtad'])
-                    fig_valor        = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'],   delta['kpi_valor'])
+                    fig_ces  = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'],  delta['kpi_esfuerzo'])
+                    fig_csat = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'], delta['kpi_satisfaccion'])
+                    fig_nps  = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'],  delta['kpi_lealtad'])
+                    fig_va   = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'],   delta['kpi_valor'])
                 else:
-                    fig_esfuerzo     = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'])
-                    fig_satisfaccion = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'])
-                    fig_lealtad      = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'])
-                    fig_valor        = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'])
+                    fig_ces  = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'])
+                    fig_csat = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'])
+                    fig_nps  = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'])
+                    fig_va   = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'])
                 
-                graph_esfuerzo     = json.dumps(fig_esfuerzo,     cls=plotly.utils.PlotlyJSONEncoder)
-                graph_satisfaccion = json.dumps(fig_satisfaccion, cls=plotly.utils.PlotlyJSONEncoder)
-                graph_lealtad      = json.dumps(fig_lealtad,      cls=plotly.utils.PlotlyJSONEncoder)
-                graph_valor        = json.dumps(fig_valor,        cls=plotly.utils.PlotlyJSONEncoder)
+                graph_ces  = json.dumps(fig_ces,  cls=plotly.utils.PlotlyJSONEncoder)
+                graph_csat = json.dumps(fig_csat, cls=plotly.utils.PlotlyJSONEncoder)
+                graph_nps  = json.dumps(fig_nps,  cls=plotly.utils.PlotlyJSONEncoder)
+                graph_va   = json.dumps(fig_va,   cls=plotly.utils.PlotlyJSONEncoder)
     except:
-        flash("Error al cargar reporte CDC", "error")
+        flash(error, "error")
         
     return render_template('chart.html',
                            kpi_total              = kpi_total,
@@ -155,10 +161,10 @@ def chart_cdc():
                            cliente_unico          = cliente_unico,
                            cliente_input          = cliente_input,
                            trimestre_input        = int(trimestre_input), 
-                           graphJSON_esfuerzo     = graph_esfuerzo,
-                           graphJSON_satisfaccion = graph_satisfaccion,
-                           graphJSON_lealtad      = graph_lealtad,
-                           graphJSON_valor        = graph_valor,
+                           graphJSON_esfuerzo     = graph_ces,
+                           graphJSON_satisfaccion = graph_csat,
+                           graphJSON_lealtad      = graph_nps,
+                           graphJSON_valor        = graph_va,
                            imagen_cliente = imagen_cliente,
                            kpi_q1 = kpi_q1, 
                            kpi_q2 = kpi_q2, 
