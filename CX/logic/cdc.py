@@ -106,12 +106,18 @@ def chart_cdc():
                 
         #Show speedmeter  
         else:
+            
             #GET ALL KPI's CDC FROM A SPECIFIC YEAR ALL Q
+            print("entro")
             kpis_client = db.collection('CDC_KPIS').where('Year','==',int(year_input)).where('Cliente','==',cliente_input).get()
             
             #GET Cliente IMAGE
             Cliente = db.collection('Clientes').where('Cliente','==',cliente_input).get()
-            imagen_cliente = Cliente[0].to_dict()["Imagen"]
+            try:
+                imagen_cliente = Cliente[0].to_dict()["Imagen"]
+            except:
+                imagen_cliente = False
+            
             
             #KPI's CDC FROM A SPECIFIC Q
             kpi_client, kpi_delta = deltaKPI(kpis_client, trimestre_input)
