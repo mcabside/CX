@@ -1,5 +1,5 @@
 import firebase_admin
-from   firebase_admin import credentials, firestore
+from   firebase_admin import credentials, firestore, storage
 import json
 from   flask import Flask, flash, request, redirect, url_for,render_template, jsonify
 from   werkzeug.utils import secure_filename
@@ -15,7 +15,7 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 #Credenciales Firebase
 cred = credentials.Certificate("CX/FirebaseKey/customer-experience-53371-firebase-adminsdk-wcb7p-879b654887.json")
-firebase_admin.initialize_app(cred)
+firebase_admin.initialize_app(cred, { 'storageBucket' : 'customer-experience-53371.appspot.com'})
 
 UPLOAD_FOLDER      = 'CX\\static\\files'
 ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xlsm'}
@@ -202,4 +202,4 @@ from CX.logic.general import reporteGeneral
 
 from CX.logic.delete import delete
 
-from CX.logic.config import config_ranges_pond
+from CX.logic.config import config_ranges_pond,clients_images

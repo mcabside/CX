@@ -141,6 +141,11 @@ function submitfunckpi(){
     });
 }
 
+function show_img() {
+    
+    document.getElementById('preview').src = JSON.parse((document.getElementById('cliente_input').value).replaceAll("'",'"')).Imagen
+}
+
 //Show Loader
 function hidden_func() {
     document.getElementById("loading").style.display = 'block';
