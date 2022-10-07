@@ -357,7 +357,7 @@ def carga_kpi(cliente,Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealt
 def mappingValues(results):# no se verifica aun si hay espacios o mayusculas
     results.replace(["No satisfecho","Ningún Valor","En Desacuerdo","No Satisfecho","En Desacuerdo	","Ningún Valor","Muy Malo","Muy insatisfecho","MUY MALO","1 . MUY MALO","1.MUY MALO","1. No es Profesional"],2,inplace=True) 
     results.replace(["Baja Satisfacción","Poco Valor","Casi Nunca","Poco Valor","Malo","Insatisfecho","MALO","2. MALO","2.MALO","2. No muy Profesional"],4,inplace=True)
-    results.replace(["Satisfacción Promedio","Valor Promedio","Normalmente de Acuerdo","Bueno","Neutral","Valor promedio","REGULAR","3. REGULAR","3.REGULAR","3. Profesional"],6,inplace=True)
+    results.replace(["Satisfacción Promedio","Valor Promedio","Normalmente de Acuerdo","Bueno","Neutral","Valor promedio","REGULAR","3. REGULAR","3.REGULAR","3. Profesional","Ni de acuerdo ni en desacuerdo"],6,inplace=True)
     results.replace(["Buena Satisfacción","Gran Valor","Totalmente de Acuerdo","Muy Bueno","Satisfecho","Muy bueno","Gran valor","BUENO","4. BUENO","4.BUENO","4. Muy Profesional"],8,inplace=True)
     results.replace(["Supera las Expectativas","Muy satisfecho","Muy Satisfecho","MUY BUENO","5.MUY BUENO"],10,inplace=True)
     return results

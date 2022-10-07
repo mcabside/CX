@@ -56,6 +56,7 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             results  = pd.read_excel(UPLOAD_FOLDER + "\\" + filename)
             results  = mappingValues(results)
+            os.remove(UPLOAD_FOLDER + "\\" + filename)
             
             #Variables aux
             not_found_list, found_list, lista_clientes = [], [], []
