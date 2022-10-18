@@ -1,1 +1,1 @@
-web: gunicorn CX\__init__.py__init__:CX
+web: gunicorn CX\__init__:CX
