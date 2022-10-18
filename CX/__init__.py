@@ -62,6 +62,7 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             results  = pd.read_excel(UPLOAD_FOLDER + "\\" + filename)
             results  = mappingValues(results)
+            os.remove(UPLOAD_FOLDER + "\\" + filename)
             
             #Variables aux
             not_found_list, found_list, lista_clientes = [], [], []
@@ -209,3 +210,7 @@ from CX.logic.general import reporteGeneral
 from CX.logic.delete import delete
 
 from CX.logic.config import config_ranges_pond,clients_images
+
+#from CX.logic.rankings import ranking_general,ranking_lealtad
+
+from CX.logic.historico import *

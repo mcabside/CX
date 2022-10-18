@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 from   plotly.graph_objs import *
 from   datetime import date
 from   flask import flash
+import plotly.express as px
 
 #Add Kpi rango y ponderaciones
 def addKPIRange(Kpis_Ref, name, min, max, pond, fecha):
@@ -355,11 +356,11 @@ def carga_kpi(cliente,Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealt
         
 #Reemplazar valores de los archivos planos por valores numericos    
 def mappingValues(results):# no se verifica aun si hay espacios o mayusculas
-    results.replace(["No satisfecho","Ningún Valor","En Desacuerdo","No Satisfecho","En Desacuerdo	","Ningún Valor","Muy Malo","Muy insatisfecho","MUY MALO","1 . MUY MALO","1.MUY MALO","1. No es Profesional"],2,inplace=True) 
+    results.replace(["No satisfecho","Ningún Valor","En Desacuerdo","No Satisfecho","En Desacuerdo	","En desacuerdo","Ningún Valor","Muy Malo","Muy insatisfecho","MUY MALO","1 . MUY MALO","1.MUY MALO","1. No es Profesional"],2,inplace=True) 
     results.replace(["Baja Satisfacción","Poco Valor","Casi Nunca","Poco Valor","Malo","Insatisfecho","MALO","2. MALO","2.MALO","2. No muy Profesional"],4,inplace=True)
-    results.replace(["Satisfacción Promedio","Valor Promedio","Normalmente de Acuerdo","Bueno","Neutral","Valor promedio","REGULAR","3. REGULAR","3.REGULAR","3. Profesional"],6,inplace=True)
-    results.replace(["Buena Satisfacción","Gran Valor","Totalmente de Acuerdo","Muy Bueno","Satisfecho","Muy bueno","Gran valor","BUENO","4. BUENO","4.BUENO","4. Muy Profesional"],8,inplace=True)
-    results.replace(["Supera las Expectativas","Muy satisfecho","Muy Satisfecho","MUY BUENO","5.MUY BUENO"],10,inplace=True)
+    results.replace(["Satisfacción Promedio","Valor Promedio","Normalmente de Acuerdo","Bueno","Neutral","Valor promedio","REGULAR","3. REGULAR","3.REGULAR","3. Profesional","Ni de acuerdo ni en desacuerdo"],6,inplace=True)
+    results.replace(["Buena Satisfacción","Gran Valor","De acuerdo","Muy Bueno","Satisfecho","Muy bueno","Gran valor","BUENO","4. BUENO","4.BUENO","4. Muy Profesional"],8,inplace=True)
+    results.replace(["Totalmente de Acuerdo","Totalmente de acuerdo","Supera las Expectativas","Muy satisfecho","Muy Satisfecho","MUY BUENO","5.MUY BUENO"],10,inplace=True)
     return results
 
 #Buscar clientes en Firebase
@@ -402,4 +403,76 @@ def SearchClients(results,not_found_list,found_list,Clientes_Data):
                 print("no se encontro : " + Nombre_Cliente)
                 
     return found_list,not_found_list,results
+    
+def getHistorico(Datos,Cliente,KPI,Area):
+    
+    historico = []
+    periodos = []
+    valores = []
+    for doc in Datos:
+        if doc.to_dict()["Cliente"] == Cliente:
+            historico.append([doc.to_dict()["Trimestre"],doc.to_dict()["Year"],doc.to_dict()[KPI]])
+    historico = OrderPeriods(historico)
+    for valor in historico:
+        periodos.append("Q" + str(valor[0]) + " " + str(valor[1]))
+        valores.append(valor[2])
+    
+    
+    fig = px.line(x=periodos, y=valores,labels={'x':'períodos', 'y':KPI[4:]}, title='Historico ' + KPI[4:] + " " + Cliente + " " + Area,
+                  markers=True,text=valores)
+    fig.update_layout(yaxis_range=[0,10])
+    fig.update_traces(textposition="bottom center")
+    return fig
+    
+    
+def OrderPeriods(periodos):
+    periodos_ord = []
+    periodos_len =len(periodos)
+    min_year = 99999
+    min_trim = 5
+    index=0
+    while(len(periodos_ord)!=periodos_len):
+        for periodo in periodos:
+            if periodo[1] < min_year:
+                min_year = periodo[1]
+        
+        for idx,periodo in enumerate(periodos):
+            if periodo[0] < min_trim and periodo[1] == min_year:
+                min_trim = periodo[0]
+                index = idx
+        
+        
+        periodos_ord.append([min_trim,min_year,periodos[index][2]])
+        periodos.pop(index)
+        min_year = 99999
+        min_trim = 5
+        index = 0
+    return periodos_ord
+    
+
+def OrderClientsRankings(KPIS):
+    periodos = []
+    trimestres = []
+    years = []
+    cliente_lealtades = []
+    
+    for doc in KPIS:
+        trimestre = doc.to_dict()["Trimestre"] 
+        year = doc.to_dict()["Year"]
+        cliente = doc.to_dict()["Cliente"]
+        lealtad = doc.to_dict()["kpi_lealtad"]
+        cliente_lealtad = [cliente,lealtad,trimestre,year]
+        cliente_lealtades.append(cliente_lealtad)
+        periodo = [trimestre,year]
+        if periodo in periodos:
+            None
+        else:
+            periodos.append(periodo)
+            
+    #periodos = OrderPeriods(periodos)
+    return periodos
+
+
+    
+    
         
