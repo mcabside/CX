@@ -8,33 +8,28 @@
 
     <div id="div_form">
 
-        <h1 class="text-center align-self-center">Configurar Imagenes de Clientes</h1>
+        <h1 class="text-center align-self-center">Configurar Imagenes de Clientes</h1><br>
 
-        <br>
+        <div style="align-items:center;justify-content:center;display:flex;">
 
-        <div style="align-items:center;justify-content:center;display:flex">
+            <div style="max-width: 350px;">
 
-            <div class="col-sm-3">
-                <form method=post enctype=multipart/form-data>
-                <select id="cliente_input" name="cliente_input" class="form-select" onchange="show_img()">
-                <option selected disabled>Selecciona Cliente...</option>
-                 {% for cliente in Clientes_Data %}
-                 
-                    <option value="{{cliente.to_dict()}}">{{cliente.to_dict()['Cliente']}}</option>
-                  
-                 {% endfor %}   
-                 </select>
-                 <img id="preview" height="200px">
-                 
-                 <input type=file name=file>
-                 <input class="btn btn-primary" type=submit value="Subir Imagen" style="float:right"><br><br>
-                 </form>
-              </div>
+                    <form method=post enctype=multipart/form-data  class="row gy-1 gx-3 align-items-center">
+                        <select id="cliente_input" name="cliente_input" class="form-select" onchange="show_img()">
+                            <option selected disabled>Selecciona Cliente...</option>
+                            {% for cliente in Clientes_Data %}
+                                <option value="{{cliente.to_dict()}}">{{cliente.to_dict()['Cliente']}}</option>
+                            {% endfor %}   
+                        </select>
+                        <img id="preview" height="150px" width="100px" src="static\img\dont_photo.png">
+                        <input type=file name=file>
+                        <input class="btn btn-primary" type=submit value="Subir Imagen" style="float:right"><br><br>
+                    </form>
 
-              
-            
-            
+            </div>
+
         </div>
+
     </div>
 
     <div class="center" id="loading" style="display:none;">

@@ -1,7 +1,7 @@
 import firebase_admin
 from   firebase_admin import credentials, firestore, storage
 import json
-from   flask import Flask, flash, request, redirect, url_for,render_template, jsonify
+from   flask import Flask, flash, request, redirect, url_for,render_template, jsonify, send_from_directory
 from   werkzeug.utils import secure_filename
 import os
 import pandas as pd
@@ -26,6 +26,12 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename): 
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+        
+#Icon
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
             
 #Home Page / upload file page
 @app.route('/', methods=['GET', 'POST'])
