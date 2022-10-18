@@ -418,7 +418,7 @@ def getHistorico(Datos,Cliente,KPI,Area):
         valores.append(valor[2])
     
     
-    fig = px.line(x=periodos, y=valores,labels={'x':'periodos', 'y':KPI[4:]}, title='Historico ' + KPI[4:] + " " + Cliente + " " + Area,
+    fig = px.line(x=periodos, y=valores,labels={'x':'períodos', 'y':KPI[4:]}, title='Historico ' + KPI[4:] + " " + Cliente + " " + Area,
                   markers=True,text=valores)
     fig.update_layout(yaxis_range=[0,10])
     fig.update_traces(textposition="bottom center")
