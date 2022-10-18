@@ -1,1 +1,1 @@
-web: gunicorn main:CX
+web: gunicorn CX\__init__:CX.app
