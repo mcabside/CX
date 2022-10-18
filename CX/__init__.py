@@ -204,3 +204,7 @@ from CX.logic.general import reporteGeneral
 from CX.logic.delete import delete
 
 from CX.logic.config import config_ranges_pond,clients_images
+
+#from CX.logic.rankings import ranking_general,ranking_lealtad
+
+from CX.logic.historico import *

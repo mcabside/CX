@@ -1,0 +1,52 @@
+{% extends 'base.html' %}  
+
+{% block content %}
+<div style="align-items:center;justify-content:center;display:flex">
+    
+    <form method = "post" class="row gy-2 gx-3 align-items-center">
+        <h2>{{Area}}</h2>
+        
+
+      <div class="col-sm-3">
+        <select id="cliente_input" name="cliente_input" class="form-select">
+         {% for cliente in lista_clientes %}
+          {% if cliente == cliente_input%}
+            <option value="{{cliente}}" selected="selected">{{cliente}}</option>
+          {% else %}
+            <option value="{{cliente}}" >{{cliente}}</option>
+          {% endif %}
+         {% endfor %}   
+         </select>
+      </div>
+
+      <div class="col-sm-3">
+        <select id="kpi_input" name="kpi_input" class="form-select">
+            <option value="kpi_lealtad">lealtad</option>
+            <option value="kpi_esfuerzo">esfuerzo</option>
+            <option value="kpi_satisfaccion">satisfaccion</option>
+            <option value="kpi_valor">valor</option>
+         </select>
+      </div>
+
+      <div class="col-sm-2">
+        <div class="form-check">
+          <input class="btn btn-primary" type=submit value="Buscar">
+        </div>
+      </div>
+
+    </form>
+    {% if  busqueda %}
+    <div class="container">
+          <div class="col" id="bargraph1">
+            <script>
+                var graphs1 = {{historico_graph | safe}};
+                graphs1.config = {'displaylogo': false}
+                Plotly.plot('bargraph1', graphs1);
+            </script>
+          </div>
+      </div>
+      {% endif %}
+    </div>
+
+    
+{% endblock %}

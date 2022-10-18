@@ -1,0 +1,39 @@
+{% extends 'base.html' %}  
+
+{% block content %}
+      
+    <!--Form/selects-->
+    <div style="align-items:center;justify-content:center;display:flex">
+      
+      <form method = "get"  id="area_select" name="area_select" class="row gy-2 gx-3 align-items-center">
+
+          <div class="col-sm-5"> 
+
+            <select id="area" name="area" class="form-select">
+                <option value="CDC_KPIS">CDC</option>
+                <option value="PCD_KPIS">Proceso Comercial Declinación</option>
+                <option value="PCS_KPIS">Proceso Comercial Satisfacción</option>
+                <option value="Consultoria_KPIS">Consultoria</option>
+            </select>
+        </div>
+
+        <div class="col-sm-3">   
+          <select id="periodos" name="periodos" class="form-select" >
+           {% for Periodo in Periodos %}
+              
+                <option value="{{Periodo}}"  selected="selected">Q{{ Periodo[0]}},{{ Periodo[1]}}</option>
+           {% endfor %}   
+           </select>
+        </div>
+             
+
+
+        <div class="col-sm-2">
+          <div class="form-check">
+            <input class="btn btn-primary" id="buscar_area" type=submit name="buscar_area" >
+          </div>
+        </div>
+
+      </form>
+    </div>
+{% endblock %}

@@ -55,7 +55,8 @@ def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
                 kpi_total        = round((kpi_esfuerzo*(kpi_ces['ponderacion']/100)) + (kpi_satisfaccion*(kpi_csat['ponderacion']/100)) + (kpi_lealtad*(kpi_nps['ponderacion']/100)) + (kpi_valor*(kpi_va['ponderacion']/100)), 2)
                 
                 carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total)
-    except: 
+    except Exception as e: 
+            print(e)
             flash('Error al carga info CDC', 'error')
             
 #Chart Page
