@@ -46,10 +46,16 @@ function goHome(){
 
 function changeSelect(){
     var cliente_input = document.getElementById("cliente_input").value
-    if(cliente_input != "Todos")
-        document.getElementById("kpi").disabled = true;
-    else
-        document.getElementById("kpi").disabled = false;
+    //console.log(cliente_input)
+    if(cliente_input == "Todos"){
+        //console.log("No Visible")
+        document.getElementById("trimestre_input").disabled = true;
+    }
+    else{
+        //console.log("Visible")
+        document.getElementById("trimestre_input").disabled = false;
+    }
+        
 }
 
 function validarkpipond(){

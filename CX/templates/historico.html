@@ -1,13 +1,14 @@
-{% extends 'base.html' %}  
+{% extends 'base.html' %}
 
 {% block content %}
-<div style="align-items:center;justify-content:center;display:flex">
-    
-    <form method = "post" class="row gy-2 gx-3 align-items-center">
-        <h2>{{Area}}</h2>
-        
 
-      <div class="col-sm-3">
+<h1 class="text-center align-self-center">Histórico {{cliente_input}} - {{Area}}</h1><br>
+
+<div style="align-items:center;justify-content:center;display:flex">
+
+    <form method = "post" class="row gy-2 gx-3 align-items-center">
+
+      <div class="col" style="width:300px">
         <select id="cliente_input" name="cliente_input" class="form-select">
          {% for cliente in lista_clientes %}
           {% if cliente == cliente_input%}
@@ -15,26 +16,52 @@
           {% else %}
             <option value="{{cliente}}" >{{cliente}}</option>
           {% endif %}
-         {% endfor %}   
+         {% endfor %}
          </select>
       </div>
 
-      <div class="col-sm-3">
+      <div class="col" style="width:200px">
         <select id="kpi_input" name="kpi_input" class="form-select">
+        {% if kpi_input == 'kpi_lealtad' %}
+            <option value="kpi_lealtad" selected=>Lealtad</option>
+        {% else %}
             <option value="kpi_lealtad">Lealtad</option>
+        {% endif%}
+
+        {% if kpi_input == 'kpi_esfuerzo' %}
+            <option value="kpi_esfuerzo" selected>Esfuerzo</option>
+        {% else %}
             <option value="kpi_esfuerzo">Esfuerzo</option>
-            <option value="kpi_satisfaccion">Satisfaccion</option>
+        {% endif%}
+
+        {% if kpi_input == "kpi_satisfaccion" %}
+            <option value="kpi_satisfaccion" selected>Satisfacción</option>
+        {% else %}
+            <option value="kpi_satisfaccion">Satisfacción</option>
+        {% endif%}
+
+        {% if kpi_input == "kpi_valor" %}
+            <option value="kpi_valor" selected>Valor</option>
+        {% else %}
             <option value="kpi_valor">Valor</option>
+        {% endif%}
+
          </select>
       </div>
 
-      <div class="col-sm-2">
+      <div class="col">
         <div class="form-check">
           <input class="btn btn-primary" type=submit value="Buscar">
         </div>
       </div>
 
     </form>
+
+    </div>
+
+    <br>
+
+
     {% if  busqueda %}
     <div class="container">
           <div class="col" id="bargraph1">
@@ -45,8 +72,7 @@
             </script>
           </div>
       </div>
-      {% endif %}
-    </div>
+    {% endif %}
 
-    
+
 {% endblock %}

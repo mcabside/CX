@@ -7,6 +7,7 @@ from   CX import app
 from   CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
 from   CX.logic.functions import carga_kpi, carga_preguntas, deltaKPI, getRangosyPonderaciones, filtrarxyear
 
+
 #Carga Respuestas CDC
 def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
     

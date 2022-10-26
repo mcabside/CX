@@ -199,6 +199,7 @@ def SaveKPISPercents():
             
 from CX.logic.cdc import cargaRespuestasCDC
 
+
 from CX.logic.consultoria import cargaRespuestasConsultoria
 
 from CX.logic.pc_satisfaccion import cargaRespuestasPCS

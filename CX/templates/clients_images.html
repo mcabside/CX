@@ -16,14 +16,14 @@
 
                     <form method=post enctype=multipart/form-data  class="row gy-1 gx-3 align-items-center">
                         <select id="cliente_input" name="cliente_input" class="form-select" onchange="show_img()">
-                            <option selected disabled>Selecciona Cliente...</option>
+                            <option selected disabled>Selecciona un Cliente...</option>
                             {% for cliente in Clientes_Data %}
                                 <option value="{{cliente.to_dict()}}">{{cliente.to_dict()['Cliente']}}</option>
                             {% endfor %}   
-                        </select>
-                        <img id="preview" height="150px" width="100px" src="static\img\dont_photo.png">
-                        <input type=file name=file>
-                        <input class="btn btn-primary" type=submit value="Subir Imagen" style="float:right"><br><br>
+                        </select><br>
+                        <img id="preview" height="150px" width="100px" src="static\img\dont_photo.png"><br>
+                        <input type=file name=file><br>
+                        <input class="btn btn-primary" type=submit value="Subir Imagen" style="float:right"><br>
                     </form>
 
             </div>

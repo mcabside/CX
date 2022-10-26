@@ -67,7 +67,7 @@
     <!--SHOW TABLE-->
     {% if not cliente_unico %}
 
-      <h1 class="text-center align-self-center">Reporte {{area}} - {{year}}</h1>
+      <h2 class="text-center align-self-center">Reporte {{area}} - {{year}}</h1>
       <br>
             <table class="table table-striped table-sm table-bordered">
               <thead class="table-dark">
@@ -173,19 +173,17 @@
       <div class="container"> 
         <div class="row">
           <div class="col">
-            <h1 class="text-center align-self-center">Reporte {{area}} - Q{{trimestre_input}}/{{year}}</h1>
+            <h2 class="text-center align-self-center">Reporte {{area}} - Q{{trimestre_input}}/{{year}}</h1><br>
             {% if imagen_cliente == false %}
-            <img style="display: block;margin-left: auto;margin-right: auto; max-width:500px; max-height:300px" src="static\img\dont_photo.png" alt="imagen de cliente" onerror="this.src='static\img\dont_photo.png'" width="auto" height="100">
+            <img style="display: block;margin-left: auto;margin-right: auto; max-width:400px; max-height:250px !important" src="static\img\dont_photo.png" alt="imagen de cliente" onerror="this.src='static\img\dont_photo.png'" width="auto" height="100">
             {% else %}
-            <img style="display: block;margin-left: auto;margin-right: auto; max-width:500px; max-height:300px" src={{imagen_cliente}} alt="imagen de cliente" onerror="this.src='static\img\dont_photo.png'"  width="auto" height="100">
+            <img style="display: block;margin-left: auto;margin-right: auto; max-width:400px; max-height:250px !important" src={{imagen_cliente}} alt="imagen de cliente" onerror="this.src='static\img\dont_photo.png'"  width="auto" height="100">
             {% endif %}
           </div>
         </div>
       </div>
 
-      <br>
-
-      <h3 style="text-align:center">Valor General: {{kpi_total}}</h3>
+      <br><br><h4 style="text-align:center">Valor General: {{kpi_total}}</h3>
       
       <div class="container">
         <div class="row row-cols-4">
