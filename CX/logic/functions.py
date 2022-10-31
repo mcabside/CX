@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 import pandas as pd
 import json
 import plotly.graph_objects as go
@@ -45,8 +46,7 @@ def updateKPIRange(Kpis_Ref, kpi_q, result):
                 'max': result[0]['max_va'],
                 'ponderacion': result[0]['ponde_va']
                         })
-           
-     
+             
 #FiltrarKPIxAño
 def filtrarxyear(kpi_clients, year_input):
     aux = [] 
@@ -124,9 +124,9 @@ def tablaReporteGeneral(consul, cdc, pc):
     #Verificar divisin entre 0
     if(cont > 0):
         avg_general      = (consul[0] + cdc[0] + pc[0]) / cont
-        avg_esfuerzo     = (consul[1] + cdc[1] + pc[1]) / cont 
+        avg_lealtad      = (consul[1] + cdc[1] + pc[1]) / cont
         avg_satisfaccion = (consul[2] + cdc[2] + pc[2]) / cont
-        avg_lealtad      = (consul[3] + cdc[3] + pc[3]) / cont
+        avg_esfuerzo     = (consul[3] + cdc[3] + pc[3]) / cont 
         avg_valor        = (consul[4] + cdc[4] + pc[4]) / cont
     
     return avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor
@@ -150,26 +150,31 @@ def deltaKPI(kpis_client, trimestre_input):
 
 #Graficar velocimetro
 def speedmeter(title, value, red, green, porcentaje, delta=None):
+    if delta != None:
+        delta = roundPropio(float(delta))
+        
     fig_total = go.Figure(go.Indicator(
             domain = {'x': [0, 1], 'y': [0, 1]},
-            value = float(value),
+            value = roundPropio(float(value)),
             mode = "gauge+number+delta",
-            title = {'text': title , 'font': {'size': 16}},
-            delta = {'reference': delta},
+            title = {'text': title , 'font': {'size': 16, 'family': "Arial"}, },
+            delta = {'reference': delta },
             gauge = {'axis': {'range': [0, 10]},
                     'bar': {'color': "hsla(120, 100%, 50%, 0.0)"},
+                    'borderwidth': 0,
                     'steps' : [
-                        {'range': [0, red], 'color': "red"},
-                        {'range': [red+0.001, green-0.001], 'color': "yellow"},
-                        {'range': [green, 10], 'color': "green"}],
-                    'threshold' : {'line': {'color': "black", 'width': 6}, 'thickness': 0.85, 'value': value}},
+                        {'range': [0, red], 'color': "#EA4335"},
+                        {'range': [red+0.001, green-0.001], 'color': "#FEDC41"},
+                        {'range': [green, 10], 'color': "#01C48B"}],
+                    'threshold' : {'line': {'color': "#454E52", 'width': 6}, 'thickness': 0.85, 'value': value}},
             ),Layout(
+                   height=400,
                    paper_bgcolor='rgba(0,0,0,0)',
                    plot_bgcolor='rgba(0,0,0,0)',                   
                    margin=dict(l=25, r=25, t=0, b=0),
                    annotations=[{'x': 0.5, 'y':0.25
                                       ,'text':str(porcentaje)+"%"
-                                      ,'font': { 'color': "hsl(36, 100%, 50%)", 'size': 25, 'family': "Open Sans"}
+                                      ,'font': { 'color': "hsl(36, 100%, 50%)", 'size': 25, 'family': "Arial"}
                                       ,'showarrow':False, 'xanchor':'center' }]),
             )
     return fig_total
@@ -423,8 +428,7 @@ def getHistorico(Datos,Cliente,KPI,Area):
     fig.update_layout(yaxis_range=[0,10.5])
     fig.update_traces(textposition="bottom center")
     return fig
-    
-    
+        
 def OrderPeriods(periodos):
     periodos_ord = []
     periodos_len =len(periodos)
@@ -449,7 +453,6 @@ def OrderPeriods(periodos):
         index = 0
     return periodos_ord
     
-
 def OrderClientsRankings(KPIS):
     periodos = []
     trimestres = []
@@ -472,7 +475,9 @@ def OrderClientsRankings(KPIS):
     #periodos = OrderPeriods(periodos)
     return periodos
 
-
-    
-    
-        
+def roundPropio(num):
+    aux  = num - int(num) 
+    if(aux != 0 and aux >= 0.5): 
+        return round(num+0.01, 1)
+    else:
+        return round(num, 1)

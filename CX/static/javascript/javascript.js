@@ -148,7 +148,6 @@ function submitfunckpi(){
 }
 
 function show_img() {
-    
     document.getElementById('preview').src = JSON.parse((document.getElementById('cliente_input').value).replaceAll("'",'"')).Imagen
 }
 
@@ -157,3 +156,11 @@ function hidden_func() {
     document.getElementById("loading").style.display = 'block';
     document.getElementById("div_form").style.display = 'none';
 }
+
+function roundPropio(num){
+    aux  = num - int(num);
+    aux2 = aux*10 - int(aux*10);
+    if(aux2!=0 && aux2 >= 0.5)
+        return round(num+0.01)
+    return round(num);       
+  }

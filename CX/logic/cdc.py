@@ -7,7 +7,6 @@ from   CX import app
 from   CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
 from   CX.logic.functions import carga_kpi, carga_preguntas, deltaKPI, getRangosyPonderaciones, filtrarxyear
 
-
 #Carga Respuestas CDC
 def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
     
@@ -50,9 +49,9 @@ def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
                     numero_de_respuestas += 1
                     
                 kpi_esfuerzo     = round(kpi_esfuerzo/numero_de_respuestas, 2)
-                kpi_satisfaccion = round(kpi_satisfaccion/numero_de_respuestas,2)
-                kpi_lealtad      = round(kpi_lealtad/numero_de_respuestas,2)
-                kpi_valor        = round(kpi_valor/numero_de_respuestas,2)
+                kpi_satisfaccion = round(kpi_satisfaccion/numero_de_respuestas, 2)
+                kpi_lealtad      = round(kpi_lealtad/numero_de_respuestas, 2)
+                kpi_valor        = round(kpi_valor/numero_de_respuestas, 2)
                 kpi_total        = round((kpi_esfuerzo*(kpi_ces['ponderacion']/100)) + (kpi_satisfaccion*(kpi_csat['ponderacion']/100)) + (kpi_lealtad*(kpi_nps['ponderacion']/100)) + (kpi_valor*(kpi_va['ponderacion']/100)), 2)
                 
                 carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total)
@@ -93,7 +92,9 @@ def chart_cdc():
         if cliente_input is None or cliente_input=="Todos":
             
             #Filtrar por año
-            kpi_clients = filtrarxyear(kpi_clients, int(year_input))        
+            kpi_clients = filtrarxyear(kpi_clients, int(year_input))
+            
+            #Cambiar digitos        
             
             #Tabla dinamica
             kpi_q1, kpi_q2, kpi_q3, kpi_q4 = tablaDinamica(kpi_clients)
@@ -127,7 +128,7 @@ def chart_cdc():
                                     
             #SHOW GRAFICOS          
             if len(kpi_client) > 0:
-                kpi_total = float(kpi_client[0].to_dict()["kpi_total"])
+                kpi_total = round(float(kpi_client[0].to_dict()["kpi_total"]), 1)
                 client    = kpi_client[0].to_dict()
                 
                 #Rangos y ponderaciones

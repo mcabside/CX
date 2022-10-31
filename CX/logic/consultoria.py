@@ -125,7 +125,7 @@ def chart_consultoria():
                                     
             #SHOW GRAFICOS          
             if len(kpi_client) > 0:
-                kpi_total = float(kpi_client[0].to_dict()["kpi_total"])
+                kpi_total = round(float(kpi_client[0].to_dict()["kpi_total"]), 1)
                 client    = kpi_client[0].to_dict()
                 
                 #Rangos y ponderaciones

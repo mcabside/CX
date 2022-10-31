@@ -1,20 +1,24 @@
+from pydoc import cli
 from   flask import request, render_template
 from   firebase_admin import firestore
 import json
 import plotly
 from   CX import app
-from   CX.logic.functions import reporteGeneral, speedmeter, tablaReporteGeneral, getRangosyPonderaciones
+from   CX.logic.functions import reporteGeneral, speedmeter, tablaReporteGeneral, getRangosyPonderaciones, roundPropio
+import datetime
 
 #Chart Page
 @app.route('/chart_general', methods=['GET', 'POST'])
 def chart_general():
     
-    #Parametros Trimestre y año
-    trimestre, year = "Todos", 2022
-    
+    #Parametros Trimestre y año (Por Defacto)
+    trimestre, year, client = "Todos",  datetime.date.today().year, "Todos"
+    client_img = None
+        
     #Guardar Parametros URL
     trimestre_input = (request.args.get('trimestre_input'))
     year_input      = (request.args.get('year_input'))
+    client_input    = (request.args.get('client_input'))
     
     if(trimestre_input != None):
         trimestre = str(trimestre_input)
@@ -22,12 +26,28 @@ def chart_general():
     if(year_input != None):
         year = int(year_input)
         
-    #Conexion con la DB - KPI's CDC/Constultaria/Proceso Comercial Satisfacción from one specific year
+    if(client_input != None):
+        client = str(client_input)
+                
+    #Conexion con la DB - KPI's CDC/Consultaria/Proceso Comercial Satisfacción from one specific year
     db = firestore.client()
-    CON_KPIS = db.collection('Consultoria_KPIS').where('Year','==',year).get()
-    CDC_KPIS = db.collection('CDC_KPIS').where('Year','==',year).get()
-    PCS_KPIS = db.collection('PCS_KPIS').where('Year','==', year).get()
     
+    #Get list Clients
+    Clients_list = db.collection("Clientes").order_by("Cliente").get()
+    
+    if(client == "Todos"):
+        CON_KPIS = db.collection('Consultoria_KPIS').where('Year','==',year).get()
+        CDC_KPIS = db.collection('CDC_KPIS').where('Year','==',year).get()
+        PCS_KPIS = db.collection('PCS_KPIS').where('Year','==', year).get()
+    else:
+        CON_KPIS   = db.collection('Consultoria_KPIS').where('Year','==',year).where('Cliente','==',client).get()
+        CDC_KPIS   = db.collection('CDC_KPIS').where('Year','==',year).where('Cliente','==',client).get()
+        PCS_KPIS   = db.collection('PCS_KPIS').where('Year','==', year).where('Cliente','==',client).get()
+        client_data = db.collection("Clientes").where('Cliente', '==', client).get()
+        for i in client_data:
+            client_img = i.to_dict()['Imagen']
+            #print(client_img)
+        
     # Variables
     #["General", "Lealtad", "Satisfacción", "Esfuerzo", "Valor"]
     c_q1, c_q2, c_q3, c_q4          = reporteGeneral(CON_KPIS) #KPI's Consultoria
@@ -90,14 +110,17 @@ def chart_general():
     graph_valor        = json.dumps(fig_valor,        cls=plotly.utils.PlotlyJSONEncoder)
                 
     return render_template('general.html', 
-                           kpi_total=round(avg_general, 2), 
+                           kpi_total=roundPropio(avg_general), 
                            trimestre = trimestre,
                            year = year,
+                           client = client,
+                           client_img = client_img,
                            graphJSON_esfuerzo     = graph_esfuerzo,
                            graphJSON_satisfaccion = graph_satisfaccion,
                            graphJSON_lealtad      = graph_lealtad,
                            graphJSON_valor        = graph_valor,
-                           hayDatos = hayDatos)
+                           hayDatos               = hayDatos,
+                           Clients_list           = Clients_list)
     
     
 

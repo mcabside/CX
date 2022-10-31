@@ -18,6 +18,10 @@
     }
   }
 
+body, h1, h2, h3, h4, h5, h6 {
+  font-family: Arial;
+}
+
 /*Pruebas*/
 #snackbar {
   min-width: 250px; /* Set a default minimum width */
