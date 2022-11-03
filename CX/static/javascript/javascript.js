@@ -46,16 +46,12 @@ function goHome(){
 
 function changeSelect(){
     var cliente_input = document.getElementById("cliente_input").value
-    //console.log(cliente_input)
     if(cliente_input == "Todos"){
-        //console.log("No Visible")
         document.getElementById("trimestre_input").disabled = true;
     }
     else{
-        //console.log("Visible")
         document.getElementById("trimestre_input").disabled = false;
-    }
-        
+    }   
 }
 
 function validarkpipond(){
@@ -157,10 +153,28 @@ function hidden_func() {
     document.getElementById("div_form").style.display = 'none';
 }
 
-function roundPropio(num){
-    aux  = num - int(num);
-    aux2 = aux*10 - int(aux*10);
-    if(aux2!=0 && aux2 >= 0.5)
-        return round(num+0.01)
-    return round(num);       
-  }
+function testing(list_clients_cdc, list_clients_con, list_clients_pcs, list_clients_pcd){
+    
+    var area = document.getElementById("area_input").value
+    var arrOptionsCollection = null
+    var arrOptions = [];
+
+    if(area == "CDC"){
+        var arrOptionsCollection = list_clients_cdc;
+    }else if(area == "Consultoria"){
+        var arrOptionsCollection = list_clients_con;
+    }else if(area == "PCS"){
+        var arrOptionsCollection = list_clients_pcs;
+    }else if(area == "PCD"){
+        var arrOptionsCollection = list_clients_pcd;
+    }
+ 
+    for (var i=0, n = arrOptionsCollection.length; i < n; i++) { // looping over the options
+        arrOptions.push("<option value='" + arrOptionsCollection[i] + "'>" + arrOptionsCollection[i] + "</option>");
+    }
+
+    document.getElementById("cliente_input").innerHTML = arrOptions.join();
+    
+}
+
+

@@ -93,45 +93,45 @@
                   <td style="font-weight: bold;">Total trimestre</td>
 
                   <th scope="row">Q1</td>
-                  {% if (list_avg_kpi[3]|float)|round(1) != 0 %}
-                    <td>{{(list_avg_kpi[3]|float)|round(1)}}</td> <!--CES-->
-                    <td>{{(list_avg_kpi[1]|float)|round(1)}}</td> <!--CSAT-->
-                    <td>{{(list_avg_kpi[2]|float)|round(1)}}</td> <!--NPS-->
-                    <td>{{(list_avg_kpi[0]|float)|round(1)}}</td> <!--VA-->
-                    <td>{{(list_avg_kpi[4]|float)|round(1)}}</td> <!--General-->
+                  {% if list_avg_kpi[4] != 0 %}
+                    <td>{{list_avg_kpi[3]}}</td> <!--CES-->
+                    <td>{{list_avg_kpi[1]}}</td> <!--CSAT-->
+                    <td>{{list_avg_kpi[2]}}</td> <!--NPS-->
+                    <td>{{list_avg_kpi[0]}}</td> <!--VA-->
+                    <td>{{list_avg_kpi[4]}}</td> <!--General-->
                   {% else %}
                     <td></td><td></td><td></td><td></td><td></td>
                   {% endif %}
 
                   <th scope="row">Q2</th>
-                  {% if (list_avg_kpi[8]|float)|round(1) != 0 %}
-                    <td>{{(list_avg_kpi[8]|float)|round(1)}}</td> <!--CES-->
-                    <td>{{(list_avg_kpi[6]|float)|round(1)}}</td> <!--CSAT-->
-                    <td>{{(list_avg_kpi[7]|float)|round(1)}}</td> <!--NPS-->
-                    <td>{{(list_avg_kpi[5]|float)|round(1)}}</td> <!--VA-->
-                    <td>{{(list_avg_kpi[9]|float)|round(1)}}</td> <!--General-->
+                  {% if list_avg_kpi[9] != 0 %}
+                    <td>{{list_avg_kpi[8]}}</td> <!--CES-->
+                    <td>{{list_avg_kpi[6]}}</td> <!--CSAT-->
+                    <td>{{list_avg_kpi[7]}}</td> <!--NPS-->
+                    <td>{{list_avg_kpi[5]}}</td> <!--VA-->
+                    <td>{{list_avg_kpi[9]}}</td> <!--General-->
                   {% else %}
                     <td></td><td></td><td></td><td></td><td></td>
                   {% endif %}
    
                   <th scope="row">Q3</th>
-                  {% if (list_avg_kpi[13]|float)|round(1) != 0 %}
-                    <td>{{(list_avg_kpi[13]|float)|round(1)}}</td> <!--CES-->
-                    <td>{{(list_avg_kpi[11]|float)|round(1)}}</td> <!--CSAT-->
-                    <td>{{(list_avg_kpi[12]|float)|round(1)}}</td> <!--NPS-->
-                    <td>{{(list_avg_kpi[10]|float)|round(1)}}</td> <!--VA-->
-                    <td>{{(list_avg_kpi[14]|float)|round(1)}}</td> <!--General-->
+                  {% if list_avg_kpi[14] != 0 %}
+                    <td>{{list_avg_kpi[13]}}</td> <!--CES-->
+                    <td>{{list_avg_kpi[11]}}</td> <!--CSAT-->
+                    <td>{{list_avg_kpi[12]}}</td> <!--NPS-->
+                    <td>{{list_avg_kpi[10]}}</td> <!--VA-->
+                    <td>{{list_avg_kpi[14]}}</td> <!--General-->
                   {% else %}
                     <td></td><td></td><td></td><td></td><td></td>
                   {% endif %}
 
                   <th scope="row">Q4</th>
-                  {% if (list_avg_kpi[18]|float)|round(1) != 0 %}
-                    <td>{{(list_avg_kpi[18]|float)|round(1)}}</td> <!--CES-->
-                    <td>{{(list_avg_kpi[16]|float)|round(1)}}</td> <!--CSAT-->
-                    <td>{{(list_avg_kpi[17]|float)|round(1)}}</td> <!--NPS-->
-                    <td>{{(list_avg_kpi[15]|float)|round(1)}}</td> <!--VA-->
-                    <td>{{(list_avg_kpi[19]|float)|round(1)}}</td> <!--General-->
+                  {% if list_avg_kpi[19] != 0 %}
+                    <td>{{list_avg_kpi[18]}}</td> <!--CES-->
+                    <td>{{list_avg_kpi[16]}}</td> <!--CSAT-->
+                    <td>{{list_avg_kpi[17]}}</td> <!--NPS-->
+                    <td>{{list_avg_kpi[15]}}</td> <!--VA-->
+                    <td>{{list_avg_kpi[19]}}</td> <!--General-->
                   {% else %}
                     <td></td><td></td><td></td><td></td><td></td>
                   {% endif %}
@@ -143,45 +143,45 @@
                   <td>{{doc['Cliente']}}</td>
 
                   <th scope="row">Q{{doc['Trimestre']}}</td>
-                  {% if (doc['kpi_total']|float)|round(1) != 0%}
-                    <td>{{(doc['kpi_esfuerzo']|float)|round(1)}}</td>
-                    <td>{{(doc['kpi_satisfaccion']|float)|round(1)}}</td>
-                    <td>{{(doc['kpi_lealtad']|float)|round(1)}}</td>
-                    <td>{{(doc['kpi_valor']|float)|round(1)}}</td>
-                    <td>{{(doc['kpi_total']|float)|round(1)}}</td>
+                  {% if doc['kpi_total'] != 0%}
+                    <td>{{doc['kpi_esfuerzo']}}</td>
+                    <td>{{doc['kpi_satisfaccion']}}</td>
+                    <td>{{doc['kpi_lealtad']}}</td>
+                    <td>{{doc['kpi_valor']}}</td>
+                    <td>{{doc['kpi_total']}}</td>
                   {% else %}
                     <td></td><td></td><td></td><td></td><td></td>                 
                   {% endif %}
 
                   <th scope="row">Q{{kpi_q2[loop.index-1]['Trimestre']}}</th>
-                  {% if (kpi_q2[loop.index-1]['kpi_total']|float)|round(1) != 0%}
-                    <td>{{(kpi_q2[loop.index-1]['kpi_esfuerzo']|float)|round(1)}}</td>
-                    <td>{{(kpi_q2[loop.index-1]['kpi_satisfaccion']|float|round(1))}}</td>
-                    <td>{{(kpi_q2[loop.index-1]['kpi_lealtad']|float|round(1))}}</td>
-                    <td>{{(kpi_q2[loop.index-1]['kpi_valor']|float|round(1))}}</td>
-                    <td>{{(kpi_q2[loop.index-1]['kpi_total']|float|round(1))}}</td>
+                  {% if kpi_q2[loop.index-1]['kpi_total']!= 0%}
+                    <td>{{kpi_q2[loop.index-1]['kpi_esfuerzo']}}</td>
+                    <td>{{kpi_q2[loop.index-1]['kpi_satisfaccion']}}</td>
+                    <td>{{kpi_q2[loop.index-1]['kpi_lealtad']}}</td>
+                    <td>{{kpi_q2[loop.index-1]['kpi_valor']}}</td>
+                    <td>{{kpi_q2[loop.index-1]['kpi_total']}}</td>
                   {% else %}
                     <td></td><td></td><td></td><td></td><td></td>                 
                   {% endif %}
 
                   <th scope="row">Q{{kpi_q3[loop.index-1]['Trimestre']}}</th>
-                  {% if (kpi_q3[loop.index-1]['kpi_total']|float)|round(1) != 0%}
-                    <td>{{(kpi_q3[loop.index-1]['kpi_esfuerzo']|float)|round(1)}}</td>
-                    <td>{{(kpi_q3[loop.index-1]['kpi_satisfaccion']|float|round(1))}}</td>
-                    <td>{{(kpi_q3[loop.index-1]['kpi_lealtad']|float|round(1))}}</td>
-                    <td>{{(kpi_q3[loop.index-1]['kpi_valor']|float|round(1))}}</td>
-                    <td>{{(kpi_q3[loop.index-1]['kpi_total']|float|round(1))}}</td>
+                  {% if kpi_q3[loop.index-1]['kpi_total'] != 0%}
+                    <td>{{kpi_q3[loop.index-1]['kpi_esfuerzo']}}</td>
+                    <td>{{kpi_q3[loop.index-1]['kpi_satisfaccion']}}</td>
+                    <td>{{kpi_q3[loop.index-1]['kpi_lealtad']}}</td>
+                    <td>{{kpi_q3[loop.index-1]['kpi_valor']}}</td>
+                    <td>{{kpi_q3[loop.index-1]['kpi_total']}}</td>
                   {% else %}
                     <td></td><td></td><td></td><td></td><td></td>                 
                   {% endif %}
                
                   <th scope="row">Q{{kpi_q4[loop.index-1]['Trimestre']}}</th>
-                  {% if (kpi_q4[loop.index-1]['kpi_total']|float)|round(1) != 0%}
-                    <td>{{(kpi_q4[loop.index-1]['kpi_esfuerzo']|float)|round(1)}}</td>
-                    <td>{{(kpi_q4[loop.index-1]['kpi_satisfaccion']|float|round(1))}}</td>
-                    <td>{{(kpi_q4[loop.index-1]['kpi_lealtad']|float|round(1))}}</td>
-                    <td>{{(kpi_q4[loop.index-1]['kpi_valor']|float|round(1))}}</td>
-                    <td>{{(kpi_q4[loop.index-1]['kpi_total']|float|round(1))}}</td>
+                  {% if kpi_q4[loop.index-1]['kpi_total'] != 0%}
+                    <td>{{kpi_q4[loop.index-1]['kpi_esfuerzo']}}</td>
+                    <td>{{kpi_q4[loop.index-1]['kpi_satisfaccion']}}</td>
+                    <td>{{kpi_q4[loop.index-1]['kpi_lealtad']}}</td>
+                    <td>{{kpi_q4[loop.index-1]['kpi_valor']}}</td>
+                    <td>{{kpi_q4[loop.index-1]['kpi_total']}}</td>
                   {% else %}
                     <td></td><td></td><td></td><td></td><td></td>                 
                   {% endif %}
@@ -199,7 +199,7 @@
       {% if  cliente_unico %}
       {% if  kpi_total == 0 %}
       
-      <p class="text-center align-self-center fst-italic">No hay información registrada para este cliente en el trimestre buscado</p>
+      <br><br><p class="text-center align-self-center fst-italic">No hay información registrada para este cliente en el trimestre buscado</p>
       
       {% else %}
 
@@ -218,8 +218,14 @@
         </div>
       </div>
 
-      <br><br><h4 style="text-align:center">Valor General: {{kpi_total}}</h3>
-      
+      {% if kpi_total_delta == 0 %}
+        <br><br><h5 style="text-align:center">Valor General: {{kpi_total}} (-)</h5>
+      {% elif kpi_total_delta > 0 %}
+        <br><br><h5 style="text-align:center">Valor General: {{kpi_total}} (+{{kpi_total_delta}})</h5>
+      {% else %}
+        <br><br><h5 style="text-align:center">Valor General: {{kpi_total}} ({{kpi_total_delta}})</h5>
+      {% endif %}
+
       <div class="container">
         <div class="row row-cols-4">
           <div class="col" id="bargraph1">

@@ -44,21 +44,49 @@
                        
         <div class="col"> 
             <select id="year_input" name="year_input" class="form-select" >
-                <option value="2022" selected="selected">2022</option>
-                <option value="2023">2023</option>
+            {% if year == 2019 %}
+               <option value="2019" selected>2019</option>
+            {% else %}
+              <option value="2019">2019</option>
+            {% endif %}
+
+            {% if year == 2020 %}
+              <option value="2020" selected>2020</option>
+            {% else %}
+              <option value="2020">2020</option>
+            {% endif %}
+
+            {% if year == 2021 %}
+              <option value="2021" selected>2021</option>
+            {% else %}
+              <option value="2021">2021</option>
+            {% endif %}
+
+            {% if year == 2022 %}
+              <option value="2022" selected>2022</option>
+            {% else %}
+              <option value="2022">2022</option>
+            {% endif %}
+
+            {% if year == 2023 %}
+              <option value="2023" selected>2023</option>
+            {% else %}
+              <option value="2023">2023</option>
+            {% endif %}
+               
            </select>
         </div> 
         
         <div class="col"> 
-          <select id="client_input" name="client_input" class="form-select" >
+          <select id="client_input" name="client_input" class="form-select">
             <option value="Todos">Todos</option>
-            {% for i in Clients_list %}
-              {% if i.to_dict()['Cliente'] == client %}
-                <option value={{i.to_dict()['Cliente']}} selected>{{i.to_dict()['Cliente']}}</option>
+            {% for cliente in Clients_list %}
+              {% if cliente == client%}
+                <option value="{{cliente}}" selected="selected">{{cliente}}</option>
               {% else %}
-                <option value={{i.to_dict()['Cliente']}}>{{i.to_dict()['Cliente']}}</option>
+                <option value="{{cliente}}" >{{cliente}}</option>
               {% endif %}
-            {% endfor %}
+           {% endfor %}  
          </select>
       </div> 
 
@@ -71,15 +99,13 @@
     </form>
   </div>
       
-     
-      {% if hayDatos  %}
-
       {% if trimestre != "Todos" %}
-        <br><h1 class="text-center align-self-center">Reporte General - {{trimestre}} ({{year}}) </h1><br>
+        <br><br><h2 class="text-center align-self-center">Reporte General - {{trimestre}} ({{year}})</h2><br>
       {% else %}
-        <br><h1 class="text-center align-self-center">Reporte General - Hasta la fecha ({{year}}) </h1><br>
+        <br><br><h2 class="text-center align-self-center">Reporte General - Hasta la fecha ({{year}})</h2><br>
       {% endif %}
 
+      {% if hayDatos  %}
 
       <div class="container"> 
         <div class="row">
@@ -87,7 +113,15 @@
             {% if client_img %}
               <img style="display: block;margin-left: auto;margin-right: auto; max-width:300px; max-height:100px !important" src={{client_img}} alt="imagen de cliente" onerror="this.src='static\img\dont_photo.png'" width="auto" height="100">
             {% endif %}
-            <br><h4 style="text-align:center">Valor General: {{kpi_total}}</h4>
+
+            {% if avg_general_delta == -1 %}
+              <br><p class="text-center align-self-center">Valor General: {{kpi_total}} (-)</p>
+            {% elif avg_general_delta > 0 %}
+              <br><p class="text-center align-self-center">Valor General: {{kpi_total}} (+{{avg_general_delta}})</p>
+            {% else %}
+              <br><p class="text-center align-self-center">Valor General: {{kpi_total}} ({{avg_general_delta}})</p>
+            {% endif %}
+
           </div>
         </div>
       </div>

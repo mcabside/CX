@@ -1,4 +1,6 @@
-from contextlib import nullcontext
+#from contextlib import nullcontext
+from   audioop import avg
+from   types import new_class
 import pandas as pd
 import json
 import plotly.graph_objects as go
@@ -77,29 +79,31 @@ def reporteGeneral(KPIS):
     # Variables
     q1, q2, q3, q4 = [], [], [], []
     # Q1
-    q1.append(promedioQuarter(KPIS, "kpi_total",        1))
-    q1.append(promedioQuarter(KPIS, "kpi_lealtad",      1))
-    q1.append(promedioQuarter(KPIS, "kpi_satisfaccion", 1))
     q1.append(promedioQuarter(KPIS, "kpi_esfuerzo",     1))
+    q1.append(promedioQuarter(KPIS, "kpi_satisfaccion", 1))
+    q1.append(promedioQuarter(KPIS, "kpi_lealtad",      1))
     q1.append(promedioQuarter(KPIS, "kpi_valor",        1))
+    q1.append(promedioQuarter(KPIS, "kpi_total",        1))
+
     # Q2
-    q2.append(promedioQuarter(KPIS, "kpi_total",        2))
-    q2.append(promedioQuarter(KPIS, "kpi_lealtad",      2))
-    q2.append(promedioQuarter(KPIS, "kpi_satisfaccion", 2))
     q2.append(promedioQuarter(KPIS, "kpi_esfuerzo",     2))
+    q2.append(promedioQuarter(KPIS, "kpi_satisfaccion", 2))
+    q2.append(promedioQuarter(KPIS, "kpi_lealtad",      2))
     q2.append(promedioQuarter(KPIS, "kpi_valor",        2))
+    q2.append(promedioQuarter(KPIS, "kpi_total",        2))
     # Q3
-    q3.append(promedioQuarter(KPIS, "kpi_total",        3))
-    q3.append(promedioQuarter(KPIS, "kpi_lealtad",      3))
-    q3.append(promedioQuarter(KPIS, "kpi_satisfaccion", 3))
     q3.append(promedioQuarter(KPIS, "kpi_esfuerzo",     3))
+    q3.append(promedioQuarter(KPIS, "kpi_satisfaccion", 3))
+    q3.append(promedioQuarter(KPIS, "kpi_lealtad",      3))
     q3.append(promedioQuarter(KPIS, "kpi_valor",        3))
+    q3.append(promedioQuarter(KPIS, "kpi_total",        3))
     # Q4
-    q4.append(promedioQuarter(KPIS, "kpi_total",        4))
-    q4.append(promedioQuarter(KPIS, "kpi_lealtad",      4))
-    q4.append(promedioQuarter(KPIS, "kpi_satisfaccion", 4))
     q4.append(promedioQuarter(KPIS, "kpi_esfuerzo",     4))
+    q4.append(promedioQuarter(KPIS, "kpi_satisfaccion", 4))
+    q4.append(promedioQuarter(KPIS, "kpi_lealtad",      4))
     q4.append(promedioQuarter(KPIS, "kpi_valor",        4))
+    q4.append(promedioQuarter(KPIS, "kpi_total",        4))
+    
     return q1, q2, q3, q4
 
 #Table Reporte General
@@ -109,26 +113,26 @@ def tablaReporteGeneral(consul, cdc, pc):
     avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor = 0, 0, 0, 0, 0
     
     #Check Vacio
-    if(consul[0] == ''):   #Si no hay datos de ese reporte para ese trimestre
-        consul = [0, 0, 0, 0, 0]
+    if(consul[4] == 0.0):   #Si no hay datos de ese reporte para ese trimestre, pos 4 es KPI General
+        consul = [0.0, 0,0, 0.0, 0.0, 0.0]
         cont = cont -1
         
-    if(cdc[0] == ''):      #Si no hay datos de ese reporte para ese trimestre
-        cdc = [0, 0, 0, 0, 0]
+    if(cdc[4] == 0.0):      #Si no hay datos de ese reporte para ese trimestre
+        cdc = [0.0, 0.0, 0.0, 0.0, 0.0]
         cont = cont -1
         
-    if(pc[0] == ''):       #Si no hay datos de ese reporte para ese trimestre
-        pc = [0, 0, 0, 0, 0]
+    if(pc[4] == 0.0):       #Si no hay datos de ese reporte para ese trimestre
+        pc = [0.0, 0.0, 0.0, 0.0, 0.0]
         cont = cont -1
-    
-    #Verificar divisin entre 0
+        
+    #Verificar divisin entre 0 ["CES","CSAT","NPS","VA","General"]
     if(cont > 0):
-        avg_general      = (consul[0] + cdc[0] + pc[0]) / cont
-        avg_lealtad      = (consul[1] + cdc[1] + pc[1]) / cont
-        avg_satisfaccion = (consul[2] + cdc[2] + pc[2]) / cont
-        avg_esfuerzo     = (consul[3] + cdc[3] + pc[3]) / cont 
-        avg_valor        = (consul[4] + cdc[4] + pc[4]) / cont
-    
+        avg_esfuerzo     = (consul[0] + cdc[0] + pc[0]) / cont 
+        avg_satisfaccion = (consul[1] + cdc[1] + pc[1]) / cont
+        avg_lealtad      = (consul[2] + cdc[2] + pc[2]) / cont
+        avg_valor        = (consul[3] + cdc[3] + pc[3]) / cont
+        avg_general      = (consul[4] + cdc[4] + pc[4]) / cont
+      
     return avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor
 
 #Delta KPI Qi vs KPI Qi-1
@@ -174,7 +178,7 @@ def speedmeter(title, value, red, green, porcentaje, delta=None):
                    margin=dict(l=25, r=25, t=0, b=0),
                    annotations=[{'x': 0.5, 'y':0.25
                                       ,'text':str(porcentaje)+"%"
-                                      ,'font': { 'color': "hsl(36, 100%, 50%)", 'size': 25, 'family': "Arial"}
+                                      ,'font': { 'color': "hsl(36, 100%, 50%)", 'size': 20, 'family': "Arial"}
                                       ,'showarrow':False, 'xanchor':'center' }]),
             )
     return fig_total
@@ -183,13 +187,13 @@ def speedmeter(title, value, red, green, porcentaje, delta=None):
 def promedioQuarter(kpi_clients, kpi_name, trimestre):
     avg_kpi_q, cont_q = 0, 0
     for i in kpi_clients:
-        if(i.to_dict()[kpi_name] != '' and i.to_dict()['Trimestre'] == trimestre):
+        if(i.to_dict()['Trimestre'] == trimestre):
             avg_kpi_q = avg_kpi_q + i.to_dict()[kpi_name]
             cont_q += 1
     if(cont_q != 0):    
-        avg_kpi_q = round(avg_kpi_q/cont_q, 1)
+        avg_kpi_q = roundPropio(avg_kpi_q/cont_q)
     else:
-        avg_kpi_q = "" 
+        avg_kpi_q = 0.0 
         
     return avg_kpi_q
 
@@ -214,24 +218,24 @@ def tablaDinamica(kpi_clients):
                     
     for cliente_kpis in kpi:
             cliente = cliente_kpis[0]
-            kpi1 = {'Cliente':cliente,'Trimestre':1,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
-                        "kpi_esfuerzo":"","kpi_total":""}
-            kpi2 = {'Cliente':cliente,'Trimestre':2,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
-                        "kpi_esfuerzo":"","kpi_total":""}
-            kpi3 = {'Cliente':cliente,'Trimestre':3,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
-                        "kpi_esfuerzo":"","kpi_total":""}
-            kpi4 = {'Cliente':cliente,'Trimestre':4,'kpi_valor':"",'kpi_satisfaccion':"","kpi_lealtad":"",
-                        "kpi_esfuerzo":"","kpi_total":""}
+            kpi1 = {'Cliente':cliente,'Trimestre':1,'kpi_valor':0.0,'kpi_satisfaccion':0.0,"kpi_lealtad":0.0,
+                        "kpi_esfuerzo":0.0,"kpi_total":0.0}
+            kpi2 = {'Cliente':cliente,'Trimestre':2,'kpi_valor':0.0,'kpi_satisfaccion':0.0,"kpi_lealtad":0.0,
+                        "kpi_esfuerzo":0.0,"kpi_total":0.0}
+            kpi3 = {'Cliente':cliente,'Trimestre':3,'kpi_valor':0.0,'kpi_satisfaccion':0.0,"kpi_lealtad":0.0,
+                        "kpi_esfuerzo":0.0,"kpi_total":0.0}
+            kpi4 = {'Cliente':cliente,'Trimestre':4,'kpi_valor':0.0,'kpi_satisfaccion':0.0,"kpi_lealtad":0.0,
+                        "kpi_esfuerzo":0.0,"kpi_total":0.0}
             
-            for i in range(1,len(cliente_kpis)):
+            for i in range(1, len(cliente_kpis)):
                 if cliente_kpis[i].to_dict()['Trimestre'] == 1:
-                    kpi1 = cliente_kpis[i].to_dict()
+                    kpi1 = changeDecimal(cliente_kpis[i].to_dict())
                 elif cliente_kpis[i].to_dict()['Trimestre'] == 2:
-                    kpi2 = cliente_kpis[i].to_dict()
+                    kpi2 = changeDecimal(cliente_kpis[i].to_dict())
                 elif cliente_kpis[i].to_dict()['Trimestre'] == 3:
-                    kpi3 = cliente_kpis[i].to_dict()
+                    kpi3 = changeDecimal(cliente_kpis[i].to_dict())
                 elif cliente_kpis[i].to_dict()['Trimestre'] == 4:
-                    kpi4 = cliente_kpis[i].to_dict()
+                    kpi4 = changeDecimal(cliente_kpis[i].to_dict())
                     
             kpi_q1.append(kpi1)
             kpi_q2.append(kpi2)
@@ -240,11 +244,25 @@ def tablaDinamica(kpi_clients):
             
     return kpi_q1, kpi_q2, kpi_q3, kpi_q4
 
+#Change decimals
+def changeDecimal(client_kpi):
+    new_client_kpi = {
+        'kpi_lealtad':      roundPropio(client_kpi['kpi_lealtad']),
+        'kpi_valor':        roundPropio(client_kpi['kpi_valor']),
+        'kpi_satisfaccion': roundPropio(client_kpi['kpi_satisfaccion']),
+        'kpi_total':        roundPropio(client_kpi['kpi_total']),
+        'kpi_esfuerzo':     roundPropio(client_kpi['kpi_esfuerzo']),
+        'Cliente':          client_kpi['Cliente'],
+        'Year':             client_kpi['Year'],
+        'Trimestre':        client_kpi['Trimestre']
+    }
+    return new_client_kpi
+
 #Guardar Listas Trimestres y años
-def saveSelectData(CDC_KPIS):
+def saveSelectData(LIST_KPIS):
     Trimestres, Years, clientes = [], [], []
     
-    for doc in CDC_KPIS:
+    for doc in LIST_KPIS:
         if doc.to_dict()["Trimestre"] not in Trimestres:
             Trimestres.append(doc.to_dict()["Trimestre"])
             
@@ -411,9 +429,8 @@ def SearchClients(results,not_found_list,found_list,Clientes_Data):
     
 def getHistorico(Datos,Cliente,KPI,Area):
     
-    historico = []
-    periodos = []
-    valores = []
+    historico, periodos, valores = [], [], []
+   
     for doc in Datos:
         if doc.to_dict()["Cliente"] == Cliente:
             historico.append([doc.to_dict()["Trimestre"],doc.to_dict()["Year"],doc.to_dict()[KPI]])
@@ -421,7 +438,6 @@ def getHistorico(Datos,Cliente,KPI,Area):
     for valor in historico:
         periodos.append("Q" + str(valor[0]) + " " + str(valor[1]))
         valores.append(valor[2])
-    
     
     fig = px.line(x=periodos, y=valores,labels={'x':'períodos', 'y':KPI[4:]}, title='Historico ' + KPI[4:] + " " + Cliente + " " + Area,
                   markers=True,text=valores)
@@ -475,9 +491,17 @@ def OrderClientsRankings(KPIS):
     #periodos = OrderPeriods(periodos)
     return periodos
 
+#Funcion para redondear personalizada
 def roundPropio(num):
-    aux  = num - int(num) 
-    if(aux != 0 and aux >= 0.5): 
+    aux  = num - int(num)
+    aux2 = aux*10 - int(aux*10) 
+    if(aux2 != 0 and aux2 >= 0.5): 
         return round(num+0.01, 1)
     else:
         return round(num, 1)
+
+def unificarClientes(lista_clientes, lista_firebase):
+    for doc in lista_firebase:
+        if doc not in lista_clientes:
+            lista_clientes.append(doc)
+    return lista_clientes

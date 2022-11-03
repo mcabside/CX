@@ -6,6 +6,7 @@ from   CX.static.questions.pc_declinacion_questions import Preguntas_esfuerzo,Pr
 from   CX import app
 from   CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
 from   CX.logic.functions import carga_kpi, carga_preguntas, deltaKPI, getRangosyPonderaciones, filtrarxyear
+from   CX.logic.functions import roundPropio
 
 #Carga Respuestas Proceso comercial declinación
 def cargaRespuestasPCD(db, Year,Trimestre, results, found_list,area):
@@ -61,7 +62,7 @@ def chart_pcd():
     # Variables
     kpi_clients = None
     kpi_q1, kpi_q2, kpi_q3, kpi_q4, Trimestres, Years, lista_clientes = [], [], [], [], [], [], []
-    kpi_total = 0
+    kpi_total, kpi_total_delta = 0, 0
     cliente_unico, graph_esfuerzo, graph_satisfaccion, graph_lealtad, graph_valor,imagen_cliente = False, False, False, False, False, False
     
     #Conexion con la DB - KPI's CDC
@@ -133,6 +134,7 @@ def chart_pcd():
                 
                 if(len(kpi_delta) > 0):
                     delta = kpi_delta[0].to_dict()
+                    kpi_total_delta =  roundPropio(kpi_total-delta['kpi_total'])
                     fig_ces  = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'],  delta['kpi_esfuerzo'])
                     fig_csat = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'], delta['kpi_satisfaccion'])
                     fig_nps  = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'],  delta['kpi_lealtad'])
@@ -152,6 +154,7 @@ def chart_pcd():
             
     return render_template('chart.html',
                            kpi_total              = kpi_total,
+                           kpi_total_delta        = kpi_total_delta,
                            Trimestres             = Trimestres,
                            Years                  = Years,
                            lista_clientes         = lista_clientes,
@@ -162,14 +165,14 @@ def chart_pcd():
                            graphJSON_satisfaccion = graph_satisfaccion,
                            graphJSON_lealtad      = graph_lealtad,
                            graphJSON_valor        = graph_valor,
-                           imagen_cliente = imagen_cliente,
-                           kpi_q1 = kpi_q1, 
-                           kpi_q2 = kpi_q2, 
-                           kpi_q3 = kpi_q3, 
-                           kpi_q4 = kpi_q4,
-                           list_avg_kpi = list_avg_kpi,
-                           area = "Proceso Comercial Declinación",
-                           year=int(year_input))
+                           imagen_cliente         = imagen_cliente,
+                           kpi_q1                 = kpi_q1, 
+                           kpi_q2                 = kpi_q2, 
+                           kpi_q3                 = kpi_q3, 
+                           kpi_q4                 = kpi_q4,
+                           list_avg_kpi           = list_avg_kpi,
+                           area                   = "Proceso Comercial Declinación",
+                           year                   = int(year_input))
     
     
 

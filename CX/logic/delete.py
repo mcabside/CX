@@ -20,10 +20,7 @@ def delete():
     if request.method == 'POST':
         
         try:
-            
-            #Message to user (no FUNCIONA)
-            #flash("Por favor espere se está borrando la información", "info")
-            
+
             #Guardar Parametros URL
             trimestre_delete = request.form.get('trimestre_delete')
             year_delete      = request.form.get('year_delete')
@@ -58,7 +55,7 @@ def delete():
             else:
                 return redirect(url_for('upload_file'))
         except:
-            flash("Error al eliminar info", "error")
+            flash("Error al eliminar la información", "error")
             
     return render_template('delete.html')
     

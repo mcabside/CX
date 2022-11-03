@@ -31,7 +31,7 @@ def allowed_file(filename):
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+                               'favicon.ico', mimetype='img/icon.png')
             
 #Home Page / upload file page
 @app.route('/', methods=['GET', 'POST'])
@@ -198,7 +198,6 @@ def SaveKPISPercents():
             flash("Error en el formato del archivo", 'error')
             
 from CX.logic.cdc import cargaRespuestasCDC
-
 
 from CX.logic.consultoria import cargaRespuestasConsultoria
 

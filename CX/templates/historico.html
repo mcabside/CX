@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<h1 class="text-center align-self-center">Histórico {{cliente_input}} - {{Area}}</h1><br>
+<br><h2 class="text-center align-self-center">Histórico {{cliente_input}} - {{Area}}</h1><br>
 
 <div style="align-items:center;justify-content:center;display:flex">
 
@@ -12,7 +12,7 @@
         <select id="cliente_input" name="cliente_input" class="form-select">
          {% for cliente in lista_clientes %}
           {% if cliente == cliente_input%}
-            <option value="{{cliente}}" selected="selected">{{cliente}}</option>
+            <option value="{{cliente}}" selected>{{cliente}}</option>
           {% else %}
             <option value="{{cliente}}" >{{cliente}}</option>
           {% endif %}
@@ -22,6 +22,13 @@
 
       <div class="col" style="width:200px">
         <select id="kpi_input" name="kpi_input" class="form-select">
+
+        {% if kpi_input == 'kpi_total' %}
+            <option value="kpi_total" selected>General</option>
+        {% else %}
+            <option value="kpi_total">General</option>
+        {% endif%}
+        
         {% if kpi_input == 'kpi_lealtad' %}
             <option value="kpi_lealtad" selected=>Lealtad</option>
         {% else %}
@@ -49,6 +56,42 @@
          </select>
       </div>
 
+      <div class="col" style="width:200px">
+        <select id="area_input" name="area_input" class="form-select" onchange="testing({{list_clients_cdc|safe}},{{list_clients_con|safe}},{{list_clients_pcs|safe}},{{list_clients_pcd|safe}})">
+
+        {% if Area == 'Todas' %}
+            <option value="Todas" selected disabled>Todas</option>
+        {% else %}
+            <option value="Todas" disabled>Todas</option>
+        {% endif%}
+
+        {% if Area == 'CDC' %}
+            <option value="CDC" selected=>CDC</option>
+        {% else %}
+            <option value="CDC">CDC</option>
+        {% endif%}
+
+        {% if Area == 'Consultoria' %}
+            <option value="Consultoria" selected>Consultoria</option>
+        {% else %}
+            <option value="Consultoria">Consultoria</option>
+        {% endif%}
+
+        {% if Area == "Proceso comercial" %}
+            <option value="PCS" selected>Proceso comercial</option>
+        {% else %}
+            <option value="PCS">Proceso comercial</option>
+        {% endif%}
+
+        {% if Area == "Proceso comercial declinación" %}
+            <option value="PCD" selected>Proceso comercial declinación</option>
+        {% else %}
+            <option value="PCD">Proceso comercial declinación</option>
+        {% endif%}
+
+         </select>
+      </div>
+
       <div class="col">
         <div class="form-check">
           <input class="btn btn-primary" type=submit value="Buscar">
@@ -61,17 +104,20 @@
 
     <br>
 
-
-    {% if  busqueda %}
-    <div class="container">
-          <div class="col" id="bargraph1">
-            <script>
-                var graphs1 = {{historico_graph | safe}};
-                graphs1.config = {'displaylogo': false}
-                Plotly.plot('bargraph1', graphs1);
-            </script>
-          </div>
-      </div>
+    {% if hayData %}
+      {% if  busqueda %}
+      <div class="container">
+            <div class="col" id="bargraph1">
+              <script>
+                  var graphs1 = {{historico_graph | safe}};
+                  graphs1.config = {'displaylogo': false}
+                  Plotly.plot('bargraph1', graphs1);
+              </script>
+            </div>
+        </div>
+      {% endif %}
+    {% else %}
+      <br><br><p class="text-center align-self-center fst-italic">No hay información disponible</p>
     {% endif %}
 
 

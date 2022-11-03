@@ -4,7 +4,7 @@ import json
 import plotly
 from   CX.static.questions.cdc_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
 from   CX import app
-from   CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
+from   CX.logic.functions import roundPropio, saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
 from   CX.logic.functions import carga_kpi, carga_preguntas, deltaKPI, getRangosyPonderaciones, filtrarxyear
 
 #Carga Respuestas CDC
@@ -48,13 +48,14 @@ def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
                     kpi_valor            += (float(doc.to_dict()['kpi_valor']))
                     numero_de_respuestas += 1
                     
-                kpi_esfuerzo     = round(kpi_esfuerzo/numero_de_respuestas, 2)
-                kpi_satisfaccion = round(kpi_satisfaccion/numero_de_respuestas, 2)
-                kpi_lealtad      = round(kpi_lealtad/numero_de_respuestas, 2)
-                kpi_valor        = round(kpi_valor/numero_de_respuestas, 2)
-                kpi_total        = round((kpi_esfuerzo*(kpi_ces['ponderacion']/100)) + (kpi_satisfaccion*(kpi_csat['ponderacion']/100)) + (kpi_lealtad*(kpi_nps['ponderacion']/100)) + (kpi_valor*(kpi_va['ponderacion']/100)), 2)
+                kpi_esfuerzo     = roundPropio(kpi_esfuerzo/numero_de_respuestas)
+                kpi_satisfaccion = roundPropio(kpi_satisfaccion/numero_de_respuestas)
+                kpi_lealtad      = roundPropio(kpi_lealtad/numero_de_respuestas)
+                kpi_valor        = roundPropio(kpi_valor/numero_de_respuestas)
+                kpi_total        = roundPropio((kpi_esfuerzo*(kpi_ces['ponderacion']/100)) + (kpi_satisfaccion*(kpi_csat['ponderacion']/100)) + (kpi_lealtad*(kpi_nps['ponderacion']/100)) + (kpi_valor*(kpi_va['ponderacion']/100)))
                 
                 carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total)
+                
     except Exception as e: 
             print(e)
             flash('Error al carga info CDC', 'error')
@@ -66,7 +67,7 @@ def chart_cdc():
         # Variables
         kpi_clients = None
         kpi_q1, kpi_q2, kpi_q3, kpi_q4,  Trimestres, Years, lista_clientes = [], [], [], [], [], [], []
-        kpi_total = 0
+        kpi_total, kpi_total_delta = 0, 0
         cliente_unico, graph_ces, graph_csat, graph_nps, graph_va, imagen_cliente = False, False, False, False, False,False
         error = "Error al cargar reporte CDC"
         
@@ -128,7 +129,7 @@ def chart_cdc():
                                     
             #SHOW GRAFICOS          
             if len(kpi_client) > 0:
-                kpi_total = round(float(kpi_client[0].to_dict()["kpi_total"]), 1)
+                kpi_total = roundPropio(float(kpi_client[0].to_dict()["kpi_total"]))
                 client    = kpi_client[0].to_dict()
                 
                 #Rangos y ponderaciones
@@ -142,12 +143,14 @@ def chart_cdc():
                 kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
                             
                 if(len(kpi_delta) > 0):
-                    delta = kpi_delta[0].to_dict()
+                    delta           = kpi_delta[0].to_dict()
+                    kpi_total_delta =  roundPropio(kpi_total-delta['kpi_total'])
                     fig_ces  = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'],  delta['kpi_esfuerzo'])
                     fig_csat = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'], delta['kpi_satisfaccion'])
                     fig_nps  = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'],  delta['kpi_lealtad'])
                     fig_va   = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'],   delta['kpi_valor'])
                 else:
+                    kpi_total_delta = 0
                     fig_ces  = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'])
                     fig_csat = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'])
                     fig_nps  = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'])
@@ -158,10 +161,11 @@ def chart_cdc():
                 graph_nps  = json.dumps(fig_nps,  cls=plotly.utils.PlotlyJSONEncoder)
                 graph_va   = json.dumps(fig_va,   cls=plotly.utils.PlotlyJSONEncoder)
     except:
-        flash(error, "error")
+        flash(error, "Error CDC")
         
     return render_template('chart.html',
                            kpi_total              = kpi_total,
+                           kpi_total_delta        = kpi_total_delta,
                            Trimestres             = Trimestres,
                            Years                  = Years,
                            lista_clientes         = lista_clientes,
@@ -172,11 +176,11 @@ def chart_cdc():
                            graphJSON_satisfaccion = graph_csat,
                            graphJSON_lealtad      = graph_nps,
                            graphJSON_valor        = graph_va,
-                           imagen_cliente = imagen_cliente,
-                           kpi_q1 = kpi_q1, 
-                           kpi_q2 = kpi_q2, 
-                           kpi_q3 = kpi_q3, 
-                           kpi_q4 = kpi_q4,
-                           list_avg_kpi = list_avg_kpi,
-                           area = "CDC",
-                           year=int(year_input))
+                           imagen_cliente         = imagen_cliente,
+                           kpi_q1                 = kpi_q1, 
+                           kpi_q2                 = kpi_q2, 
+                           kpi_q3                 = kpi_q3, 
+                           kpi_q4                 = kpi_q4,
+                           list_avg_kpi           = list_avg_kpi,
+                           area                   = "CDC",
+                           year                   = int(year_input))

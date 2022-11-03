@@ -1,11 +1,9 @@
-from   flask import render_template,request,flash,redirect
-from   CX import app,firestore,storage,UPLOAD_FOLDER
+from   flask import render_template, request, flash, redirect
+from   CX import app, firestore, storage, UPLOAD_FOLDER
 from   werkzeug.utils import secure_filename
 import os
-import tempfile
-from uuid import uuid4
+from   uuid import uuid4
 import json
-
 
 ALLOWED_EXTENSIONS = {'JPEG', 'JPG', 'PNG','jpeg','jpg','png'}
 bucket = storage.bucket()
@@ -13,7 +11,6 @@ bucket = storage.bucket()
 def allowed_file(filename): 
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-           
            
 #Chart Page
 @app.route('/config_ranges_pond', methods=['GET', 'POST'])
@@ -46,14 +43,10 @@ def clients_images():
         
         # Verificar si existe el archivo y si tiene el formato correcto
         if file and allowed_file(file.filename):
-            
-            
                 
             #Firebase
             try:
-                
-                #firebase.storage().put('Imagenes_Cliente/' + temp.name)
-                
+                                
                 # Create new token
                 new_token = uuid4()
                 
@@ -70,8 +63,6 @@ def clients_images():
                 
                 # Set metadata to blob
                 blob.metadata = metadata
-                
-                
                 blob.upload_from_filename(filename=UPLOAD_FOLDER + "\\" + filename)
                 blob.make_public()
                 img_url = blob.public_url
@@ -88,7 +79,5 @@ def clients_images():
         
         else:
             flash("Error formato del archivo erroneo", "error") 
-            
-        
         
         return render_template('clients_images.html',Clientes_Data = Clientes_Data)
