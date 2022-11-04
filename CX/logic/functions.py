@@ -434,8 +434,92 @@ def getHistorico(Datos,Cliente,KPI,Area):
     for doc in Datos:
         if doc.to_dict()["Cliente"] == Cliente:
             historico.append([doc.to_dict()["Trimestre"],doc.to_dict()["Year"],doc.to_dict()[KPI]])
+            
     historico = OrderPeriods(historico)
+    
     for valor in historico:
+        periodos.append("Q" + str(valor[0]) + " " + str(valor[1]))
+        valores.append(valor[2])
+    
+    fig = px.line(x=periodos, y=valores,labels={'x':'períodos', 'y':KPI[4:]}, title='Historico ' + KPI[4:] + " " + Cliente + " " + Area,
+                  markers=True,text=valores)
+    fig.update_layout(yaxis_range=[0,10.5])
+    fig.update_traces(textposition="bottom center")
+    return fig
+
+def getHistoricoTodaslasAreas(cdc, con, pcs, pcd, Cliente, KPI, Area):
+    
+    historico_cdc, historico_con, historico_pcs, historico_pcd = [], [], [], []
+    periodos, valores, list_periodos  = [], [], []
+   
+    #CDC
+    for doc in cdc:
+        if doc.to_dict()["Cliente"] == Cliente:
+            if([doc.to_dict()["Trimestre"],doc.to_dict()["Year"]] not in list_periodos):
+                list_periodos.append([doc.to_dict()["Trimestre"],doc.to_dict()["Year"]])
+            historico_cdc.append([doc.to_dict()["Trimestre"],doc.to_dict()["Year"],doc.to_dict()[KPI]])
+    
+    #Consultoria
+    for doc in con:
+        if doc.to_dict()["Cliente"] == Cliente:
+            if([doc.to_dict()["Trimestre"],doc.to_dict()["Year"]] not in list_periodos):
+                list_periodos.append([doc.to_dict()["Trimestre"],doc.to_dict()["Year"]])
+            historico_con.append([doc.to_dict()["Trimestre"],doc.to_dict()["Year"],doc.to_dict()[KPI]])
+            
+    #PCS
+    for doc in pcs:
+        if doc.to_dict()["Cliente"] == Cliente:
+            if([doc.to_dict()["Trimestre"],doc.to_dict()["Year"]] not in list_periodos):
+                list_periodos.append([doc.to_dict()["Trimestre"],doc.to_dict()["Year"]])
+            historico_pcs.append([doc.to_dict()["Trimestre"],doc.to_dict()["Year"],doc.to_dict()[KPI]])
+            
+    #PCD
+    for doc in pcd:
+        if doc.to_dict()["Cliente"] == Cliente:
+            if([doc.to_dict()["Trimestre"],doc.to_dict()["Year"]] not in list_periodos):
+                list_periodos.append([doc.to_dict()["Trimestre"],doc.to_dict()["Year"]])
+            historico_pcd.append([doc.to_dict()["Trimestre"],doc.to_dict()["Year"],doc.to_dict()[KPI]])
+            
+    historico_cdc = OrderPeriods(historico_cdc) #[[1,2022,10],[2,2022,9]]
+    historico_con = OrderPeriods(historico_con) #[[2,2022,6]]
+    historico_pcs = OrderPeriods(historico_pcs)
+    historico_pcd = OrderPeriods(historico_pcd)
+        
+    historico_total = []
+    
+    for periodo in list_periodos:
+        valor_t, cont = 0, 0
+        for perioco_cdc in historico_cdc:
+            if(perioco_cdc[:2] == periodo):
+                valor_t = valor_t + perioco_cdc[2]
+                cont = cont + 1
+                
+        for perioco_con in historico_con:
+            if(perioco_con[:2] == periodo):
+                valor_t = valor_t + perioco_con[2]
+                cont = cont + 1
+                
+        for perioco_pcs in historico_pcs:
+            if(perioco_pcs[:2] == periodo):
+                valor_t = valor_t + perioco_pcs[2]
+                cont = cont + 1
+        
+        for perioco_pcd in historico_pcd:
+            if(perioco_pcd[:2] == periodo):
+                valor_t = valor_t + perioco_pcd[2]
+                cont = cont + 1
+                
+        if(cont==0 ):
+             cont=1       
+             
+        historico_total.append([periodo[0],periodo[1], roundPropio(valor_t/cont)])
+        cont = 0
+        valor_t = 0
+    
+    historico_total = OrderPeriods(historico_total)
+        
+    #["1", "Year", "kpi_value"]
+    for valor in historico_total:
         periodos.append("Q" + str(valor[0]) + " " + str(valor[1]))
         valores.append(valor[2])
     

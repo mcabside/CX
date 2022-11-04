@@ -7,6 +7,9 @@ from   CX import app
 from   CX.logic.functions import roundPropio, saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
 from   CX.logic.functions import carga_kpi, carga_preguntas, deltaKPI, getRangosyPonderaciones, filtrarxyear
 
+#Global variables
+kpi_clients = []           
+
 #Carga Respuestas CDC
 def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
     
@@ -59,119 +62,127 @@ def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
     except Exception as e: 
             print(e)
             flash('Error al carga info CDC', 'error')
-            
+           
+ 
 #Chart Page
 @app.route('/chart_cdc', methods=['GET', 'POST'])
 def chart_cdc():
-    try:    
-        # Variables
-        kpi_clients = None
-        kpi_q1, kpi_q2, kpi_q3, kpi_q4,  Trimestres, Years, lista_clientes = [], [], [], [], [], [], []
-        kpi_total, kpi_total_delta = 0, 0
-        cliente_unico, graph_ces, graph_csat, graph_nps, graph_va, imagen_cliente = False, False, False, False, False,False
-        error = "Error al cargar reporte CDC"
-        
-        #Conexion con la DB - KPI's CDC
-        db = firestore.client()
-        kpi_clients = db.collection('CDC_KPIS').order_by("Cliente").get() #Get All CDC KPI's
-        
-        #Guardar Listas Trimestres y años de la DB
-        Trimestres, Years, lista_clientes = saveSelectData(kpi_clients)
-        
-        #Guardar Parametros URL
-        trimestre_input = (request.args.get('trimestre_input'))
-        year_input      = (request.args.get('year_input'))
-        cliente_input   = (request.args.get('cliente_input'))
-        
-        #Validación parametros URL
-        trimestre_input, year_input = validarParametros(trimestre_input, year_input, Trimestres, Years)
-        
-        #Lista Avg Kpi's
-        list_avg_kpi = []
-        
-        #Show Table
-        if cliente_input is None or cliente_input=="Todos":
+    
+    global kpi_clients
+    
+    # Variables
+    #kpi_clients = None
+    kpi_q1, kpi_q2, kpi_q3, kpi_q4, Trimestres, Years, lista_clientes = [], [], [], [], [], [], []
+    kpi_total, kpi_total_delta = 0, 0
+    cliente_unico, graph_ces, graph_csat, graph_nps, graph_va, imagen_cliente = False, False, False, False, False,False
+    error = "Error al cargar reporte CDC"
+    trimestre_input, year_input, cliente_input = None, None, None
+    list_avg_kpi = []
+    
+    #Firebase 
+    db = firestore.client()
+    
+    #Guardar Parametros URL
+    trimestre_input = request.form.get('trimestre_input')
+    cliente_input   = request.form.get('cliente_input')
+    year_input      = request.form.get('year_input')
+    
+    #Guardar Listas Trimestres y años de la DB
+    Trimestres, Years, lista_clientes = saveSelectData(kpi_clients)
             
-            #Filtrar por año
-            kpi_clients = filtrarxyear(kpi_clients, int(year_input))
+    #Validación parametros URL
+    trimestre_input, year_input = validarParametros(trimestre_input, year_input, Trimestres, Years)
             
-            #Cambiar digitos        
-            
-            #Tabla dinamica
-            kpi_q1, kpi_q2, kpi_q3, kpi_q4 = tablaDinamica(kpi_clients)
-        
-            #Promedio Q's    
-            for i in range(4):
-                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_valor',        i+1))
-                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_satisfaccion', i+1))
-                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_lealtad',      i+1))
-                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_esfuerzo',     i+1))
-                list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_total',        i+1))
+    if request.method == 'GET':
+        try:    
+            #Conexion con la DB - KPI's CDC
+            kpi_clients = db.collection('CDC_KPIS').order_by("Cliente").get() #Get All CDC KPI's
+                  
+            #Show Table (GET)
+            if cliente_input is None or cliente_input=="Todos":
                 
-        #Show speedmeter  
-        else:
+                #Filtrar por año
+                kpi_clients = filtrarxyear(kpi_clients, int(year_input))
+                                
+                #Tabla dinamica
+                kpi_q1, kpi_q2, kpi_q3, kpi_q4 = tablaDinamica(kpi_clients)
             
-            #GET ALL KPI's CDC FROM A SPECIFIC YEAR ALL Q
-            kpis_client = db.collection('CDC_KPIS').where('Year','==',int(year_input)).where('Cliente','==',cliente_input).get()
+                #Promedio Q's    
+                for i in range(4):
+                    list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_valor',        i+1))
+                    list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_satisfaccion', i+1))
+                    list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_lealtad',      i+1))
+                    list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_esfuerzo',     i+1))
+                    list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_total',        i+1))
+        except:
+            flash(error, "Error CDC")        
+    
+    #Show speedmeter (POST)
+    if request.method == 'POST':  
+    
+        #Filter
+        kpis_client = []
+        for i in kpi_clients:
+            if(i.to_dict()['Cliente'] == cliente_input and i.to_dict()['Year']==int(year_input) and i.to_dict()['Trimestre']==int(trimestre_input)):
+                kpis_client.append(i)
             
-            #GET Cliente IMAGE
-            try:
-                Cliente        = db.collection('Clientes').where('Cliente','==',cliente_input).get()
-                imagen_cliente = Cliente[0].to_dict()["Imagen"]
-            except:
-                imagen_cliente = False
+        #GET Cliente IMAGE
+        try:
+            Cliente        = db.collection('Clientes').where('Cliente','==',cliente_input).get()
+            imagen_cliente = Cliente[0].to_dict()["Imagen"]
+        except:
+            imagen_cliente = False
             
-            #KPI's CDC FROM A SPECIFIC Q
-            kpi_client, kpi_delta = deltaKPI(kpis_client, trimestre_input)
+        #KPI's CDC FROM A SPECIFIC Q
+        kpi_client, kpi_delta = deltaKPI(kpis_client, trimestre_input)
             
-            #ONLY ONE CLIENT
-            cliente_unico = True
+        #ONLY ONE CLIENT
+        cliente_unico = True
                                     
-            #SHOW GRAFICOS          
-            if len(kpi_client) > 0:
-                kpi_total = roundPropio(float(kpi_client[0].to_dict()["kpi_total"]))
-                client    = kpi_client[0].to_dict()
+        #SHOW GRAFICOS          
+        if len(kpi_client) > 0:
+            kpi_total = roundPropio(float(kpi_client[0].to_dict()["kpi_total"]))
+            client    = kpi_client[0].to_dict()
                 
-                #Rangos y ponderaciones
-                config = db.collection('Rangos_Ponderaciones').where('year','==',int(year_input)).get()
+            #Rangos y ponderaciones
+            config = db.collection('Rangos_Ponderaciones').where('year','==',int(year_input)).get()
                 
-                #Check get rangos
-                if(len(config) == 0):
-                    error = "Error, no se encontraron los rangos para ese trimestre"
+            #Check get rangos
+            if(len(config) == 0):
+                error = "Error, no se encontraron los rangos para ese trimestre"
                 
-                #Recuperar rangos y ponderaciones desde Firebase
-                kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
+            #Recuperar rangos y ponderaciones desde Firebase
+            kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
                             
-                if(len(kpi_delta) > 0):
-                    delta           = kpi_delta[0].to_dict()
-                    kpi_total_delta =  roundPropio(kpi_total-delta['kpi_total'])
-                    fig_ces  = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'],  delta['kpi_esfuerzo'])
-                    fig_csat = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'], delta['kpi_satisfaccion'])
-                    fig_nps  = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'],  delta['kpi_lealtad'])
-                    fig_va   = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'],   delta['kpi_valor'])
-                else:
-                    kpi_total_delta = 0
-                    fig_ces  = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'])
-                    fig_csat = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'])
-                    fig_nps  = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'])
-                    fig_va   = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'])
+            if(len(kpi_delta) > 0):
+                delta           = kpi_delta[0].to_dict()
+                kpi_total_delta =  roundPropio(kpi_total-delta['kpi_total'])
+                fig_ces  = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'],  delta['kpi_esfuerzo'])
+                fig_csat = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'], delta['kpi_satisfaccion'])
+                fig_nps  = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'],  delta['kpi_lealtad'])                    
+                fig_va   = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'],   delta['kpi_valor'])
+            else:
+                kpi_total_delta = 0
+                fig_ces  = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'])
+                fig_csat = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'])
+                fig_nps  = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'])
+                fig_va   = speedmeter(kpi_va['kpi_name'],   client["kpi_valor"],        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'])
                 
-                graph_ces  = json.dumps(fig_ces,  cls=plotly.utils.PlotlyJSONEncoder)
-                graph_csat = json.dumps(fig_csat, cls=plotly.utils.PlotlyJSONEncoder)
-                graph_nps  = json.dumps(fig_nps,  cls=plotly.utils.PlotlyJSONEncoder)
-                graph_va   = json.dumps(fig_va,   cls=plotly.utils.PlotlyJSONEncoder)
-    except:
-        flash(error, "Error CDC")
-        
+            graph_ces  = json.dumps(fig_ces,  cls=plotly.utils.PlotlyJSONEncoder)
+            graph_csat = json.dumps(fig_csat, cls=plotly.utils.PlotlyJSONEncoder)
+            graph_nps  = json.dumps(fig_nps,  cls=plotly.utils.PlotlyJSONEncoder)
+            graph_va   = json.dumps(fig_va,   cls=plotly.utils.PlotlyJSONEncoder)
+   
     return render_template('chart.html',
                            kpi_total              = kpi_total,
                            kpi_total_delta        = kpi_total_delta,
                            Trimestres             = Trimestres,
+                           trimestre_input        = int(trimestre_input), 
                            Years                  = Years,
+                           year                   = int(year_input),
                            lista_clientes         = lista_clientes,
                            cliente_unico          = cliente_unico,
                            cliente_input          = cliente_input,
-                           trimestre_input        = int(trimestre_input), 
                            graphJSON_esfuerzo     = graph_ces,
                            graphJSON_satisfaccion = graph_csat,
                            graphJSON_lealtad      = graph_nps,
@@ -182,5 +193,4 @@ def chart_cdc():
                            kpi_q3                 = kpi_q3, 
                            kpi_q4                 = kpi_q4,
                            list_avg_kpi           = list_avg_kpi,
-                           area                   = "CDC",
-                           year                   = int(year_input))
+                           area                   = "CDC")

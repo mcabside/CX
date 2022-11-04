@@ -5,19 +5,16 @@
     <!--Form/selects-->
     <div style="align-items:center;justify-content:center;display:flex">
       
-      <form method="get" class="row gy-2 gx-3 align-items-center">
+      <form method="post" class="row gy-2 gx-3 align-items-center">
 
-          <div class="col-sm-3"> 
-
+          <div class="form-floating" style="width:150px"> 
             {% if cliente_input  != "Todos" and cliente_input %}
               <select id="trimestre_input" name="trimestre_input" class="form-select" >
-            
             {% else %}
               <select id="trimestre_input" name="trimestre_input" class="form-select" disabled>
-            
             {% endif %}
 
-             {% for Trimestre in Trimestres %}
+            {% for Trimestre in Trimestres %}
                 {% if Trimestre == trimestre_input %}
                   <option value="{{Trimestre}}" selected="selected">Q{{ Trimestre}}</option>
                 {% else %}
@@ -25,10 +22,10 @@
                 {% endif %}
              {% endfor %}   
             </select>
-
+            <label for="floatingSelect">Trimestres</label>
            </div>  
                          
-        <div class="col-sm-3">   
+          <div class="form-floating" style="width:150px">           
           <select id="year_input" name="year_input" class="form-select" >
            {% for Year in Years %}
               {% if Year == year %}
@@ -38,9 +35,10 @@
               {% endif %}
            {% endfor %}   
            </select>
+           <label for="floatingSelect">Años</label>
         </div>
 
-        <div class="col-sm-3">
+        <div class="form-floating" style="width:200px">           
           <select id="cliente_input" name="cliente_input" class="form-select" onchange="changeSelect()">
             <option value="Todos" default>Todos</option>
            {% for cliente in lista_clientes %}
@@ -51,9 +49,10 @@
             {% endif %}
            {% endfor %}   
            </select>
+           <label for="floatingSelect">Clientes</label>
         </div>
 
-        <div class="col-sm-2">
+        <div class="col">
           <div class="form-check">
             <input class="btn btn-primary" type=submit value="Filtrar">
           </div>

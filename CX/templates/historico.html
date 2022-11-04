@@ -2,99 +2,98 @@
 
 {% block content %}
 
-<br><h2 class="text-center align-self-center">Histórico {{cliente_input}} - {{Area}}</h1><br>
+<br><h2 class="text-center align-self-center">Histórico {{cliente_input}} - {{area_input}}</h2><br>
 
 <div style="align-items:center;justify-content:center;display:flex">
 
-    <form method = "post" class="row gy-2 gx-3 align-items-center">
+    <form  method="post" class="row gy-2 gx-3 align-items-center">
 
-      <div class="col" style="width:300px">
-        <select id="cliente_input" name="cliente_input" class="form-select">
-         {% for cliente in lista_clientes %}
-          {% if cliente == cliente_input%}
-            <option value="{{cliente}}" selected>{{cliente}}</option>
-          {% else %}
-            <option value="{{cliente}}" >{{cliente}}</option>
-          {% endif %}
-         {% endfor %}
-         </select>
+        <div class="form-floating"  style="width:300px">
+            <select id="cliente_input" name="cliente_input" class="form-select">
+                {% for cliente in lista_clientes %}
+                    {% if cliente == cliente_input%}
+                        <option value="{{cliente}}" selected>{{cliente}}</option>
+                    {% else %}
+                        <option value="{{cliente}}" >{{cliente}}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            <label for="floatingSelect">Clientes</label>
+        </div>
+
+        <div class="form-floating"  style="width:200px">
+            <select id="kpi_input" name="kpi_input" class="form-select">
+                {% if kpi_input == 'kpi_total' %}
+                    <option value="kpi_total" selected>General</option>
+                {% else %}
+                    <option value="kpi_total">General</option>
+                {% endif%}
+                
+                {% if kpi_input == 'kpi_lealtad' %}
+                    <option value="kpi_lealtad" selected=>Lealtad</option>
+                {% else %}
+                    <option value="kpi_lealtad">Lealtad</option>
+                {% endif%}
+
+                {% if kpi_input == 'kpi_esfuerzo' %}
+                    <option value="kpi_esfuerzo" selected>Esfuerzo</option>
+                {% else %}
+                    <option value="kpi_esfuerzo">Esfuerzo</option>
+                {% endif%}
+
+                {% if kpi_input == "kpi_satisfaccion" %}
+                    <option value="kpi_satisfaccion" selected>Satisfacción</option>
+                {% else %}
+                    <option value="kpi_satisfaccion">Satisfacción</option>
+                {% endif%}
+
+                {% if kpi_input == "kpi_valor" %}
+                    <option value="kpi_valor" selected>Valor</option>
+                {% else %}
+                    <option value="kpi_valor">Valor</option>
+                {% endif%}
+            </select>
+            <label for="floatingSelect">KPI's</label>
       </div>
 
-      <div class="col" style="width:200px">
-        <select id="kpi_input" name="kpi_input" class="form-select">
+      <div class="form-floating"  style="width:200px">
+        <select id="area_input" name="area_input" class="form-select" onchange="changeListClients({{list_clients_cdc|safe}},{{list_clients_con|safe}},{{list_clients_pcs|safe}},{{list_clients_pcd|safe}})">
+            {% if area_input == 'Todas' %}
+                <option value="Todas" selected>Todas</option>
+            {% else %}
+                <option value="Todas">Todas</option>
+            {% endif%}
 
-        {% if kpi_input == 'kpi_total' %}
-            <option value="kpi_total" selected>General</option>
-        {% else %}
-            <option value="kpi_total">General</option>
-        {% endif%}
-        
-        {% if kpi_input == 'kpi_lealtad' %}
-            <option value="kpi_lealtad" selected=>Lealtad</option>
-        {% else %}
-            <option value="kpi_lealtad">Lealtad</option>
-        {% endif%}
+            {% if area_input == 'CDC' %}
+                <option value="CDC" selected=>CDC</option>
+            {% else %}
+                <option value="CDC">CDC</option>
+            {% endif%}
 
-        {% if kpi_input == 'kpi_esfuerzo' %}
-            <option value="kpi_esfuerzo" selected>Esfuerzo</option>
-        {% else %}
-            <option value="kpi_esfuerzo">Esfuerzo</option>
-        {% endif%}
+            {% if area_input == 'Consultoria' %}
+                <option value="Consultoria" selected>Consultoria</option>
+            {% else %}
+                <option value="Consultoria">Consultoria</option>
+            {% endif%}
 
-        {% if kpi_input == "kpi_satisfaccion" %}
-            <option value="kpi_satisfaccion" selected>Satisfacción</option>
-        {% else %}
-            <option value="kpi_satisfaccion">Satisfacción</option>
-        {% endif%}
+            {% if area_input == "PCS" %}
+                <option value="PCS" selected>Proceso comercial</option>
+            {% else %}
+                <option value="PCS">Proceso comercial</option>
+            {% endif%}
 
-        {% if kpi_input == "kpi_valor" %}
-            <option value="kpi_valor" selected>Valor</option>
-        {% else %}
-            <option value="kpi_valor">Valor</option>
-        {% endif%}
-
-         </select>
-      </div>
-
-      <div class="col" style="width:200px">
-        <select id="area_input" name="area_input" class="form-select" onchange="testing({{list_clients_cdc|safe}},{{list_clients_con|safe}},{{list_clients_pcs|safe}},{{list_clients_pcd|safe}})">
-
-        {% if Area == 'Todas' %}
-            <option value="Todas" selected disabled>Todas</option>
-        {% else %}
-            <option value="Todas" disabled>Todas</option>
-        {% endif%}
-
-        {% if Area == 'CDC' %}
-            <option value="CDC" selected=>CDC</option>
-        {% else %}
-            <option value="CDC">CDC</option>
-        {% endif%}
-
-        {% if Area == 'Consultoria' %}
-            <option value="Consultoria" selected>Consultoria</option>
-        {% else %}
-            <option value="Consultoria">Consultoria</option>
-        {% endif%}
-
-        {% if Area == "Proceso comercial" %}
-            <option value="PCS" selected>Proceso comercial</option>
-        {% else %}
-            <option value="PCS">Proceso comercial</option>
-        {% endif%}
-
-        {% if Area == "Proceso comercial declinación" %}
-            <option value="PCD" selected>Proceso comercial declinación</option>
-        {% else %}
-            <option value="PCD">Proceso comercial declinación</option>
-        {% endif%}
-
-         </select>
+            {% if area_input == "PCD" %}
+                <option value="PCD" selected>Proceso comercial declinación</option>
+            {% else %}
+                <option value="PCD">Proceso comercial declinación</option>
+            {% endif%}
+            </select>
+            <label for="floatingSelect">Áreas</label>
       </div>
 
       <div class="col">
         <div class="form-check">
-          <input class="btn btn-primary" type=submit value="Buscar">
+            <input class="btn btn-primary" type=submit value="Filtrar">
         </div>
       </div>
 
@@ -105,7 +104,6 @@
     <br>
 
     {% if hayData %}
-      {% if  busqueda %}
       <div class="container">
             <div class="col" id="bargraph1">
               <script>
@@ -115,7 +113,6 @@
               </script>
             </div>
         </div>
-      {% endif %}
     {% else %}
       <br><br><p class="text-center align-self-center fst-italic">No hay información disponible</p>
     {% endif %}

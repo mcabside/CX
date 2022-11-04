@@ -1,7 +1,7 @@
 import firebase_admin
 from   firebase_admin import credentials, firestore, storage
 import json
-from   flask import Flask, flash, request, redirect, url_for,render_template, jsonify, send_from_directory
+from   flask import Flask, flash, request, redirect, url_for,render_template, jsonify, send_from_directory, session
 from   werkzeug.utils import secure_filename
 import os
 import pandas as pd
@@ -131,8 +131,8 @@ def SaveClients():
             
             if request.is_json:
 
-                output2 = json.dumps(request.json)
-                result  = json.loads(output2) #this converts the json output to a python dictionary
+                output = json.dumps(request.json)
+                result  = json.loads(output) #this converts the json output to a python dictionary
 
                 lista_agregados = []
                 

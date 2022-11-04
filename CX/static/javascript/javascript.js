@@ -123,8 +123,8 @@ function submitfunckpi(){
     dict["dateInput"] = dateInput
     data[0] = dict   
     
-    aux = "{"
-    json_data=aux.concat(JSON.stringify(data).slice(1, -1),"}")
+    //aux = "{"
+    //json_data=aux.concat(JSON.stringify(data).slice(1, -1),"}")
     $.ajax({
         url: '/SaveKPISPercents',
         type: 'POST',
@@ -153,7 +153,7 @@ function hidden_func() {
     document.getElementById("div_form").style.display = 'none';
 }
 
-function testing(list_clients_cdc, list_clients_con, list_clients_pcs, list_clients_pcd){
+function changeListClients(list_clients_cdc, list_clients_con, list_clients_pcs, list_clients_pcd){
     
     var area = document.getElementById("area_input").value
     var arrOptionsCollection = null
@@ -174,6 +174,34 @@ function testing(list_clients_cdc, list_clients_con, list_clients_pcs, list_clie
     }
 
     document.getElementById("cliente_input").innerHTML = arrOptions.join();
+    
+}
+
+function changeChart(kpi_cdc, kpi_con, kpi_pcs, kpi_pcd){
+    //Get variables from HTML selects
+    area   = document.getElementById("area_input");
+    client = document.getElementById("cliente_input");
+    kpi    = document.getElementById("kpi_input");
+
+    console.log(kpi_cdc)
+    
+    /*
+    //Send data to Python File (POST)
+    $.ajax({
+        url: '/historico',
+        type: 'POST',
+        contentType: "application/json",
+        data: {'area': area, 'client': client, 'kpi_cdc': kpi_cdc, 'kpi_con': kpi_con, 'kpi_pcs':kpi_pcs, 'kpi_pcd':kpi_pcd},
+        dataType: "json",
+        success: function(response) {
+            console.log("success",response)
+            window.location.href="http://127.0.0.1:5000/historico"
+          },
+          error: function(err) {
+            console.log("error",err);
+          }
+        
+    });*/
     
 }
 
