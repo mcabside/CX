@@ -5,7 +5,7 @@
     <!--Form/selects-->
     <div style="align-items:center;justify-content:center;display:flex">
       
-      <form method="post" class="row gy-2 gx-3 align-items-center">
+      <form action="/chart?area={{area}}" method="post" class="row gy-2 gx-3 align-items-center">
 
           <div class="form-floating" style="width:150px"> 
             {% if cliente_input  != "Todos" and cliente_input %}
@@ -27,9 +27,10 @@
                          
           <div class="form-floating" style="width:150px">           
           <select id="year_input" name="year_input" class="form-select" >
+            
            {% for Year in Years %}
               {% if Year == year %}
-                <option value="{{Year}}"  selected="selected"> {{ Year}} </option>
+                <option value="{{Year}}" selected="selected"> {{ Year}} </option>
               {% else %}
                 <option value="{{Year}}"> {{ Year}} </option> 
               {% endif %}
@@ -67,6 +68,8 @@
     {% if not cliente_unico %}
 
       <h2 class="text-center align-self-center">Reporte {{area}} - {{year}}</h1>
+
+      {% if kpi_q1|length>0 or kpi_q2|length>0 or kpi_q3|length>0 or kpi_q4|length>0%}
       <br>
             <table class="table table-striped table-sm table-bordered">
               <thead class="table-dark">
@@ -190,6 +193,10 @@
                 {% endfor %}   
               </tbody>
             </table>
+
+            {% else %}
+            <br><br><p class="text-center align-self-center fst-italic">No hay información registrada para este periodo</p>
+            {% endif %}
 
             {% endif %}
       

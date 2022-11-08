@@ -30,8 +30,7 @@ def allowed_file(filename):
 #Icon
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='img/icon.png')
+    return send_from_directory(os.path.join(app.root_path, 'static'),'favicon.ico', mimetype='img/icon.png')
             
 #Home Page / upload file page
 @app.route('/', methods=['GET', 'POST'])
@@ -106,7 +105,6 @@ def upload_file():
                     elif str(area) == "Proceso Comercial Declinación":
                         cargaRespuestasPCD(db, Year,Trimestre, results, found_list,area)
                         return redirect(url_for('chart_pcd'))
-                    
                 else:
                     flash("No se han encontrado estos cliente en la base de datos", 'info')
                     return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
@@ -207,9 +205,11 @@ from CX.logic.pc_declinacion import cargaRespuestasPCD
 
 from CX.logic.general import reporteGeneral
 
+from CX.logic.reporte_area import chart
+
 from CX.logic.delete import delete
 
-from CX.logic.config import config_ranges_pond,clients_images
+from CX.logic.config import config_ranges_pond, clients_images
 
 #from CX.logic.rankings import ranking_general,ranking_lealtad
 

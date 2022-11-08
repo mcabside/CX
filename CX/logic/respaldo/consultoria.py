@@ -2,48 +2,50 @@ from   flask import flash, request, render_template
 from   firebase_admin import firestore
 import json
 import plotly
-from   CX.static.questions.cdc_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
+from   CX.static.questions.consultoria_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
 from   CX import app
-from   CX.logic.functions import roundPropio, saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
+from   CX.logic.functions import saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
 from   CX.logic.functions import carga_kpi, carga_preguntas, deltaKPI, getRangosyPonderaciones, filtrarxyear
+from   CX.logic.functions import roundPropio
 
 #Global variables
-kpi_clients = []           
+kpi_clients = []   
 
-#Carga Respuestas CDC
-def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
+#Carga Respuestas Consultoria
+def cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list, area):
     
     try:
         #Cargar respuesta para un trimestre en particular
-        query_trimestre = db.collection('CDC_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
-        
+        query_trimestre = db.collection('Consultoria_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
+            
         #Verificar si ya se ingreso el archivo
         if len(query_trimestre)>0:
             flash('Ya se ingreso el archivo', 'warning')
                     
         else:
-            #Firebase CDC Respuestas
-            CDC_Respuestas_Ref = db.collection("CDC_Respuestas")
-            carga_preguntas(results, CDC_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor)
+            #Firebase Consultoria Respuestas
+            Consultoria_Respuestas_Ref = db.collection("Consultoria_Respuestas")
+            carga_preguntas(results, Consultoria_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor,area)
             
-            #Firebase CDC KPI's
-            CDC_KPI_Ref        = db.collection("CDC_KPIS")
-            found_set          = set(found_list)
-            found_list_unique  = list(found_set)
+            #Firebase Consultoria KPI's
+            Consultoria_KPI_Ref       = db.collection("Consultoria_KPIS")
+            found_set         = set(found_list)
+            found_list_unique = list(found_set)
             
             for cliente in found_list_unique:
                 #Variables
                 kpi_esfuerzo, kpi_satisfaccion, kpi_lealtad, kpi_valor, numero_de_respuestas = 0, 0, 0, 0, 0
-            
+                
                 #Firebase
-                query_kpi = db.collection('CDC_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where("Nombre_de_la_empresa_a_la_que_pertenece", '==', cliente).get()
+                query_kpi = db.collection('Consultoria_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where("Nombre_de_la_empresa_a_la_que_pertenece", '==', cliente).get()
                 
                 #Rangos y ponderaciones
                 config = db.collection('Rangos_Ponderaciones').where('year','==',int(Year)).get()
-                
+                    
                 #Recuperar rangos y ponderaciones desde Firebase
                 kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
                 
+                #Cargar KPI's
                 for doc in query_kpi:
                     kpi_esfuerzo         += (float(doc.to_dict()['kpi_esfuerzo']))
                     kpi_satisfaccion     += (float(doc.to_dict()['kpi_satisfaccion']))
@@ -51,31 +53,27 @@ def cargaRespuestasCDC(db, Year,Trimestre, results, found_list):
                     kpi_valor            += (float(doc.to_dict()['kpi_valor']))
                     numero_de_respuestas += 1
                     
-                kpi_esfuerzo     = roundPropio(kpi_esfuerzo/numero_de_respuestas)
-                kpi_satisfaccion = roundPropio(kpi_satisfaccion/numero_de_respuestas)
-                kpi_lealtad      = roundPropio(kpi_lealtad/numero_de_respuestas)
-                kpi_valor        = roundPropio(kpi_valor/numero_de_respuestas)
-                kpi_total        = roundPropio((kpi_esfuerzo*(kpi_ces['ponderacion']/100)) + (kpi_satisfaccion*(kpi_csat['ponderacion']/100)) + (kpi_lealtad*(kpi_nps['ponderacion']/100)) + (kpi_valor*(kpi_va['ponderacion']/100)))
-                
-                carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total)
-                
-    except Exception as e: 
-            print(e)
-            flash('Error al carga info CDC', 'error')
-           
- 
+                kpi_esfuerzo     = round(kpi_esfuerzo/numero_de_respuestas,     2)
+                kpi_satisfaccion = round(kpi_satisfaccion/numero_de_respuestas, 2)
+                kpi_lealtad      = round(kpi_lealtad/numero_de_respuestas,      2)
+                kpi_valor        = round(kpi_valor/numero_de_respuestas,        2)
+                kpi_total        = round((kpi_esfuerzo*(kpi_ces['ponderacion']/100)) + (kpi_satisfaccion*(kpi_csat['ponderacion']/100)) + (kpi_lealtad*(kpi_nps['ponderacion']/100)) + (kpi_valor*(kpi_va['ponderacion']/100)), 2)
+        
+                carga_kpi(cliente,Consultoria_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total) 
+    except:
+        flash("Error al carga información consultoria", "error")
+
 #Chart Page
-@app.route('/chart_cdc', methods=['GET', 'POST'])
-def chart_cdc():
+@app.route('/chart_consultoria', methods=['GET', 'POST'])
+def chart_consultoria():
     
     global kpi_clients
     
     # Variables
-    #kpi_clients = None
     kpi_q1, kpi_q2, kpi_q3, kpi_q4, Trimestres, Years, lista_clientes = [], [], [], [], [], [], []
     kpi_total, kpi_total_delta = 0, 0
     cliente_unico, graph_ces, graph_csat, graph_nps, graph_va, imagen_cliente = False, False, False, False, False,False
-    error = "Error al cargar reporte CDC"
+    error = "Error al cargar reporte Consultoria"
     trimestre_input, year_input, cliente_input = None, None, None
     list_avg_kpi = []
     
@@ -94,9 +92,15 @@ def chart_cdc():
     trimestre_input, year_input = validarParametros(trimestre_input, year_input, Trimestres, Years)
             
     if request.method == 'GET':
-        try:    
-            #Conexion con la DB - KPI's CDC
-            kpi_clients = db.collection('CDC_KPIS').order_by("Cliente").get() #Get All CDC KPI's
+        try:        
+            #Conexion con la DB - KPI's Consultoria
+            kpi_clients = db.collection('Consultoria_KPIS').order_by("Cliente").get() #Get All Consultoria KPI's #2022, 2021
+            
+             #Guardar Listas Trimestres y años de la DB
+            Trimestres, Years, lista_clientes = saveSelectData(kpi_clients)
+            
+            #Validación parametros URL
+            trimestre_input, year_input = validarParametros(trimestre_input, year_input, Trimestres, Years)
                   
             #Show Table (GET)
             if cliente_input is None or cliente_input=="Todos":
@@ -115,11 +119,17 @@ def chart_cdc():
                     list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_esfuerzo',     i+1))
                     list_avg_kpi.append(promedioQuarter(kpi_clients, 'kpi_total',        i+1))
         except:
-            flash(error, "Error CDC")        
+            flash(error, "Error Consultoria")        
     
     #Show speedmeter (POST)
     if request.method == 'POST':  
     
+        #Guardar Listas Trimestres y años de la DB
+        Trimestres, Years, lista_clientes = saveSelectData(kpi_clients)
+            
+        #Validación parametros URL
+        trimestre_input, year_input = validarParametros(trimestre_input, year_input, Trimestres, Years)
+        
         #Filter
         kpis_client = []
         for i in kpi_clients:
@@ -133,7 +143,7 @@ def chart_cdc():
         except:
             imagen_cliente = False
             
-        #KPI's CDC FROM A SPECIFIC Q
+        #KPI's Consultoria FROM A SPECIFIC Q
         kpi_client, kpi_delta = deltaKPI(kpis_client, trimestre_input)
             
         #ONLY ONE CLIENT
@@ -193,4 +203,8 @@ def chart_cdc():
                            kpi_q3                 = kpi_q3, 
                            kpi_q4                 = kpi_q4,
                            list_avg_kpi           = list_avg_kpi,
-                           area                   = "CDC")
+                           area                   = "Consultoria")
+    
+    
+
+

@@ -27,10 +27,10 @@ def historico():
         kpi_clients_pcd = db.collection('PCD_KPIS').get()
         
         #Extract list of clients for all areas    
-        Trimestres, Years, list_clients_cdc = saveSelectData(kpi_clients_cdc)
-        Trimestres, Years, list_clients_con = saveSelectData(kpi_clients_con)
-        Trimestres, Years, list_clients_pcs = saveSelectData(kpi_clients_pcs)
-        Trimestres, Years, list_clients_pcd = saveSelectData(kpi_clients_pcd)
+        list_clients_cdc = saveSelectData(kpi_clients_cdc, "Cliente", True)
+        list_clients_con = saveSelectData(kpi_clients_con, "Cliente", True)
+        list_clients_pcs = saveSelectData(kpi_clients_pcs, "Cliente", True)
+        list_clients_pcd = saveSelectData(kpi_clients_pcd, "Cliente", True)
         
         lista_clientes = unificarClientes(lista_clientes, list_clients_cdc)
         lista_clientes = unificarClientes(lista_clientes, list_clients_con)

@@ -1,6 +1,3 @@
-#from contextlib import nullcontext
-from   audioop import avg
-from   types import new_class
 import pandas as pd
 import json
 import plotly.graph_objects as go
@@ -8,6 +5,7 @@ from   plotly.graph_objs import *
 from   datetime import date
 from   flask import flash
 import plotly.express as px
+import datetime
 
 #Add Kpi rango y ponderaciones
 def addKPIRange(Kpis_Ref, name, min, max, pond, fecha):
@@ -53,7 +51,7 @@ def updateKPIRange(Kpis_Ref, kpi_q, result):
 def filtrarxyear(kpi_clients, year_input):
     aux = [] 
     for i in kpi_clients:
-            if(i.to_dict()['Year'] == year_input):
+            if(i['Year'] == year_input):
                 aux.append(i)
     return aux
 
@@ -79,30 +77,30 @@ def reporteGeneral(KPIS):
     # Variables
     q1, q2, q3, q4 = [], [], [], []
     # Q1
-    q1.append(promedioQuarter(KPIS, "kpi_esfuerzo",     1))
-    q1.append(promedioQuarter(KPIS, "kpi_satisfaccion", 1))
-    q1.append(promedioQuarter(KPIS, "kpi_lealtad",      1))
-    q1.append(promedioQuarter(KPIS, "kpi_valor",        1))
-    q1.append(promedioQuarter(KPIS, "kpi_total",        1))
+    q1.append(promedioQuarter(KPIS, "kpi_esfuerzo",     1, True))
+    q1.append(promedioQuarter(KPIS, "kpi_satisfaccion", 1, True))
+    q1.append(promedioQuarter(KPIS, "kpi_lealtad",      1, True))
+    q1.append(promedioQuarter(KPIS, "kpi_valor",        1, True))
+    q1.append(promedioQuarter(KPIS, "kpi_total",        1, True))
 
     # Q2
-    q2.append(promedioQuarter(KPIS, "kpi_esfuerzo",     2))
-    q2.append(promedioQuarter(KPIS, "kpi_satisfaccion", 2))
-    q2.append(promedioQuarter(KPIS, "kpi_lealtad",      2))
-    q2.append(promedioQuarter(KPIS, "kpi_valor",        2))
-    q2.append(promedioQuarter(KPIS, "kpi_total",        2))
+    q2.append(promedioQuarter(KPIS, "kpi_esfuerzo",     2, True))
+    q2.append(promedioQuarter(KPIS, "kpi_satisfaccion", 2, True))
+    q2.append(promedioQuarter(KPIS, "kpi_lealtad",      2, True))
+    q2.append(promedioQuarter(KPIS, "kpi_valor",        2, True))
+    q2.append(promedioQuarter(KPIS, "kpi_total",        2, True))
     # Q3
-    q3.append(promedioQuarter(KPIS, "kpi_esfuerzo",     3))
-    q3.append(promedioQuarter(KPIS, "kpi_satisfaccion", 3))
-    q3.append(promedioQuarter(KPIS, "kpi_lealtad",      3))
-    q3.append(promedioQuarter(KPIS, "kpi_valor",        3))
-    q3.append(promedioQuarter(KPIS, "kpi_total",        3))
+    q3.append(promedioQuarter(KPIS, "kpi_esfuerzo",     3, True))
+    q3.append(promedioQuarter(KPIS, "kpi_satisfaccion", 3, True))
+    q3.append(promedioQuarter(KPIS, "kpi_lealtad",      3, True))
+    q3.append(promedioQuarter(KPIS, "kpi_valor",        3, True))
+    q3.append(promedioQuarter(KPIS, "kpi_total",        3, True))
     # Q4
-    q4.append(promedioQuarter(KPIS, "kpi_esfuerzo",     4))
-    q4.append(promedioQuarter(KPIS, "kpi_satisfaccion", 4))
-    q4.append(promedioQuarter(KPIS, "kpi_lealtad",      4))
-    q4.append(promedioQuarter(KPIS, "kpi_valor",        4))
-    q4.append(promedioQuarter(KPIS, "kpi_total",        4))
+    q4.append(promedioQuarter(KPIS, "kpi_esfuerzo",     4, True))
+    q4.append(promedioQuarter(KPIS, "kpi_satisfaccion", 4, True))
+    q4.append(promedioQuarter(KPIS, "kpi_lealtad",      4, True))
+    q4.append(promedioQuarter(KPIS, "kpi_valor",        4, True))
+    q4.append(promedioQuarter(KPIS, "kpi_total",        4, True))
     
     return q1, q2, q3, q4
 
@@ -143,11 +141,11 @@ def deltaKPI(kpis_client, trimestre_input):
     for i in kpis_client:
     
     #GET KPI SPECIFIC QUARTER 
-        if(i.to_dict()['Trimestre'] == int(trimestre_input)):
+        if(i['Trimestre'] == int(trimestre_input)):
             kpi_client.append(i)
             
     #GET KPI PREVIUS
-        if(int(trimestre_input) != 1 and (i.to_dict()['Trimestre'] == (int(trimestre_input)-1))):
+        if(int(trimestre_input) != 1 and (i['Trimestre'] == (int(trimestre_input)-1))):
             kpi_delta.append(i)
             
     return kpi_client, kpi_delta
@@ -184,12 +182,17 @@ def speedmeter(title, value, red, green, porcentaje, delta=None):
     return fig_total
 
 #Promedio Q'S
-def promedioQuarter(kpi_clients, kpi_name, trimestre):
+def promedioQuarter(kpi_clients, kpi_name, trimestre, use_todict):
     avg_kpi_q, cont_q = 0, 0
     for i in kpi_clients:
-        if(i.to_dict()['Trimestre'] == trimestre):
-            avg_kpi_q = avg_kpi_q + i.to_dict()[kpi_name]
-            cont_q += 1
+        if(use_todict):
+            if(i.to_dict()['Trimestre'] == trimestre):
+                avg_kpi_q = avg_kpi_q + i.to_dict()[kpi_name]
+                cont_q += 1
+        else:
+            if(i['Trimestre'] == trimestre):
+                avg_kpi_q = avg_kpi_q + i[kpi_name]
+                cont_q += 1
     if(cont_q != 0):    
         avg_kpi_q = roundPropio(avg_kpi_q/cont_q)
     else:
@@ -202,19 +205,19 @@ def tablaDinamica(kpi_clients):
     kpi, kpi_q1, kpi_q2, kpi_q3, kpi_q4  = [], [], [], [], []
     for i, doc in enumerate(kpi_clients):
             if i == 0:
-                kpi.append([doc.to_dict()['Cliente'], doc])
+                kpi.append([doc['Cliente'], doc])
             else:
                 esta = False
                 posi = 0
                 for j, client in enumerate(kpi):
-                    if doc.to_dict()['Cliente'] in client: 
+                    if doc['Cliente'] in client: 
                         posi = j
                         esta = True
                         break
                 if esta:
                     kpi[posi].append(doc)
                 else:
-                    kpi.append([doc.to_dict()['Cliente'], doc])
+                    kpi.append([doc['Cliente'], doc])
                     
     for cliente_kpis in kpi:
             cliente = cliente_kpis[0]
@@ -228,14 +231,14 @@ def tablaDinamica(kpi_clients):
                         "kpi_esfuerzo":0.0,"kpi_total":0.0}
             
             for i in range(1, len(cliente_kpis)):
-                if cliente_kpis[i].to_dict()['Trimestre'] == 1:
-                    kpi1 = changeDecimal(cliente_kpis[i].to_dict())
-                elif cliente_kpis[i].to_dict()['Trimestre'] == 2:
-                    kpi2 = changeDecimal(cliente_kpis[i].to_dict())
-                elif cliente_kpis[i].to_dict()['Trimestre'] == 3:
-                    kpi3 = changeDecimal(cliente_kpis[i].to_dict())
-                elif cliente_kpis[i].to_dict()['Trimestre'] == 4:
-                    kpi4 = changeDecimal(cliente_kpis[i].to_dict())
+                if cliente_kpis[i]['Trimestre'] == 1:
+                    kpi1 = changeDecimal(cliente_kpis[i])
+                elif cliente_kpis[i]['Trimestre'] == 2:
+                    kpi2 = changeDecimal(cliente_kpis[i])
+                elif cliente_kpis[i]['Trimestre'] == 3:
+                    kpi3 = changeDecimal(cliente_kpis[i])
+                elif cliente_kpis[i]['Trimestre'] == 4:
+                    kpi4 = changeDecimal(cliente_kpis[i])
                     
             kpi_q1.append(kpi1)
             kpi_q2.append(kpi2)
@@ -259,36 +262,30 @@ def changeDecimal(client_kpi):
     return new_client_kpi
 
 #Guardar Listas Trimestres y años
-def saveSelectData(LIST_KPIS):
-    Trimestres, Years, clientes = [], [], []
-    
+def saveSelectData(LIST_KPIS, campo, use_todict):
+    valores = []
     for doc in LIST_KPIS:
-        if doc.to_dict()["Trimestre"] not in Trimestres:
-            Trimestres.append(doc.to_dict()["Trimestre"])
-            
-        if doc.to_dict()["Year"] not in Years:
-            Years.append(doc.to_dict()["Year"])
-            
-        if doc.to_dict()["Cliente"] not in clientes:
-            clientes.append(doc.to_dict()["Cliente"])
+        if(use_todict and doc.to_dict()[campo] not in valores):
+            valores.append(doc.to_dict()[campo])
+        elif(use_todict == False and doc[campo] not in valores):
+            valores.append(doc[campo])
     #Ordenar
-    Trimestres.sort()
-    clientes.sort()
-    Years.sort()
-    return Trimestres, Years, clientes
+    if(campo == "Year"):
+        valores.sort(reverse=True)
+    else:
+        valores.sort()
+    return valores
       
 #Validación parametros
-def validarParametros(trimestre_input, year_input, Trimestres, Years):
+def validarParametros(trimestre_input, year_input, Years):
     if trimestre_input is None:
-        if len(Trimestres) > 0:
-            trimestre_input = Trimestres[len(Trimestres)-1]
-        else:
-            trimestre_input = 1
+        trimestre_input = 4
     if year_input is None:
         if len(Years) > 0:
             year_input = Years[len(Years)-1]
         else:
             year_input = int(date.today().year)
+
     return trimestre_input, year_input
     
 #Cargar preguntas en Firebase
@@ -555,8 +552,6 @@ def OrderPeriods(periodos):
     
 def OrderClientsRankings(KPIS):
     periodos = []
-    trimestres = []
-    years = []
     cliente_lealtades = []
     
     for doc in KPIS:
@@ -589,3 +584,54 @@ def unificarClientes(lista_clientes, lista_firebase):
         if doc not in lista_clientes:
             lista_clientes.append(doc)
     return lista_clientes
+
+def getLastAndCurrentYear():
+    date         = datetime.date.today()
+    current_year = int(date.year)
+    last_year    = current_year - 1
+    return current_year, last_year
+
+def orderClients(kpi_clients, use_todict):
+    kpi_clients_aux = []
+    for i in kpi_clients:
+        if(use_todict):
+            kpi_clients_aux.append(i.to_dict())
+        else:
+            kpi_clients_aux.append(i)
+            
+    #Order by Client
+    kpi_clients_aux.sort(key=lambda x: x["Cliente"])
+    kpi_clients = kpi_clients_aux
+    return kpi_clients
+
+def addOthersYear(Years, last_year):
+    while(last_year >= 2019):
+        if(last_year not in Years):
+            Years.append(last_year)
+        last_year = last_year - 1
+    Years.sort()
+    return Years
+    
+def filterClients(kpi_clients, cliente_input, year_input, trimestre_input):
+    kpis_client = []
+    for i in kpi_clients:
+        if(i['Cliente'] == cliente_input and i['Year']==int(year_input) and i['Trimestre']==int(trimestre_input)):
+            kpis_client.append(i)
+    return kpis_client
+
+def getImageClient(db, cliente_input):
+    try:
+        Cliente        = db.collection('Clientes').where('Cliente','==',cliente_input).get()
+        imagen_cliente = Cliente[0].to_dict()["Imagen"]
+    except:
+        imagen_cliente = False
+    return imagen_cliente
+
+def addNewData(db, year_input, last_year, area, kpi_clients):       #Add data from year_input
+    if(year_input < last_year):
+        aux = db.collection(area+'_KPIS').where('Year', '==', year_input).get() 
+        aux = orderClients(aux, True)
+        kpi_clients = kpi_clients + aux 
+        #Order by Client
+        kpi_clients = orderClients(kpi_clients, False)
+    return kpi_clients
