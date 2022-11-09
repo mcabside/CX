@@ -36,6 +36,10 @@ def historico():
         lista_clientes = unificarClientes(lista_clientes, list_clients_con)
         lista_clientes = unificarClientes(lista_clientes, list_clients_pcs)
         lista_clientes = unificarClientes(lista_clientes, list_clients_pcd)
+        
+        lista_clientes.sort()
+        
+        #Ordenar
 
         return render_template('historico.html',
                                 lista_clientes   = lista_clientes, 
@@ -47,11 +51,11 @@ def historico():
 
     if request.method == 'POST':
         #Guardar Parametros URL
-        kpi_input    = request.form.get('kpi_input')
-        cliente_input = request.form.get('cliente_input')
-        area_input   = request.form.get('area_input')
+        kpi_input       = request.form.get('kpi_input')
+        cliente_input   = request.form.get('cliente_input')
+        area_input      = request.form.get('area_input')
         historico_graph = None
-        hayData = False
+        hayData         = False
         
         #Filter Data
         if(area_input == "CDC"):

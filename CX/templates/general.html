@@ -4,7 +4,7 @@
 
 <div style="align-items:center;justify-content:center;display:flex">
       
-    <form method = "get" class="row gy-2 gx-3 align-items-center">
+    <form method="post" class="row gy-2 gx-3 align-items-center">
 
         <div class="form-floating" style="width:200px"> 
             <select id="trimestre_input" name="trimestre_input" class="form-select" >
@@ -44,35 +44,13 @@
                        
         <div class="form-floating" style="width:200px"> 
             <select id="year_input" name="year_input" class="form-select" >
-              {% if year == 2019 %}
-                <option value="2019" selected>2019</option>
+              {% for i in list_years %}
+              {% if year == i %}
+                <option value={{i}} selected>{{i}}</option>
               {% else %}
-                <option value="2019">2019</option>
+                <option value={{i}}>{{i}}</option>
               {% endif %}
-
-              {% if year == 2020 %}
-                <option value="2020" selected>2020</option>
-              {% else %}
-                <option value="2020">2020</option>
-              {% endif %}
-
-              {% if year == 2021 %}
-                <option value="2021" selected>2021</option>
-              {% else %}
-                <option value="2021">2021</option>
-              {% endif %}
-
-              {% if year == 2022 %}
-                <option value="2022" selected>2022</option>
-              {% else %}
-                <option value="2022">2022</option>
-              {% endif %}
-
-              {% if year == 2023 %}
-                <option value="2023" selected>2023</option>
-              {% else %}
-                <option value="2023">2023</option>
-              {% endif %}
+              {% endfor %}
            </select>
            <label for="floatingSelect">Años</label>
         </div> 

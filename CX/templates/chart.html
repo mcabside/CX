@@ -1,7 +1,10 @@
 {% extends 'base.html' %}  
 
 {% block content %}
-      
+    
+    <script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/jquery.table2excel.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
     <!--Form/selects-->
     <div style="align-items:center;justify-content:center;display:flex">
       
@@ -67,11 +70,20 @@
     <!--SHOW TABLE-->
     {% if not cliente_unico %}
 
-      <h2 class="text-center align-self-center">Reporte {{area}} - {{year}}</h1>
-
+      
       {% if kpi_q1|length>0 or kpi_q2|length>0 or kpi_q3|length>0 or kpi_q4|length>0%}
-      <br>
-            <table class="table table-striped table-sm table-bordered">
+      
+            <div class="text-center">
+            <br><h2 class="d-inline align-middle">Reporte {{area}} - {{year}}</h1>
+          
+            <button id="exporttable" class="btn d-inline align-middle" onclick="exportTable({{year}},'{{area}}')">
+              <i id="icon_export" class="bi bi-download"></i>
+            </button>
+
+            <div>
+          
+            <br><br>
+            <table class="table table-striped table-sm table-bordered" id="table_clients">
               <thead class="table-dark">
                 <tr>
                   {% for i in range(4) %}

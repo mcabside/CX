@@ -1,7 +1,7 @@
 import firebase_admin
 from   firebase_admin import credentials, firestore, storage
 import json
-from   flask import Flask, flash, request, redirect, url_for,render_template, jsonify, send_from_directory, session
+from   flask import Flask, flash, request, redirect, url_for,render_template, jsonify, send_from_directory
 from   werkzeug.utils import secure_filename
 import os
 import pandas as pd
@@ -91,20 +91,20 @@ def upload_file():
                     area = request.form.get('area')
                     
                     if(str(area) == "CDC"):
-                        cargaRespuestasCDC(db, Year, Trimestre, results, found_list)
-                        return redirect(url_for('chart_cdc'))
+                        cargaRespuestasArea(db, Year, Trimestre, results, found_list, "CDC")
+                        return redirect(url_for('chart'))
                     
                     elif str(area) == "Consultoria Corta" or str(area) =="Consultoria Larga":
-                        cargaRespuestasConsultoria(db, Year,Trimestre, results, found_list, area)
-                        return redirect(url_for('chart_consultoria'))
+                        cargaRespuestasArea(db, Year,Trimestre, results, found_list, area, "Consultoria")
+                        return redirect(url_for('chart'))
                     
                     elif str(area) == "Proceso Comercial Satisfacción":
-                        cargaRespuestasPCS(db, Year,Trimestre, results, found_list)
-                        return redirect(url_for('chart_pcs'))
+                        cargaRespuestasArea(db, Year,Trimestre, results, found_list, "PCS")
+                        return redirect(url_for('chart'))
                     
                     elif str(area) == "Proceso Comercial Declinación":
-                        cargaRespuestasPCD(db, Year,Trimestre, results, found_list,area)
-                        return redirect(url_for('chart_pcd'))
+                        cargaRespuestasArea(db, Year,Trimestre, results, found_list,area, "PCD")
+                        return redirect(url_for('chart'))
                 else:
                     flash("No se han encontrado estos cliente en la base de datos", 'info')
                     return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
@@ -195,13 +195,15 @@ def SaveKPISPercents():
         else:
             flash("Error en el formato del archivo", 'error')
             
-from CX.logic.cdc import cargaRespuestasCDC
+#from CX.logic.respaldo.cdc import cargaRespuestasCDC
 
-from CX.logic.consultoria import cargaRespuestasConsultoria
+#from CX.logic.respaldo.consultoria import cargaRespuestasConsultoria
 
-from CX.logic.pc_satisfaccion import cargaRespuestasPCS
+#from CX.logic.respaldo.pc_satisfaccion import cargaRespuestasPCS
 
-from CX.logic.pc_declinacion import cargaRespuestasPCD
+#from CX.logic.respaldo.pc_declinacion import cargaRespuestasPCD
+
+from CX.logic.reporte_area import cargaRespuestasArea
 
 from CX.logic.general import reporteGeneral
 

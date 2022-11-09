@@ -362,14 +362,14 @@ def carga_preguntas(dataframe,Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,P
 def carga_kpi(cliente,Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total):
     try:
         Ref.add({
-                    'Cliente': cliente,
-                    'Trimestre': Trimestre,
-                    'Year': Year,
-                    'kpi_esfuerzo':kpi_esfuerzo,
-                    'kpi_lealtad':kpi_lealtad,
-                    'kpi_valor':kpi_valor,
-                    'kpi_satisfaccion':kpi_satisfaccion,
-                    'kpi_total':kpi_total
+                'Cliente': cliente,
+                'Trimestre': Trimestre,
+                'Year': Year,
+                'kpi_esfuerzo':kpi_esfuerzo,
+                'kpi_lealtad':kpi_lealtad,
+                'kpi_valor':kpi_valor,
+                'kpi_satisfaccion':kpi_satisfaccion,
+                'kpi_total':kpi_total
             })
     except:
         flash("Error al cargar KPI's", "error")
@@ -583,6 +583,7 @@ def unificarClientes(lista_clientes, lista_firebase):
     for doc in lista_firebase:
         if doc not in lista_clientes:
             lista_clientes.append(doc)
+    print(lista_clientes)
     return lista_clientes
 
 def getLastAndCurrentYear():

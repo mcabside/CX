@@ -1,8 +1,12 @@
 {% extends 'base.html' %}
 
-{% block content %}
+{% block content %} 
 
-<br><h2 class="text-center align-self-center">Histórico {{cliente_input}} - {{area_input}}</h2><br>
+{% if area_input  %}
+    <br><h2 class="text-center align-self-center">Histórico {{cliente_input}} - {{ area_input}}</h2><br>
+{% else %}
+    <br><h2 class="text-center align-self-center">Histórico {{cliente_input}}</h2><br>
+{% endif %}
 
 <div style="align-items:center;justify-content:center;display:flex">
 
@@ -77,15 +81,15 @@
             {% endif%}
 
             {% if area_input == "PCS" %}
-                <option value="PCS" selected>Proceso comercial</option>
+                <option value="PCS" selected>P.C Satisfacción</option>
             {% else %}
-                <option value="PCS">Proceso comercial</option>
+                <option value="PCS">P.C Satisfacción</option>
             {% endif%}
 
             {% if area_input == "PCD" %}
-                <option value="PCD" selected>Proceso comercial declinación</option>
+                <option value="PCD" selected>P.C declinación</option>
             {% else %}
-                <option value="PCD">Proceso comercial declinación</option>
+                <option value="PCD">P.C declinación</option>
             {% endif%}
             </select>
             <label for="floatingSelect">Áreas</label>

@@ -44,6 +44,24 @@ function goHome(){
     window.location.href="http://127.0.0.1:5000/"
 }
 
+
+
+function exportTable(year, area){
+    var table = $("#table_clients");
+    if(table && table.length){
+    $(table).table2excel({
+        sheetName: area+"-"+year+" ",
+        exclude: ".noExl",
+        filename: "Reporte " + area + " - " + year + ".xls",
+        fileext: ".xls",
+        exclude_img: true,
+        exclude_links: true,
+        exclude_inputs: true,
+        preserveColors: false
+    });
+    }
+}
+
 function changeSelect(){
     var cliente_input = document.getElementById("cliente_input").value
     if(cliente_input == "Todos"){
@@ -167,6 +185,10 @@ function changeListClients(list_clients_cdc, list_clients_con, list_clients_pcs,
         var arrOptionsCollection = list_clients_pcs;
     }else if(area == "PCD"){
         var arrOptionsCollection = list_clients_pcd;
+    }else{
+        var arrOptionsCollection = list_clients_cdc.concat(list_clients_con, list_clients_pcs, list_clients_pcd)
+        let uniqueItems = [...new Set(arrOptionsCollection)]
+        arrOptionsCollection = uniqueItems.sort()
     }
  
     for (var i=0, n = arrOptionsCollection.length; i < n; i++) { // looping over the options
@@ -174,7 +196,6 @@ function changeListClients(list_clients_cdc, list_clients_con, list_clients_pcs,
     }
 
     document.getElementById("cliente_input").innerHTML = arrOptions.join();
-    
 }
 
 function changeChart(kpi_cdc, kpi_con, kpi_pcs, kpi_pcd){

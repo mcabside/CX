@@ -2,44 +2,57 @@ from   flask import flash, request, render_template
 from   firebase_admin import firestore
 import json
 import plotly
-from   CX.static.questions.cdc_questions import Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor
+from   CX.static.questions.cdc_questions             import Preguntas_esfuerzo_cdc,Preguntas_satisfaccion_cdc,Preguntas_lealtad_cdc,Preguntas_valor_cdc
+from   CX.static.questions.consultoria_questions     import Preguntas_esfuerzo_con,Preguntas_satisfaccion_con,Preguntas_lealtad_con,Preguntas_valor_con
+from   CX.static.questions.pc_declinacion_questions  import Preguntas_esfuerzo_pcd,Preguntas_satisfaccion_pcd,Preguntas_lealtad_pcd,Preguntas_valor_pcd
+from   CX.static.questions.pc_satisfaccion_questions import Preguntas_esfuerzo_pcs,Preguntas_satisfaccion_pcs,Preguntas_lealtad_pcs,Preguntas_valor_pcs
+from   CX.logic.functions                            import roundPropio, saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
+from   CX.logic.functions                            import carga_kpi, carga_preguntas, deltaKPI, getRangosyPonderaciones, filtrarxyear
+from   CX.logic.functions                            import getLastAndCurrentYear, orderClients, addOthersYear, filterClients, getImageClient, addNewData
 from   CX import app
-from   CX.logic.functions import roundPropio, saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
-from   CX.logic.functions import carga_kpi, carga_preguntas, deltaKPI, getRangosyPonderaciones, filtrarxyear
-from   CX.logic.functions import getLastAndCurrentYear, orderClients, addOthersYear, filterClients, getImageClient, addNewData
 
-#Global variables (Que venguenza, sorry si alguien ve esto :c)
+#Global variables (Un poco venguenza, sorry si alguien ve esto :c)
 kpi_clients = []
-last_year, current_year, area = None, None, None
-Years, lista_clientes, year_loaded = None, None, None
+last_year, current_year, area, Years, lista_clientes, year_loaded = None, None, None, None, None, None
 
-#Carga Respuestas (Falta ajustar)
-def cargaRespuestas(db, area, Year,Trimestre, results, found_list):
-    
+#Carga Respuestas Area
+def cargaRespuestasArea(db, Year,Trimestre, results, found_list, area):
     try:
         #Cargar respuesta para un trimestre en particular
-        query_trimestre = db.collection('CDC_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
+        query_trimestre = db.collection(area+'_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
+        name_campo = None
         
         #Verificar si ya se ingreso el archivo
         if len(query_trimestre)>0:
             flash('Ya se ingreso el archivo', 'warning')
                     
-        else:
+        else:   
             #Firebase CDC Respuestas
-            CDC_Respuestas_Ref = db.collection("CDC_Respuestas")
-            carga_preguntas(results, CDC_Respuestas_Ref,Trimestre,Year,Preguntas_esfuerzo,Preguntas_satisfaccion,Preguntas_lealtad,Preguntas_valor)
-            
-            #Firebase CDC KPI's
-            CDC_KPI_Ref        = db.collection("CDC_KPIS")
-            found_set          = set(found_list)
-            found_list_unique  = list(found_set)
+            area_Respuestas_Ref = db.collection(area+"_Respuestas")
+            if(area=="CDC"):
+                name_campo = "Nombre_de_la_empresa_a_la_que_pertenece"
+                carga_preguntas(results, area_Respuestas_Ref, Trimestre,Year, Preguntas_esfuerzo_cdc, Preguntas_satisfaccion_cdc, Preguntas_lealtad_cdc, Preguntas_valor_cdc)
+            elif(area=="Consultoria"):
+                name_campo = "Nombre_de_la_empresa_a_la_que_pertenece"
+                carga_preguntas(results, area_Respuestas_Ref, Trimestre,Year, Preguntas_esfuerzo_con, Preguntas_satisfaccion_con, Preguntas_lealtad_con, Preguntas_valor_con)
+            elif(area=="PCS"):
+                name_campo = "NOMBRE_DE_LA_EMPRESA__CLIENTE_"
+                carga_preguntas(results, area_Respuestas_Ref, Trimestre,Year, Preguntas_esfuerzo_pcs, Preguntas_satisfaccion_pcs, Preguntas_lealtad_pcs, Preguntas_valor_pcs)
+            elif(area=="PCD"):
+                name_campo = "NOMBRE_DE_LA_EMPRESA__CLIENTE_"
+                carga_preguntas(results, area_Respuestas_Ref, Trimestre,Year, Preguntas_esfuerzo_pcd, Preguntas_satisfaccion_pcd, Preguntas_lealtad_pcd, Preguntas_valor_pcd)
+
+            #Firebase Area KPI's
+            area_KPI_Ref      = db.collection(area+"_KPIS")
+            found_set         = set(found_list)
+            found_list_unique = list(found_set)
             
             for cliente in found_list_unique:
                 #Variables
                 kpi_esfuerzo, kpi_satisfaccion, kpi_lealtad, kpi_valor, numero_de_respuestas = 0, 0, 0, 0, 0
             
                 #Firebase
-                query_kpi = db.collection('CDC_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where("Nombre_de_la_empresa_a_la_que_pertenece", '==', cliente).get()
+                query_kpi = db.collection(area+'_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).where(name_campo, '==', cliente).get()
                 
                 #Rangos y ponderaciones
                 config = db.collection('Rangos_Ponderaciones').where('year','==',int(Year)).get()
@@ -60,11 +73,11 @@ def cargaRespuestas(db, area, Year,Trimestre, results, found_list):
                 kpi_valor        = roundPropio(kpi_valor/numero_de_respuestas)
                 kpi_total        = roundPropio((kpi_esfuerzo*(kpi_ces['ponderacion']/100)) + (kpi_satisfaccion*(kpi_csat['ponderacion']/100)) + (kpi_lealtad*(kpi_nps['ponderacion']/100)) + (kpi_valor*(kpi_va['ponderacion']/100)))
                 
-                carga_kpi(cliente,CDC_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total)
+                carga_kpi(cliente,area_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total)
                 
     except Exception as e: 
             print(e)
-            flash('Error al carga info CDC', 'error')
+            flash('Error al carga info '+area, 'error')
            
 #Chart Page
 @app.route('/chart', methods=['GET', 'POST'])
@@ -116,7 +129,7 @@ def chart():
             #Add years
             addOthersYear(Years, last_year)
            
-            #Default
+            #Default input values
             if cliente_input is None:
                 cliente_input = "Todos"
                 
@@ -132,6 +145,7 @@ def chart():
             
         if(year_input not in year_loaded):
                         
+            #Add new data
             kpi_clients = addNewData(db, year_input, last_year, area, kpi_clients)
              
             #Guardar Listas Trimestres y años de la DB
@@ -160,7 +174,6 @@ def chart():
     else:   #Show speedmeter 
         
         try:
-          
             # Variables
             cliente_unico   = True
             trimestre_input = int(trimestre_input)
@@ -197,7 +210,7 @@ def chart():
                                 
                 if(len(kpi_delta) > 0):
                     delta           = kpi_delta[0]
-                    kpi_total_delta =  roundPropio(kpi_total-delta['kpi_total'])
+                    kpi_total_delta = roundPropio(kpi_total-delta['kpi_total'])
                     fig_ces  = speedmeter(kpi_ces['kpi_name'],  client["kpi_esfuerzo"],     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'],  delta['kpi_esfuerzo'])
                     fig_csat = speedmeter(kpi_csat['kpi_name'], client["kpi_satisfaccion"], kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'], delta['kpi_satisfaccion'])
                     fig_nps  = speedmeter(kpi_nps['kpi_name'],  client["kpi_lealtad"],      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'],  delta['kpi_lealtad'])                    
