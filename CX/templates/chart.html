@@ -3,8 +3,7 @@
 {% block content %}
     
     <script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/jquery.table2excel.min.js"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-
+    
     <!--Form/selects-->
     <div style="align-items:center;justify-content:center;display:flex">
       
@@ -17,11 +16,11 @@
               <select id="trimestre_input" name="trimestre_input" class="form-select" disabled>
             {% endif %}
 
-            {% for Trimestre in Trimestres %}
-                {% if Trimestre == trimestre_input %}
-                  <option value="{{Trimestre}}" selected="selected">Q{{ Trimestre}}</option>
+            {% for i in range(4) %}
+                {% if (i+1) == trimestre_input %}
+                  <option value="{{(i+1)}}" selected="selected">Q{{(i+1)}}</option>
                 {% else %}
-                  <option value="{{Trimestre}}">Q{{ Trimestre}}</option>  
+                  <option value="{{(i+1)}}">Q{{(i+1)}}</option>  
                 {% endif %}
              {% endfor %}   
             </select>
@@ -31,11 +30,11 @@
           <div class="form-floating" style="width:150px">           
           <select id="year_input" name="year_input" class="form-select" >
             
-           {% for Year in Years %}
-              {% if Year == year %}
-                <option value="{{Year}}" selected="selected"> {{ Year}} </option>
+           {% for i in years %}
+              {% if i == year %}
+                <option value="{{i}}" selected="selected"> {{i}} </option>
               {% else %}
-                <option value="{{Year}}"> {{ Year}} </option> 
+                <option value="{{i}}"> {{i}} </option> 
               {% endif %}
            {% endfor %}   
            </select>
@@ -68,18 +67,16 @@
     <br>
 
     <!--SHOW TABLE-->
-    {% if not cliente_unico %}
-
+    {% if cliente_input == "Todos" %}
       
       {% if kpi_q1|length>0 or kpi_q2|length>0 or kpi_q3|length>0 or kpi_q4|length>0%}
       
             <div class="text-center">
-            <br><h2 class="d-inline align-middle">Reporte {{area}} - {{year}}</h1>
-          
-            <button id="exporttable" class="btn d-inline align-middle" onclick="exportTable({{year}},'{{area}}')">
-              <i id="icon_export" class="bi bi-download"></i>
-            </button>
-
+              <br><h2 class="d-inline align-middle">Reporte {{area}} - {{year}}</h1>
+            
+              <button id="exporttable" class="btn d-inline align-middle" onclick="exportTable({{year}},'{{area}}')">
+                <i id="icon_export" class="bi bi-download"></i>
+              </button>
             <div>
           
             <br><br>
@@ -214,7 +211,8 @@
       
       <!--SHOW SPEEDMETER-->
 
-      {% if  cliente_unico %}
+      {% if  cliente_input != "Todos" %}
+
       {% if  kpi_total == 0 %}
       
       <br><br><p class="text-center align-self-center fst-italic">No hay información registrada para este cliente en el trimestre buscado</p>

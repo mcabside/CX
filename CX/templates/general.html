@@ -58,11 +58,11 @@
         <div class="form-floating" style="width:200px">
           <select id="client_input" name="client_input" class="form-select">
             <option value="Todos">Todos</option>
-              {% for cliente in Clients_list %}
-                {% if cliente == client%}
-                  <option value="{{cliente}}" selected="selected">{{cliente}}</option>
+              {% for i in clients_list %}
+                {% if i == client%}
+                  <option value="{{i}}" selected="selected">{{i}}</option>
                 {% else %}
-                  <option value="{{cliente}}" >{{cliente}}</option>
+                  <option value="{{i}}" >{{i}}</option>
                 {% endif %}
               {% endfor %}  
          </select>

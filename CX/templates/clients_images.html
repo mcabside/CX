@@ -8,7 +8,7 @@
 
     <div id="div_form">
 
-        <h1 class="text-center align-self-center">Configurar Imagenes de Clientes</h1><br>
+        <h1 class="text-center align-self-center">Configurar imágenes de clientes</h1><br>
 
         <div style="align-items:center;justify-content:center;display:flex;">
 
@@ -16,7 +16,7 @@
 
                     <form method=post enctype=multipart/form-data  class="row gy-1 gx-3 align-items-center">
                         <select id="cliente_input" name="cliente_input" class="form-select" onchange="show_img()">
-                            <option selected disabled>Selecciona un Cliente...</option>
+                            <option selected disabled>Selecciona un cliente...</option>
                             {% for cliente in Clientes_Data %}
                                 <option value="{{cliente.to_dict()}}">{{cliente.to_dict()['Cliente']}}</option>
                             {% endfor %}   

@@ -44,8 +44,6 @@ function goHome(){
     window.location.href="http://127.0.0.1:5000/"
 }
 
-
-
 function exportTable(year, area){
     var table = $("#table_clients");
     if(table && table.length){
@@ -169,6 +167,7 @@ function show_img() {
 function hidden_func() {
     document.getElementById("loading").style.display = 'block';
     document.getElementById("div_form").style.display = 'none';
+    document.getElementById("exampleModalCenter").hidden = 'true'
 }
 
 function changeListClients(list_clients_cdc, list_clients_con, list_clients_pcs, list_clients_pcd){
@@ -203,27 +202,7 @@ function changeChart(kpi_cdc, kpi_con, kpi_pcs, kpi_pcd){
     area   = document.getElementById("area_input");
     client = document.getElementById("cliente_input");
     kpi    = document.getElementById("kpi_input");
-
-    console.log(kpi_cdc)
-    
-    /*
-    //Send data to Python File (POST)
-    $.ajax({
-        url: '/historico',
-        type: 'POST',
-        contentType: "application/json",
-        data: {'area': area, 'client': client, 'kpi_cdc': kpi_cdc, 'kpi_con': kpi_con, 'kpi_pcs':kpi_pcs, 'kpi_pcd':kpi_pcd},
-        dataType: "json",
-        success: function(response) {
-            console.log("success",response)
-            window.location.href="http://127.0.0.1:5000/historico"
-          },
-          error: function(err) {
-            console.log("error",err);
-          }
         
-    });*/
-    
 }
 
 

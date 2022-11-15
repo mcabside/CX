@@ -1,4 +1,4 @@
-from   flask import flash, request, render_template
+from   flask import flash, request, render_template, redirect
 from   firebase_admin import firestore
 import json
 import plotly
@@ -8,15 +8,17 @@ from   CX.static.questions.pc_declinacion_questions  import Preguntas_esfuerzo_p
 from   CX.static.questions.pc_satisfaccion_questions import Preguntas_esfuerzo_pcs,Preguntas_satisfaccion_pcs,Preguntas_lealtad_pcs,Preguntas_valor_pcs
 from   CX.logic.functions                            import roundPropio, saveSelectData, speedmeter, promedioQuarter, tablaDinamica, validarParametros
 from   CX.logic.functions                            import carga_kpi, carga_preguntas, deltaKPI, getRangosyPonderaciones, filtrarxyear
-from   CX.logic.functions                            import getLastAndCurrentYear, orderClients, addOthersYear, filterClients, getImageClient, addNewData
+from   CX.logic.functions                            import getLastAndCurrentYear, orderClients, addOthersYear, getImageClient, addNewData
 from   CX import app
+import CX.logic.general as General
+import datetime
 
 #Global variables (Un poco venguenza, sorry si alguien ve esto :c)
-kpi_clients = []
-last_year, current_year, area, Years, lista_clientes, year_loaded = None, None, None, None, None, None
+kpi_clients, years, lista_clientes, year_loaded = [], [], [], []
+last_year, current_year, area = None, None, None, 
 
 #Carga Respuestas Area
-def cargaRespuestasArea(db, Year,Trimestre, results, found_list, area):
+def cargaRespuestasArea(db, Year, Trimestre, results, found_list, area):
     try:
         #Cargar respuesta para un trimestre en particular
         query_trimestre = db.collection(area+'_Respuestas').where('Year', '==',str(Year) ).where('Trimestre', '==', str(Trimestre)).get()
@@ -75,23 +77,28 @@ def cargaRespuestasArea(db, Year,Trimestre, results, found_list, area):
                 
                 carga_kpi(cliente,area_KPI_Ref,Trimestre,Year,kpi_esfuerzo,kpi_satisfaccion,kpi_lealtad,kpi_valor,kpi_total)
                 
+                #Reset Global variables
+                General.year_cargados = []
+                global year_loaded
+                year_loaded = []
+                
     except Exception as e: 
-            print(e)
-            flash('Error al carga info '+area, 'error')
+        print("error ", e)
+        flash('Error al carga información '+area, 'error')
            
 #Chart Page
 @app.route('/chart', methods=['GET', 'POST'])
 def chart():
+    
     # Variables Globales
-    global kpi_clients, area, last_year, current_year, Years, lista_clientes, year_loaded
+    global kpi_clients, area, last_year, current_year, years, lista_clientes, year_loaded
     
     # Variables locales
-    kpi_q1, kpi_q2, kpi_q3, kpi_q4 = [], [], [], [], 
+    kpi_q1, kpi_q2, kpi_q3, kpi_q4, list_avg_kpi = [], [], [], [], []
     kpi_total, kpi_total_delta = 0, 0
-    cliente_unico, graph_ces, graph_csat, graph_nps, graph_va, imagen_cliente = False, False, False, False, False,False
+    graph_ces, graph_csat, graph_nps, graph_va, imagen_cliente = False, False, False, False, False
     trimestre_input, year_input, cliente_input = None, None, None
-    list_avg_kpi = []
-
+    
     #Firebase connection
     db = firestore.client()
     
@@ -101,12 +108,13 @@ def chart():
     year_input      = request.form.get('year_input')
 
     #Guardar Parametros URL 
-    if request.args.get('area') is not None:
+    if request.args.get('area') is not None and len(request.args.get('area'))>0:
         area = request.args.get('area')
-        error = "Error al cargar reporte " + area   #Config Error message
-    
+    else:
+        return redirect('/error_page') #Redirect error page
+        
     #Case 1: Config initial
-    if request.method == 'GET':
+    if request.method == 'GET' or len(year_loaded) == 0:
         try:    
             #Get Current year and previus year
             current_year, last_year = getLastAndCurrentYear()
@@ -124,90 +132,93 @@ def chart():
             #Guardar Listas Trimestres y años de la DB
             year_loaded     = saveSelectData(kpi_clients, "Year",      False)
             lista_clientes  = saveSelectData(kpi_clients, "Cliente",   False)
-            Years           = saveSelectData(kpi_clients, "Year",      False)
-                    
-            #Add years
-            addOthersYear(Years, last_year)
-           
-            #Default input values
-            if cliente_input is None:
-                cliente_input = "Todos"
-                
-            trimestre_input, year_input = validarParametros(trimestre_input, year_input, Years)
-    
-        except:
-            flash(error, "Error Carga inicial "+area)        
-         
-    #Add data from year_input
-    if(year_input is not None):
-        
-        year_input = int(year_input)
+            years           = saveSelectData(kpi_clients, "Year",      False)
             
-        if(year_input not in year_loaded):
-                        
-            #Add new data
-            kpi_clients = addNewData(db, year_input, last_year, area, kpi_clients)
-             
-            #Guardar Listas Trimestres y años de la DB
-            lista_clientes  = saveSelectData(kpi_clients, "Cliente", False)
+            #Validate parameters    
+            trimestre_input, year_input = validarParametros(trimestre_input, year_input, years)
+        except:
+            flash("Error Carga inicial "+area)
+                   
+    #Check if years is empty         
+    if(len(years)<4):  
+        current_year, last_year = getLastAndCurrentYear()
+        addOthersYear(years, current_year)  
+            
+    #Check is cliente_input is None
+    if(cliente_input is None):
+        cliente_input = "Todos" 
+    
+    #Check is cliente_input is None
+    if(year_input is None):
+        year_input = current_year
+            
+    #if year_input is not null and the information for that year has not been loaded
+    if(year_input is not None and int(year_input) not in year_loaded):
+            try:       
+                #Add new data
+                kpi_clients = addNewData(db, int(year_input), area, kpi_clients)
+                
+                #Guardar Listas Trimestres y años de la DB
+                lista_clientes  = saveSelectData(kpi_clients, "Cliente", False)
 
-            #Add Year Data loaded
-            year_loaded.append(year_input)
- 
+                #Add Year Data loaded
+                year_loaded.append(int(year_input))
+            except:
+                flash("Error cargar nueva información "+area)   
     
     if (cliente_input == "Todos"): # Show Table
-        
-        #Filtrar por año
-        kpi_clients_year = filtrarxyear(kpi_clients, int(year_input))
-       
-        #Tabla dinamica
-        kpi_q1, kpi_q2, kpi_q3, kpi_q4 = tablaDinamica(kpi_clients_year)
-            
-        #Promedio Q's    
-        for i in range(4):
-            list_avg_kpi.append(promedioQuarter(kpi_clients_year, 'kpi_valor',        i+1, False))
-            list_avg_kpi.append(promedioQuarter(kpi_clients_year, 'kpi_satisfaccion', i+1, False))
-            list_avg_kpi.append(promedioQuarter(kpi_clients_year, 'kpi_lealtad',      i+1, False))
-            list_avg_kpi.append(promedioQuarter(kpi_clients_year, 'kpi_esfuerzo',     i+1, False))
-            list_avg_kpi.append(promedioQuarter(kpi_clients_year, 'kpi_total',        i+1, False))
+        try:
+            #Filtrar por año
+            kpi_clients_year = filtrarxyear(kpi_clients, int(year_input))
                 
-    else:   #Show speedmeter 
-        
+            #Tabla dinamica
+            kpi_q1, kpi_q2, kpi_q3, kpi_q4 = tablaDinamica(kpi_clients_year)
+                        
+            #Promedio Q's    
+            for i in range(4):
+                list_avg_kpi.append(promedioQuarter(kpi_clients_year, 'kpi_valor',        i+1, False))
+                list_avg_kpi.append(promedioQuarter(kpi_clients_year, 'kpi_satisfaccion', i+1, False))
+                list_avg_kpi.append(promedioQuarter(kpi_clients_year, 'kpi_lealtad',      i+1, False))
+                list_avg_kpi.append(promedioQuarter(kpi_clients_year, 'kpi_esfuerzo',     i+1, False))
+                list_avg_kpi.append(promedioQuarter(kpi_clients_year, 'kpi_total',        i+1, False))
+        except:
+            flash("Error al generar la tabla "+area, "Error")  
+    
+    #Show speedmeter               
+    else:   
         try:
             # Variables
-            cliente_unico   = True
             trimestre_input = int(trimestre_input)
             year_input      = int(year_input)
-                
-            #Filter client
-            kpis_client = filterClients(kpi_clients, cliente_input, year_input, trimestre_input)
                 
             #GET Cliente IMAGE
             imagen_cliente = getImageClient(db, cliente_input)
                 
-            #KPI's CDC FROM A SPECIFIC Q
-            kpi_client, kpi_delta = deltaKPI(kpis_client, trimestre_input)
-                
-            #ONLY ONE CLIENT
-            cliente_unico = True
-                                        
+            #KPI's CDC FROM A Q and Q-1 (If exist)
+            kpi_client, kpi_delta = deltaKPI(kpi_clients, trimestre_input)
+                    
             #SHOW GRAFICOS          
             if len(kpi_client) > 0:
                 
                 kpi_total = roundPropio(float(kpi_client[0]["kpi_total"]))
                 client    = kpi_client[0]
                     
-                #Rangos y ponderaciones
-                config = db.collection('Rangos_Ponderaciones').where('year','==',int(year_input)).get()
-                    
-                #Check get rangos
-                if(len(config) == 0):
-                    error = "Error, no se encontraron los rangos para ese trimestre"
-                    flash(error, 'Error')
-                          
                 #Recuperar rangos y ponderaciones desde Firebase
-                kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
-                                
+                config = db.collection('Rangos_Ponderaciones').where('year','==',int(year_input)).get()
+              
+                if(len(config)>0):
+                    kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
+                    find_range = True
+                else:
+                    find_range = False
+                    year_search = int(datetime.date.today().year)
+                    while(find_range == False):
+                        config = db.collection('Rangos_Ponderaciones').where('year','==',year_search).get()
+                        if(len(config)>0):
+                            kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
+                            find_range = True
+                        year_search = year_search -1
+                          
                 if(len(kpi_delta) > 0):
                     delta           = kpi_delta[0]
                     kpi_total_delta = roundPropio(kpi_total-delta['kpi_total'])
@@ -227,17 +238,15 @@ def chart():
                 graph_nps  = json.dumps(fig_nps,  cls=plotly.utils.PlotlyJSONEncoder)
                 graph_va   = json.dumps(fig_va,   cls=plotly.utils.PlotlyJSONEncoder)
         except:
-            flash(error, "Error "+area)  
+            flash("Error al generar el speedmeter "+area, "Error")  
             
     return render_template('chart.html',
                            kpi_total              = kpi_total,
                            kpi_total_delta        = kpi_total_delta,
-                           Trimestres             = [1, 2, 3, 4],
                            trimestre_input        = trimestre_input, 
-                           Years                  = Years,
+                           years                  = years,
                            year                   = year_input,
                            lista_clientes         = lista_clientes,
-                           cliente_unico          = cliente_unico,
                            cliente_input          = cliente_input,
                            graphJSON_esfuerzo     = graph_ces,
                            graphJSON_satisfaccion = graph_csat,

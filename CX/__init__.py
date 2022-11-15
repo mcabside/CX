@@ -27,6 +27,11 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
         
+@app.errorhandler(404)
+def page_not_found(e):
+    # note that we set the 404 status explicitly
+    return render_template('error.html', error=e), 404
+
 #Icon
 @app.route('/favicon.ico')
 def favicon():
@@ -34,8 +39,12 @@ def favicon():
             
 #Home Page / upload file page
 @app.route('/', methods=['GET', 'POST'])
+def home():
+    return redirect('/chart_general')
+
+#Upload file
+@app.route('/upload_file', methods=['GET', 'POST'])
 def upload_file():
-    
     if request.method == "GET":
         return render_template('upload_file.html')
     
@@ -85,34 +94,39 @@ def upload_file():
                 found_list, not_found_list, results = SearchClients(results,not_found_list,found_list,Clientes_Data)
             
                 #Si se consiguen todos los clientes        
-                if len(not_found_list) == 0:
-                                    
+                if len(not_found_list) == 0:     
                     #Get area
                     area = request.form.get('area')
                     
                     if(str(area) == "CDC"):
                         cargaRespuestasArea(db, Year, Trimestre, results, found_list, "CDC")
-                        return redirect(url_for('chart'))
+                        flash("Se cargó correctamente el archivo "+area+" "+str(Trimestre)+"("+str(Year)+")", 'success')
+                        return redirect(url_for('chart',area="CDC"))
                     
-                    elif str(area) == "Consultoria Corta" or str(area) =="Consultoria Larga":
-                        cargaRespuestasArea(db, Year,Trimestre, results, found_list, area, "Consultoria")
-                        return redirect(url_for('chart'))
+                    elif str(area) == "Consultoria Corta" or str(area) == "Consultoria Larga":
+                        cargaRespuestasArea(db, Year,Trimestre, results, found_list, "Consultoria")
+                        flash("Se cargó correctamente el archivo "+area+" "+str(Trimestre)+"("+str(Year)+")", 'success')
+                        return redirect(url_for('chart',area='Consultoria'))
                     
                     elif str(area) == "Proceso Comercial Satisfacción":
                         cargaRespuestasArea(db, Year,Trimestre, results, found_list, "PCS")
-                        return redirect(url_for('chart'))
+                        flash("Se cargó correctamente el archivo "+area+" "+str(Trimestre)+"("+str(Year)+")", 'success')
+                        return redirect(url_for('chart',area='PCS'))
                     
                     elif str(area) == "Proceso Comercial Declinación":
-                        cargaRespuestasArea(db, Year,Trimestre, results, found_list,area, "PCD")
-                        return redirect(url_for('chart'))
+                        cargaRespuestasArea(db, Year,Trimestre, results, found_list, "PCD")
+                        flash("Se cargó correctamente el archivo "+area+" "+str(Trimestre)+"("+str(Year)+")", 'success')
+                        return redirect(url_for('chart',area='PCD'))
                 else:
                     flash("No se han encontrado estos cliente en la base de datos", 'info')
                     return render_template('clients_form.html', your_list=not_found_list,lista_clientes=lista_clientes)
                             
-            except:
+            except Exception as e: 
+                print("Error", e)
                 flash("Error al cargar el archivo",'error')
         
         else:
+            print("Error formato del archivo erroneo")
             flash("Error formato del archivo erroneo", "error") 
             
     return render_template('upload_file.html')
@@ -194,14 +208,6 @@ def SaveKPISPercents():
             
         else:
             flash("Error en el formato del archivo", 'error')
-            
-#from CX.logic.respaldo.cdc import cargaRespuestasCDC
-
-#from CX.logic.respaldo.consultoria import cargaRespuestasConsultoria
-
-#from CX.logic.respaldo.pc_satisfaccion import cargaRespuestasPCS
-
-#from CX.logic.respaldo.pc_declinacion import cargaRespuestasPCD
 
 from CX.logic.reporte_area import cargaRespuestasArea
 

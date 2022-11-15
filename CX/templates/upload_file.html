@@ -2,26 +2,45 @@
 
 {% block content %}
       
-    <div id="div_form" class="center">
+    <div id="div_form" class="center"  id="form1">
 
-      <h1>Cargar Archivo de Resultados</h1>
+      <h2>Cargar archivo de resultados</h2>
 
-      <form method=post enctype=multipart/form-data>
+      <form method="post" enctype=multipart/form-data>
         
-          <input type=file name=file>
+          <input type=file name=file required>
           
           <input class="btn btn-primary" type=submit value="Subir Archivo" style="float:right" onclick="hidden_func()"><br><br>
           
           <select id="area" name="area" class="form-select">
               <option value="CDC">CDC</option>
-              <option value="Proceso Comercial Declinación">Proceso Comercial Declinación</option>
-              <option value="Proceso Comercial Satisfacción">Proceso Comercial Satisfacción</option>
-              <option value="Consultoria Corta">Consultoria Corta</option>
-              <option value="Consultoria Larga">Consultoria Larga</option>
+              <option value="Consultoria Corta">Consultoría Corta</option>
+              <option value="Consultoria Larga">Consultoría Larga</option>
+              <option value="Proceso Comercial Declinación">P.C Declinación</option>
+              <option value="Proceso Comercial Satisfacción">P.C Satisfacción</option>
           </select>
+
+          <div class="d-grid gap-2 mx-auto">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">Borrar información</button>
+          </div>
           
       </form>
 
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+              <div class="modal-body">
+                  ¿Está seguro que quiere cargar la información?
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                  <button type="submit" form="form1" class="btn btn-primary" onclick="hidden_func()" type=submit>Continuar</button>
+              </div>
+          </div>
+      </div>
     </div>
 
     <div class="center" id="loading" style="display:none;">
@@ -32,11 +51,4 @@
         <p class="text-center align-self-center">Por favor espere...</p>
     </div>
 
-    <script type="text/javascript">
-      function hidden_func() {
-        document.getElementById("loading").style.display = 'block';
-        document.getElementById("div_form").style.display = 'none';
-      }
-    </script>
-       
 {% endblock %}

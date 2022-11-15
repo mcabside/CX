@@ -134,11 +134,11 @@ def tablaReporteGeneral(consul, cdc, pc):
     return avg_general, avg_lealtad, avg_satisfaccion, avg_esfuerzo, avg_valor
 
 #Delta KPI Qi vs KPI Qi-1
-def deltaKPI(kpis_client, trimestre_input):
+def deltaKPI(kpis_clients, trimestre_input):
     kpi_client, kpi_delta = [], []
     
     #CALCULATE DELTA     
-    for i in kpis_client:
+    for i in kpis_clients:
     
     #GET KPI SPECIFIC QUARTER 
         if(i['Trimestre'] == int(trimestre_input)):
@@ -437,10 +437,16 @@ def getHistorico(Datos,Cliente,KPI,Area):
     for valor in historico:
         periodos.append("Q" + str(valor[0]) + " " + str(valor[1]))
         valores.append(valor[2])
-    
-    fig = px.line(x=periodos, y=valores,labels={'x':'períodos', 'y':KPI[4:]}, title='Historico ' + KPI[4:] + " " + Cliente + " " + Area,
+        
+    kpi_name = None   
+    if(KPI[4:] == "total"):
+        kpi_name = "General"
+    else:
+        kpi_name = KPI[4:]  
+          
+    fig = px.line(x=periodos, y=valores,labels={'x':'Períodos', 'y':"KPI: "+kpi_name}, title='Histórico de '+Cliente+ ' para KPI: ' + kpi_name + " y área: " + Area,
                   markers=True,text=valores)
-    fig.update_layout(yaxis_range=[0,10.5])
+    fig.update_layout(yaxis_range=[-0.7,10.5])
     fig.update_traces(textposition="bottom center")
     return fig
 
@@ -519,10 +525,16 @@ def getHistoricoTodaslasAreas(cdc, con, pcs, pcd, Cliente, KPI, Area):
     for valor in historico_total:
         periodos.append("Q" + str(valor[0]) + " " + str(valor[1]))
         valores.append(valor[2])
-    
-    fig = px.line(x=periodos, y=valores,labels={'x':'períodos', 'y':KPI[4:]}, title='Historico ' + KPI[4:] + " " + Cliente + " " + Area,
+     
+    kpi_name = None   
+    if(KPI[4:] == "total"):
+        kpi_name = "General"
+    else:
+        kpi_name = KPI[4:] 
+            
+    fig = px.line(x=periodos, y=valores,labels={'x':'Períodos', 'y':"KPI: "+kpi_name}, title='Histórico de '+Cliente+ ' para KPI: ' + kpi_name + " y área: " + Area,
                   markers=True,text=valores)
-    fig.update_layout(yaxis_range=[0,10.5])
+    fig.update_layout(yaxis_range=[-0.7,10.5])
     fig.update_traces(textposition="bottom center")
     return fig
         
@@ -583,7 +595,6 @@ def unificarClientes(lista_clientes, lista_firebase):
     for doc in lista_firebase:
         if doc not in lista_clientes:
             lista_clientes.append(doc)
-    print(lista_clientes)
     return lista_clientes
 
 def getLastAndCurrentYear():
@@ -610,14 +621,21 @@ def addOthersYear(Years, last_year):
         if(last_year not in Years):
             Years.append(last_year)
         last_year = last_year - 1
-    Years.sort()
+    Years.sort(reverse=True)
     return Years
     
-def filterClients(kpi_clients, cliente_input, year_input, trimestre_input):
+def filterClients(kpi_clients, cliente_input, year_input):
     kpis_client = []
     for i in kpi_clients:
-        if(i['Cliente'] == cliente_input and i['Year']==int(year_input) and i['Trimestre']==int(trimestre_input)):
-            kpis_client.append(i)
+        if(cliente_input is not None and year_input is not None):
+            if(i.to_dict()['Cliente'] == cliente_input and i.to_dict()['Year']==int(year_input)):
+                kpis_client.append(i)
+        elif(cliente_input is None and year_input is not None):
+            if(i.to_dict()['Year'] == int(year_input)):
+                kpis_client.append(i)   
+        elif(cliente_input is not None and year_input is None):
+            if(i.to_dict()['Cliente'] == cliente_input):
+                kpis_client.append(i)    
     return kpis_client
 
 def getImageClient(db, cliente_input):
@@ -628,11 +646,10 @@ def getImageClient(db, cliente_input):
         imagen_cliente = False
     return imagen_cliente
 
-def addNewData(db, year_input, last_year, area, kpi_clients):       #Add data from year_input
-    if(year_input < last_year):
-        aux = db.collection(area+'_KPIS').where('Year', '==', year_input).get() 
-        aux = orderClients(aux, True)
-        kpi_clients = kpi_clients + aux 
-        #Order by Client
-        kpi_clients = orderClients(kpi_clients, False)
+def addNewData(db, year_input, area, kpi_clients):       #Add data from year_input
+    aux = db.collection(area+'_KPIS').where('Year', '==', year_input).get() 
+    aux = orderClients(aux, True)
+    kpi_clients = kpi_clients + aux 
+    #Order by Client
+    kpi_clients = orderClients(kpi_clients, False)
     return kpi_clients

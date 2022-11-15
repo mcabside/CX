@@ -1,25 +1,29 @@
-from   flask import request, render_template
+from   flask import request, render_template, flash
 from   firebase_admin import firestore
 import json
 import plotly
 from   CX import app
-from   CX.logic.functions import reporteGeneral, speedmeter, tablaReporteGeneral, getRangosyPonderaciones, roundPropio, addOthersYear
+from   CX.logic.functions import reporteGeneral, speedmeter, tablaReporteGeneral, getRangosyPonderaciones, roundPropio, addOthersYear, filterClients
 import datetime
 
-CON_KPIS, PCS_KPIS, CDC_KPIS, clientes, Clients_list  = [], [], [], [], []
-year_cargados = []
+#Global variables
+CON_KPIS, PCS_KPIS, CDC_KPIS, clients_name, clients_list, year_cargados  = [], [], [], [], [], []
 
 #Chart Page
 @app.route('/chart_general', methods=['GET', 'POST'])
 def chart_general():
     
     #Global variables
-    global CON_KPIS, PCS_KPIS, CDC_KPIS, clientes, Clients_list, year_cargados
+    global CON_KPIS, PCS_KPIS, CDC_KPIS, clients_name, clients_list, year_cargados
     
-    #Parametros Trimestre y año (Por Defacto)
+    #Local variables
+    CON_KPIS_USE, CDC_KPIS_USE, PCS_KPIS_USE = [], [], []
     trimestre, year, client = "Todos",  datetime.date.today().year, "Todos"
     client_img = None
-        
+    
+    #Conexión con la DB
+    db = firestore.client()
+    
     #Guardar Parametros URL
     trimestre_input = request.form.get('trimestre_input')
     year_input      = request.form.get('year_input')
@@ -34,110 +38,95 @@ def chart_general():
         
     if(client_input != None):
         client = str(client_input)
-                        
-    #Conexion con la DB - KPI's CDC/Consultaria/Proceso Comercial Satisfacción from one specific year
-    db = firestore.client()
-    
-    #KPI's USE variables
-    CON_KPIS_USE, CDC_KPIS_USE, PCS_KPIS_USE = [], [], []
-    
+                            
     if request.method == "GET":
-        #Get list Clients
-        Clients_list = db.collection("Clientes").order_by("Cliente").get()
-        clientes = []
         
-        #Get all clients
-        for doc in Clients_list:
-            if doc.to_dict()["Cliente"] not in clientes:
-                clientes.append(doc.to_dict()["Cliente"])         
-        clientes.sort() #Ordenar
+        #Firts load data
+        if(len(year_cargados) == 0):
+            try:
+                #Get KPI's from one year 
+                CON_KPIS = db.collection('Consultoria_KPIS').where('Year','==', year).get()
+                CDC_KPIS = db.collection('CDC_KPIS').where('Year','==', year).get()
+                PCS_KPIS = db.collection('PCS_KPIS').where('Year','==', year).get()
+                
+                year_cargados.append(year)
+            except:
+                flash("Error al cargas los cargos del periodo "+year, "Error")
         
-        #Get KPI's from one year 
-        CON_KPIS = db.collection('Consultoria_KPIS').where('Year','==', year).get()
-        CDC_KPIS = db.collection('CDC_KPIS').where('Year','==', year).get()
-        PCS_KPIS = db.collection('PCS_KPIS').where('Year','==', year).get()
-        
+        #Client list 
+        if(len(clients_name) == 0):
+            try:
+                #Get list Clients
+                clients_list = db.collection("Clientes").order_by("Cliente").get()
+                
+                #Get all clients name
+                for doc in clients_list:
+                    if doc.to_dict()["Cliente"] not in clients_name:
+                        clients_name.append(doc.to_dict()["Cliente"])         
+                clients_name.sort() #Ordenar
+            except:
+                flash("Error al cargas los cargos de clientes del periodo "+year, "Error")
+
         CON_KPIS_USE = CON_KPIS
         CDC_KPIS_USE = CDC_KPIS
-        PCS_KPIS_USE = PCS_KPIS_USE
-        
-        year_cargados.append(year)
-    
+        PCS_KPIS_USE = PCS_KPIS
+            
     if request.method == "POST":
          
         if(year in year_cargados):
+            
             #Fitrar por cliente
             if(client_input != "Todos"): 
-                                  
-                for i in CON_KPIS:
-                    if(i.to_dict()['Cliente'] == client_input and i.to_dict()['Year'] == year):  
-                        CON_KPIS_USE.append(i)
-                        
-                for i in CDC_KPIS:
-                    if(i.to_dict()['Cliente'] == client_input and i.to_dict()['Year'] == year):  
-                        CDC_KPIS_USE.append(i)
-                        
-                for i in PCS_KPIS:
-                    if(i.to_dict()['Cliente'] == client_input and i.to_dict()['Year'] == year):  
-                        PCS_KPIS_USE.append(i)                                    
+                CON_KPIS_USE = filterClients(CON_KPIS, client_input, year)
+                CDC_KPIS_USE = filterClients(CDC_KPIS, client_input, year)
+                PCS_KPIS_USE = filterClients(PCS_KPIS, client_input, year)
+                            
             else:
-                for i in CON_KPIS:
-                    if(i.to_dict()['Year'] == year):  
-                        CON_KPIS_USE.append(i)
-                        
-                for i in CDC_KPIS:
-                    if(i.to_dict()['Year'] == year):  
-                        CDC_KPIS_USE.append(i)
-                        
-                for i in PCS_KPIS:
-                    if(i.to_dict()['Year'] == year):  
-                        PCS_KPIS_USE.append(i)   
+                CON_KPIS_USE = filterClients(CON_KPIS, None, year)
+                CDC_KPIS_USE = filterClients(CDC_KPIS, None, year)
+                PCS_KPIS_USE = filterClients(PCS_KPIS, None, year)
                         
         else: #ADD NEW DATA 
             
-            CON_KPIS_NEW_DATA    = db.collection('Consultoria_KPIS').where('Year','==',year).get()
-            CDC_KPIS_NEW_DATA    = db.collection('CDC_KPIS').where('Year','==',year).get()
-            PCS_KPIS_NEW_DATA    = db.collection('PCS_KPIS').where('Year','==', year).get()
-            year_cargados.append(year)
-            
-            print(CON_KPIS_NEW_DATA)
-            print(CDC_KPIS_NEW_DATA)
+            try:
+                CON_KPIS_NEW_DATA    = db.collection('Consultoria_KPIS').where('Year','==',year).get()
+                CDC_KPIS_NEW_DATA    = db.collection('CDC_KPIS').where('Year','==',year).get()
+                PCS_KPIS_NEW_DATA    = db.collection('PCS_KPIS').where('Year','==', year).get()
+                
+                year_cargados.append(year)
 
-            #Validacion, Add data 
-            if(len(CON_KPIS_NEW_DATA) > 0):
-                CON_KPIS = CON_KPIS + CON_KPIS_NEW_DATA
-                
-            if(len(CDC_KPIS_NEW_DATA) > 0):
-                CDC_KPIS = CON_KPIS + CDC_KPIS_NEW_DATA
-                
-            if(len(PCS_KPIS_NEW_DATA) > 0):
-                PCS_KPIS = CON_KPIS + PCS_KPIS_NEW_DATA
-            
-            #Unificar
-            if(client_input != "Todos"): 
-                #Fitrar por cliente
-                for i in CON_KPIS_NEW_DATA:
-                    if(i.to_dict()['Cliente'] == client_input):  
-                        CON_KPIS_USE.append(i)
-                        
-                for i in CDC_KPIS_NEW_DATA:
-                    if(i.to_dict()['Cliente'] == client_input):  
-                        CDC_KPIS_USE.append(i)
-                        
-                for i in PCS_KPIS_NEW_DATA:
-                    if(i.to_dict()['Cliente'] == client_input):  
-                        PCS_KPIS_USE.append(i)     
-            else:
-                CON_KPIS_USE = CON_KPIS_NEW_DATA
-                CDC_KPIS_USE = CDC_KPIS_NEW_DATA
-                PCS_KPIS_USE = PCS_KPIS_NEW_DATA
-        
-    if(client_input != "Todos"):
-        #Get Img Client
-        for i in Clients_list:
-            if(i.to_dict()['Cliente'] == client_input):
-                client_img = i.to_dict()['Imagen']
+                #Validacion, Add data 
+                if(len(CON_KPIS_NEW_DATA) > 0):
+                    CON_KPIS = CON_KPIS + CON_KPIS_NEW_DATA
                     
+                if(len(CDC_KPIS_NEW_DATA) > 0):
+                    CDC_KPIS = CON_KPIS + CDC_KPIS_NEW_DATA
+                    
+                if(len(PCS_KPIS_NEW_DATA) > 0):
+                    PCS_KPIS = CON_KPIS + PCS_KPIS_NEW_DATA
+                
+                #Unificar
+                if(client_input != "Todos"): 
+                    #Fitrar por cliente
+                    CDC_KPIS_USE = filterClients(CDC_KPIS_NEW_DATA, client_input, None)
+                    CON_KPIS_USE = filterClients(CON_KPIS_NEW_DATA, client_input, None)
+                    PCS_KPIS_USE = filterClients(PCS_KPIS_NEW_DATA, client_input, None)
+                else:
+                    CON_KPIS_USE = CON_KPIS_NEW_DATA
+                    CDC_KPIS_USE = CDC_KPIS_NEW_DATA
+                    PCS_KPIS_USE = PCS_KPIS_NEW_DATA
+            except:
+                flash("Error al añadir la información del periodo "+year, "Error")
+    
+    #Get Img Client
+    try:
+        if(client_input != "Todos"):
+            for i in clients_list:
+                if(i.to_dict()['Cliente'] == client_input):
+                    client_img = i.to_dict()['Imagen']
+    except:
+        flash("Error al cargar la imagen del cliente "+client_input, "Error")      
+              
     # Variables
     #["Esfuerzo", "Satisfacción","Lealtad", "Valor, "General"] 
     c_q1, c_q2, c_q3, c_q4          = reporteGeneral(CON_KPIS_USE) #KPI's Consultoria
@@ -187,35 +176,38 @@ def chart_general():
     if(avg_general != 0):
         hayDatos = True
     
-    #Rangos y ponderaciones
-    config = db.collection('Rangos_Ponderaciones').where('year','==',int(year)).get()
+    try:
+        #Rangos y ponderaciones
+        config = db.collection('Rangos_Ponderaciones').where('year','==',int(year)).get()
+            
+        if(len(config)>0):
+            #Recuperar rangos y ponderaciones desde Firebase
+            kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
+            find_range = True
+        else:
+            find_range = False
+            year_search = int(datetime.date.today().year)
+            while(find_range == False):
+                config = db.collection('Rangos_Ponderaciones').where('year','==',year_search).get()
+                if(len(config)>0):
+                    kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
+                    find_range = True
+                year_search = year_search -1
+    except:
+        flash("Error al carga la información de los rangos y ponderaciones", "Error")
         
-    if(len(config)>0):
-        #Recuperar rangos y ponderaciones desde Firebase
-        kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
-        find_range = True
-    else:
-        find_range = False
-        year_search = int(datetime.date.today().year)
-        while(find_range == False):
-            config = db.collection('Rangos_Ponderaciones').where('year','==',year_search).get()
-            if(len(config)>0):
-                kpi_nps, kpi_csat, kpi_va, kpi_ces = getRangosyPonderaciones(config)
-                find_range = True
-            year_search = year_search -1
-
     if(avg_general_previus != -1):
         avg_general_delta = roundPropio(avg_general-avg_general_previus)
-        fig_esfuerzo     = speedmeter(kpi_ces['kpi_name'],  roundPropio(avg_esfuerzo),     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'], avg_ces_previus)
-        fig_satisfaccion = speedmeter(kpi_csat['kpi_name'], roundPropio(avg_satisfaccion), kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'], avg_csat_previus)
-        fig_lealtad      = speedmeter(kpi_nps['kpi_name'],  roundPropio(avg_lealtad),      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'], avg_nps_previus)
-        fig_valor        = speedmeter(kpi_va['kpi_name'],   roundPropio(avg_valor),        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'], avg_va_previus)
+        fig_esfuerzo      = speedmeter(kpi_ces['kpi_name'],  roundPropio(avg_esfuerzo),     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'], avg_ces_previus)
+        fig_satisfaccion  = speedmeter(kpi_csat['kpi_name'], roundPropio(avg_satisfaccion), kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'], avg_csat_previus)
+        fig_lealtad       = speedmeter(kpi_nps['kpi_name'],  roundPropio(avg_lealtad),      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'], avg_nps_previus)
+        fig_valor         = speedmeter(kpi_va['kpi_name'],   roundPropio(avg_valor),        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'], avg_va_previus)
     else:
         avg_general_delta = -1
-        fig_esfuerzo     = speedmeter(kpi_ces['kpi_name'],  roundPropio(avg_esfuerzo),     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'])
-        fig_satisfaccion = speedmeter(kpi_csat['kpi_name'], roundPropio(avg_satisfaccion), kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'])
-        fig_lealtad      = speedmeter(kpi_nps['kpi_name'],  roundPropio(avg_lealtad),      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'])
-        fig_valor        = speedmeter(kpi_va['kpi_name'],   roundPropio(avg_valor),        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'])          
+        fig_esfuerzo      = speedmeter(kpi_ces['kpi_name'],  roundPropio(avg_esfuerzo),     kpi_ces['min'],  kpi_ces['max'],  kpi_ces['ponderacion'])
+        fig_satisfaccion  = speedmeter(kpi_csat['kpi_name'], roundPropio(avg_satisfaccion), kpi_csat['min'], kpi_csat['max'], kpi_csat['ponderacion'])
+        fig_lealtad       = speedmeter(kpi_nps['kpi_name'],  roundPropio(avg_lealtad),      kpi_nps['min'],  kpi_nps['max'],  kpi_nps['ponderacion'])
+        fig_valor         = speedmeter(kpi_va['kpi_name'],   roundPropio(avg_valor),        kpi_va['min'],   kpi_va['max'],   kpi_va['ponderacion'])          
     
     graph_esfuerzo     = json.dumps(fig_esfuerzo,     cls=plotly.utils.PlotlyJSONEncoder)
     graph_satisfaccion = json.dumps(fig_satisfaccion, cls=plotly.utils.PlotlyJSONEncoder)
@@ -235,7 +227,7 @@ def chart_general():
                            graphJSON_lealtad      = graph_lealtad,
                            graphJSON_valor        = graph_valor,
                            hayDatos               = hayDatos,
-                           Clients_list           = clientes)
+                           clients_list           = clients_name)
     
     
 

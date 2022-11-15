@@ -1,10 +1,11 @@
 from   CX import app
-from   flask import render_template, request
+from   flask import render_template, request, flash
 from   CX.logic.functions import saveSelectData, getHistorico, unificarClientes, getHistoricoTodaslasAreas
 from   firebase_admin import firestore
 import plotly
 import json
 
+#Global variables
 kpi_clients_cdc, kpi_clients_con, kpi_clients_pcs, kpi_clients_pcd = [], [], [], []
 lista_clientes, list_clients_cdc, list_clients_con, list_clients_pcs, list_clients_pcd = [], [], [], [], []
 
@@ -18,29 +19,31 @@ def historico():
     
     area_input = "Todas"
     
-    if request.method == 'GET':
-        #Get KPI's for all areas
-        db = firestore.client()
-        kpi_clients_cdc = db.collection('CDC_KPIS').get()
-        kpi_clients_con = db.collection('Consultoria_KPIS').get()
-        kpi_clients_pcs = db.collection('PCS_KPIS').get()
-        kpi_clients_pcd = db.collection('PCD_KPIS').get()
-        
-        #Extract list of clients for all areas    
-        list_clients_cdc = saveSelectData(kpi_clients_cdc, "Cliente", True)
-        list_clients_con = saveSelectData(kpi_clients_con, "Cliente", True)
-        list_clients_pcs = saveSelectData(kpi_clients_pcs, "Cliente", True)
-        list_clients_pcd = saveSelectData(kpi_clients_pcd, "Cliente", True)
-        
-        lista_clientes = unificarClientes(lista_clientes, list_clients_cdc)
-        lista_clientes = unificarClientes(lista_clientes, list_clients_con)
-        lista_clientes = unificarClientes(lista_clientes, list_clients_pcs)
-        lista_clientes = unificarClientes(lista_clientes, list_clients_pcd)
-        
-        lista_clientes.sort()
+    if request.method == 'GET' or (len(lista_clientes) == 0):
+        try:
+            #Get KPI's for all areas
+            db = firestore.client()
+            kpi_clients_cdc = db.collection('CDC_KPIS').get()
+            kpi_clients_con = db.collection('Consultoria_KPIS').get()
+            kpi_clients_pcs = db.collection('PCS_KPIS').get()
+            kpi_clients_pcd = db.collection('PCD_KPIS').get()
+            
+            #Extract list of clients for all areas    
+            list_clients_cdc = saveSelectData(kpi_clients_cdc, "Cliente", True)
+            list_clients_con = saveSelectData(kpi_clients_con, "Cliente", True)
+            list_clients_pcs = saveSelectData(kpi_clients_pcs, "Cliente", True)
+            list_clients_pcd = saveSelectData(kpi_clients_pcd, "Cliente", True)
+            
+            lista_clientes = unificarClientes(lista_clientes, list_clients_cdc)
+            lista_clientes = unificarClientes(lista_clientes, list_clients_con)
+            lista_clientes = unificarClientes(lista_clientes, list_clients_pcs)
+            lista_clientes = unificarClientes(lista_clientes, list_clients_pcd)
+            
+            lista_clientes.sort()
+        except:
+            flash("Error al carga la información", "Error")
         
         #Ordenar
-
         return render_template('historico.html',
                                 lista_clientes   = lista_clientes, 
                                 list_clients_cdc = list_clients_cdc,
